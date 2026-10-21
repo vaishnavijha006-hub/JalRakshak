@@ -289,7 +289,7 @@ export function LandingPage() {
             <ChevronRight className="h-3.5 w-3.5" />
           </Link>
 
-          <p className="mt-2 text-gray-600">© {new Date().getFullYear()} JalRakshak</p>
+          <p className="mt-2 text-gray-600">© JalRakshak Civic-Tech Initiative</p>
         </div>
       </footer>
     </div>

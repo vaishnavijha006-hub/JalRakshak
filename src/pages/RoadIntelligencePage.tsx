@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { getIncidents, getHiddenHazards, updateIncidentVerification } from '../data/store';
+import { useStore, updateIncidentVerification } from '../data/store';
 import type { Incident, HazardCategory, VerificationStatus, HiddenHazard } from '../data/types';
 import {
   formatTimeAgo, formatDate, getCategoryLabel, getSeverityBg,
@@ -294,9 +294,7 @@ export function RoadIntelligencePage() {
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [selectedHHId, setSelectedHHId] = useState<string | null>(null);
 
-  const allIncidents = useMemo(() => getIncidents(), []);
-  const allHiddenHazards = useMemo(() => getHiddenHazards(), []);
-  const [incidents, _setIncidents] = useState(allIncidents);
+  const { incidents, hiddenHazards: allHiddenHazards } = useStore();
 
   const filtered = useMemo(() => {
     let base = [...incidents];

@@ -394,12 +394,20 @@ export function ReportPage() {
               ✓ Added to incident database · ✓ Reflected in dashboard metrics · ✗ Not submitted to any government system
             </p>
           </div>
-          <button
-            onClick={handleReset}
-            className="w-full py-3 rounded-lg bg-navy-700/50 hover:bg-navy-700 border border-navy-600/50 text-white font-medium text-sm transition-all"
-          >
-            Report Another Hazard
-          </button>
+          <div className="flex flex-col sm:flex-row gap-2 pt-2">
+            <button
+              onClick={handleReset}
+              className="flex-1 py-2.5 rounded-lg bg-navy-700/60 hover:bg-navy-700 border border-navy-600/50 text-white font-medium text-xs transition-all"
+            >
+              Report Another Hazard
+            </button>
+            <a
+              href="/dashboard"
+              className="flex-1 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-navy-950 font-bold text-xs text-center transition-all flex items-center justify-center gap-1.5"
+            >
+              View on Dashboard Map →
+            </a>
+          </div>
         </div>
       )}
     </div>

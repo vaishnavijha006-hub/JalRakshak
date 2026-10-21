@@ -1,6 +1,5 @@
 // JalRakshak — Dashboard / Command Center Page
-// Main judging screen: information-dense, visually impressive, responsive
-
+// Professional geospatial intelligence dashboard for Delhi monsoon hazards
 import { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -9,34 +8,51 @@ import {
 import {
   AlertTriangle, Shield, Droplets, Activity, CheckCircle2, Search,
   Clock, MapPin, ChevronRight, ExternalLink, TriangleAlert, X,
-  CircleDot, Construction, ShieldAlert, Eye, ArrowUpRight,
+  CircleDot, Construction, ShieldAlert, ArrowUpRight,
+  Filter, Layers, Sparkles
 } from 'lucide-react';
 
-import { getIncidents, getHiddenHazards, getMetrics, filterIncidents } from '../data/store';
-import type { Incident, HiddenHazard, HazardCategory } from '../data/types';
+import { useStore } from '../data/store';
+import type { Incident, HiddenHazard, HazardCategory, Severity } from '../data/types';
 import { HazardMap } from '../components/map/HazardMap';
 import {
   formatTimeAgo, getCategoryLabel, getSeverityBg, getSeverityColor,
-  getStatusBg, getStatusLabel, getVerificationBg, cn, getCategoryMarkerColor,
+  getStatusBg, getStatusLabel, getVerificationBg, cn,
 } from '../utils/format';
 
-// ─── Severity sort priority ──────────────────────────────────────────
+// Severity sort priority
 const SEVERITY_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
 
-// ─── Category filter config ──────────────────────────────────────────
+// Category filter config
 const CATEGORY_FILTERS: { key: HazardCategory | 'all'; label: string; icon: typeof AlertTriangle }[] = [
-  { key: 'all', label: 'All', icon: Activity },
+  { key: 'all', label: 'All Hazards', icon: Activity },
   { key: 'pothole', label: 'Pothole', icon: CircleDot },
   { key: 'open_manhole', label: 'Open Manhole', icon: AlertTriangle },
   { key: 'waterlogging', label: 'Waterlogging', icon: Droplets },
   { key: 'damaged_road', label: 'Damaged Road', icon: Construction },
 ];
 
-// ─── Metric card component ──────────────────────────────────────────
-function MetricCard({ icon: Icon, label, value, highlight, color }: {
+const SEVERITY_FILTERS: { key: Severity | 'all'; label: string; color: string }[] = [
+  { key: 'all', label: 'All Severities', color: '#9CA3AF' },
+  { key: 'critical', label: 'Critical', color: '#EF4444' },
+  { key: 'high', label: 'High', color: '#F97316' },
+  { key: 'medium', label: 'Medium', color: '#F59E0B' },
+  { key: 'low', label: 'Low', color: '#10B981' },
+];
+
+// Metric Card Component
+function MetricCard({
+  icon: Icon,
+  label,
+  value,
+  sublabel,
+  highlight,
+  color,
+}: {
   icon: typeof AlertTriangle;
   label: string;
   value: number;
+  sublabel?: string;
   highlight?: boolean;
   color: string;
 }) {
@@ -45,38 +61,43 @@ function MetricCard({ icon: Icon, label, value, highlight, color }: {
       className={cn(
         'relative overflow-hidden rounded-xl border p-4 transition-all duration-300',
         highlight
-          ? 'bg-red-500/5 border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.08)]'
-          : 'bg-[#111827] border-[#1F2937]/50 hover:border-[#374151]/70',
+          ? 'bg-red-500/10 border-red-500/40 shadow-[0_0_24px_rgba(239,68,68,0.12)]'
+          : 'bg-[#111827] border-[#1F2937]/70 hover:border-[#374151]',
       )}
     >
       {highlight && (
-        <div className="absolute top-0 right-0 w-16 h-16 -mr-4 -mt-4 rounded-full bg-red-500/10 blur-xl" />
+        <div className="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 rounded-full bg-red-500/15 blur-xl pointer-events-none" />
       )}
       <div className="flex items-start justify-between">
-        <div className="flex items-center gap-2">
-          <div
-            className="w-9 h-9 rounded-lg flex items-center justify-center"
-            style={{ background: `${color}18` }}
-          >
-            <Icon className="w-[18px] h-[18px]" style={{ color }} />
-          </div>
+        <div
+          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 border"
+          style={{ background: `${color}18`, borderColor: `${color}35` }}
+        >
+          <Icon className="w-4 h-4" style={{ color }} />
         </div>
-        {highlight && (
-          <span className="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse">
-            ⚠ ALERT
+        {highlight ? (
+          <span className="px-2 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse">
+            USP Inferred
           </span>
+        ) : (
+          <span className="text-[10px] text-gray-500 font-mono">SYNTHETIC</span>
         )}
       </div>
       <div className="mt-3">
-        <p className="text-2xl font-bold text-white tracking-tight">{value}</p>
-        <p className="text-xs text-gray-400 mt-0.5">{label}</p>
+        <p className="text-2xl font-extrabold text-white tracking-tight">{value}</p>
+        <p className="text-xs font-medium text-gray-300 mt-0.5">{label}</p>
+        {sublabel && <p className="text-[10px] text-gray-500 mt-0.5">{sublabel}</p>}
       </div>
     </div>
   );
 }
 
-// ─── Incident card in the feed ───────────────────────────────────────
-function IncidentCard({ incident, isSelected, onClick }: {
+// Incident card in feed
+function IncidentCard({
+  incident,
+  isSelected,
+  onClick,
+}: {
   incident: Incident;
   isSelected: boolean;
   onClick: () => void;
@@ -85,47 +106,45 @@ function IncidentCard({ incident, isSelected, onClick }: {
     <button
       onClick={onClick}
       className={cn(
-        'w-full text-left rounded-lg border p-3 transition-all duration-200',
-        'hover:bg-[#1F2937]/60',
+        'w-full text-left rounded-lg border p-3 transition-all duration-200 focus:outline-none',
         isSelected
-          ? 'bg-[#1F2937]/80 border-cyan-500/40 shadow-[0_0_12px_rgba(6,182,212,0.06)]'
-          : 'bg-[#111827] border-[#1F2937]/50',
+          ? 'bg-[#1F2937]/90 border-cyan-500/50 shadow-[0_0_12px_rgba(6,182,212,0.1)]'
+          : 'bg-[#111827] border-[#1F2937]/60 hover:bg-[#1F2937]/50 hover:border-gray-600/50',
       )}
     >
-      <div className="flex items-start gap-2">
-        {/* Severity dot */}
+      <div className="flex items-start gap-2.5">
         <div
-          className="w-2 h-2 rounded-full mt-1.5 flex-shrink-0"
+          className="w-2.5 h-2.5 rounded-full mt-1 shrink-0"
           style={{ background: getSeverityColor(incident.severity) }}
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap mb-1">
-            <span className={cn('text-[10px] font-medium px-1.5 py-0.5 rounded border', getSeverityBg(incident.severity))}>
+            <span className={cn('text-[9px] font-bold px-1.5 py-0.5 rounded border', getSeverityBg(incident.severity))}>
               {incident.severity.toUpperCase()}
             </span>
-            <span className="text-[10px] text-gray-500">
+            <span className="text-[10px] text-gray-400 font-medium">
               {getCategoryLabel(incident.category)}
             </span>
+            {incident.isHistorical && (
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                Pre-Monsoon
+              </span>
+            )}
           </div>
-          <p className="text-sm font-medium text-gray-200 truncate">{incident.title}</p>
-          <div className="flex items-center gap-3 mt-1 text-[11px] text-gray-500">
+          <p className="text-xs font-semibold text-gray-200 truncate">{incident.title}</p>
+          <div className="flex items-center gap-3 mt-1.5 text-[11px] text-gray-400">
             <span className="flex items-center gap-1 truncate">
-              <MapPin className="w-3 h-3 flex-shrink-0" />
+              <MapPin className="w-3 h-3 text-gray-500 shrink-0" />
               {incident.location.area}
             </span>
-            <span className="flex items-center gap-1 flex-shrink-0">
-              <Clock className="w-3 h-3" />
+            <span className="flex items-center gap-1 shrink-0">
+              <Clock className="w-3 h-3 text-gray-500" />
               {formatTimeAgo(incident.reportedAt)}
-            </span>
-          </div>
-          <div className="mt-1.5">
-            <span className={cn('text-[10px] px-1.5 py-0.5 rounded border', getVerificationBg(incident.verification))}>
-              {incident.verification === 'unverified' ? 'Unverified' : incident.verification === 'verified' ? '✓ Verified' : incident.verification}
             </span>
           </div>
         </div>
         <ChevronRight className={cn(
-          'w-4 h-4 text-gray-600 flex-shrink-0 mt-1 transition-transform',
+          'w-4 h-4 text-gray-500 shrink-0 mt-1 transition-transform',
           isSelected && 'rotate-90 text-cyan-400',
         )} />
       </div>
@@ -133,231 +152,193 @@ function IncidentCard({ incident, isSelected, onClick }: {
   );
 }
 
-// ─── Expanded incident detail ────────────────────────────────────────
+// Expanded incident detail
 function IncidentDetail({ incident }: { incident: Incident }) {
   return (
-    <div className="mt-1 space-y-3 animate-in fade-in duration-300">
-      <div className="bg-[#0B1220] rounded-lg border border-[#1F2937]/50 p-3">
+    <div className="mt-1 space-y-3">
+      <div className="bg-[#0B1220] rounded-lg border border-[#1F2937] p-3 text-left">
         <p className="text-xs text-gray-300 leading-relaxed">{incident.description}</p>
 
-        {/* Badges row */}
         <div className="flex flex-wrap gap-1.5 mt-3">
-          <span className={cn('text-[10px] px-2 py-0.5 rounded border font-medium', getSeverityBg(incident.severity))}>
-            {incident.severity.toUpperCase()}
+          <span className={cn('text-[10px] px-2 py-0.5 rounded border font-semibold', getSeverityBg(incident.severity))}>
+            {incident.severity.toUpperCase()} SEVERITY
           </span>
-          <span className="text-[10px] px-2 py-0.5 rounded border bg-cyan-500/15 text-cyan-400 border-cyan-500/30">
+          <span className="text-[10px] px-2 py-0.5 rounded border bg-cyan-500/15 text-cyan-300 border-cyan-500/30">
             {getCategoryLabel(incident.category)}
           </span>
           <span className={cn('text-[10px] px-2 py-0.5 rounded border', getStatusBg(incident.status))}>
             {getStatusLabel(incident.status)}
           </span>
           <span className={cn('text-[10px] px-2 py-0.5 rounded border', getVerificationBg(incident.verification))}>
-            {incident.verification}
+            {incident.verification === 'verified' ? '✓ Verified' : incident.verification}
           </span>
         </div>
 
-        {/* Location */}
-        <div className="mt-3 text-[11px] text-gray-400 flex items-start gap-1.5">
-          <MapPin className="w-3.5 h-3.5 text-gray-500 flex-shrink-0 mt-0.5" />
+        <div className="mt-3 text-[11px] text-gray-300 flex items-start gap-1.5">
+          <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
           <span>{incident.location.road}, {incident.location.area}</span>
         </div>
 
-        {/* Timestamps */}
-        <div className="mt-2 space-y-1 text-[11px] text-gray-500">
-          <div className="flex items-center gap-1.5">
-            <Eye className="w-3 h-3" />
-            <span>Observed: {formatTimeAgo(incident.observedAt)}</span>
+        <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] text-gray-400">
+          <div className="p-2 rounded bg-navy-900 border border-navy-700/50">
+            <span className="text-gray-500 block">First Observed</span>
+            <span className="font-mono text-gray-200">{formatTimeAgo(incident.observedAt)}</span>
           </div>
-          <div className="flex items-center gap-1.5">
-            <CheckCircle2 className="w-3 h-3" />
-            <span>Verified: {formatTimeAgo(incident.lastVerifiedAt)}</span>
+          <div className="p-2 rounded bg-navy-900 border border-navy-700/50">
+            <span className="text-gray-500 block">Last Verified</span>
+            <span className="font-mono text-gray-200">{formatTimeAgo(incident.lastVerifiedAt)}</span>
           </div>
         </div>
 
-        {/* Status history timeline */}
-        {incident.statusHistory.length > 0 && (
-          <div className="mt-3 border-t border-[#1F2937]/50 pt-3">
-            <h4 className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
-              Status History
-            </h4>
-            <div className="space-y-2">
-              {incident.statusHistory.map((entry, idx) => (
-                <div key={idx} className="flex gap-2 text-[11px]">
-                  <div className="flex flex-col items-center">
-                    <div className="w-2 h-2 rounded-full bg-cyan-500/50 mt-1" />
-                    {idx < incident.statusHistory.length - 1 && (
-                      <div className="w-px flex-1 bg-[#1F2937] mt-1" />
-                    )}
-                  </div>
-                  <div className="pb-2">
-                    <p className="text-gray-300 font-medium">{getStatusLabel(entry.status)}</p>
-                    <p className="text-gray-500 text-[10px]">
-                      {entry.actor} · {formatTimeAgo(entry.timestamp)}
-                    </p>
-                    {entry.note && (
-                      <p className="text-gray-500 text-[10px] italic mt-0.5">"{entry.note}"</p>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Link to full detail */}
         <Link
           to={`/incidents/${incident.id}`}
-          className="mt-3 flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 transition-colors group"
+          className="mt-3 flex items-center justify-between px-3 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/25 text-xs text-cyan-400 hover:bg-cyan-500/20 transition-colors"
         >
-          <ExternalLink className="w-3.5 h-3.5" />
-          View Full Details
-          <ArrowUpRight className="w-3 h-3 opacity-0 -ml-1 group-hover:opacity-100 transition-opacity" />
+          <span className="flex items-center gap-1.5">
+            <ExternalLink className="w-3.5 h-3.5" />
+            Inspect Incident Evidence &amp; Timeline
+          </span>
+          <ArrowUpRight className="w-3.5 h-3.5" />
         </Link>
       </div>
     </div>
   );
 }
 
-// ─── Hidden hazard alert card ────────────────────────────────────────
+// Hidden hazard alert banner
 function HiddenHazardAlert({ hazard, onClose }: { hazard: HiddenHazard; onClose: () => void }) {
   return (
-    <div className="rounded-xl border-2 border-red-500/40 bg-red-500/5 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
+    <div className="rounded-xl border-2 border-red-500/50 bg-red-500/10 p-4 relative">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-red-500/20 border border-red-500/40 flex items-center justify-center">
             <TriangleAlert className="w-4 h-4 text-red-400" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-red-400">⚠ Hidden Hazard Detected</h3>
-            <p className="text-[10px] text-gray-500">Inferred — not directly confirmed</p>
+            <h3 className="text-sm font-bold text-red-400">USP — Inferred Hidden Hazard</h3>
+            <p className="text-[10px] text-red-300/80">Historical Defect Submerged Beneath Waterlogging</p>
           </div>
         </div>
-        <button onClick={onClose} className="p-1 rounded hover:bg-red-500/10 transition-colors">
-          <X className="w-4 h-4 text-gray-500" />
+        <button onClick={onClose} className="p-1 rounded text-gray-400 hover:text-white transition-colors">
+          <X className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Historical defect */}
-      <div className="rounded-lg bg-[#0B1220] border border-[#1F2937]/50 p-3 mb-2">
-        <p className="text-[10px] font-semibold text-amber-400 uppercase tracking-wider mb-1">
-          Historical Defect
+      <div className="rounded-lg bg-[#0B1220] border border-[#1F2937] p-3 mb-2 space-y-2">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-amber-400 font-semibold uppercase tracking-wider text-[10px]">1. Historical Defect</span>
+          <span className="text-gray-400 text-[10px]">{formatTimeAgo(hazard.historicalObservedAt)}</span>
+        </div>
+        <p className="text-xs text-gray-200">
+          Known <strong className="text-white">{getCategoryLabel(hazard.historicalDefectType)}</strong> recorded on {hazard.location.road}.
         </p>
-        <p className="text-xs text-gray-300">
-          <span className="font-medium text-white">{getCategoryLabel(hazard.historicalDefectType)}</span>
-          {' '}observed on {hazard.location.road}
-        </p>
-        <p className="text-[10px] text-gray-500 mt-0.5">
-          First observed: {formatTimeAgo(hazard.historicalObservedAt)}
+
+        <div className="flex items-center justify-between text-xs pt-2 border-t border-navy-800">
+          <span className="text-cyan-400 font-semibold uppercase tracking-wider text-[10px]">2. Active Waterlogging</span>
+          <span className="text-gray-400 text-[10px]">{formatTimeAgo(hazard.waterloggingReportedAt)}</span>
+        </div>
+        <p className="text-xs text-gray-200">
+          Heavy surface water reported overlapping the exact road segment.
         </p>
       </div>
 
-      {/* Current waterlogging */}
-      <div className="rounded-lg bg-[#0B1220] border border-[#1F2937]/50 p-3 mb-2">
-        <p className="text-[10px] font-semibold text-cyan-400 uppercase tracking-wider mb-1">
-          Current Waterlogging
-        </p>
-        <p className="text-xs text-gray-300">
-          Active flooding reported at {hazard.location.area}
-        </p>
-        <p className="text-[10px] text-gray-500 mt-0.5">
-          Reported: {formatTimeAgo(hazard.waterloggingReportedAt)}
-        </p>
-      </div>
-
-      {/* Confidence */}
       <div className="flex items-center gap-2 mb-2">
         <div className="flex-1 h-2 rounded-full bg-[#1F2937] overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-500"
             style={{
               width: `${hazard.confidence}%`,
-              background: hazard.confidence >= 75 ? '#EF4444' : hazard.confidence >= 50 ? '#F59E0B' : '#6B7280',
+              background: hazard.confidence >= 75 ? '#EF4444' : hazard.confidence >= 50 ? '#F97316' : '#F59E0B',
             }}
           />
         </div>
-        <span className="text-xs font-semibold text-white">{hazard.confidence}%</span>
-        <span className="text-[10px] text-gray-400">{hazard.confidenceLabel}</span>
+        <span className="text-xs font-bold text-white">{hazard.confidence}%</span>
+        <span className="text-[10px] text-gray-400 font-medium">{hazard.confidenceLabel}</span>
       </div>
 
-      {/* Explanation */}
-      <p className="text-[11px] text-gray-400 leading-relaxed mb-2">
+      <p className="text-[11px] text-gray-300 leading-relaxed mb-3">
         {hazard.explanation}
       </p>
 
-      {/* Disclaimer */}
-      <div className="flex items-start gap-1.5 text-[10px] text-amber-500/80 bg-amber-500/5 rounded-lg px-2.5 py-2 border border-amber-500/20">
-        <ShieldAlert className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
-        <span>⚠ This hazard is inferred from overlapping data — it has not been directly confirmed by on-ground verification.</span>
+      <div className="flex items-start gap-1.5 text-[10px] text-amber-300 bg-amber-500/10 rounded-lg p-2.5 border border-amber-500/25">
+        <ShieldAlert className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+        <span>
+          <strong>Inferred Decision-Support Alert:</strong> Submerged condition is statistically estimated from spatial and temporal correlation. Not directly confirmed by physical divers.
+        </span>
       </div>
     </div>
   );
 }
 
-// ─── Custom recharts tooltip ─────────────────────────────────────────
+// Chart tooltip
 function ChartTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
     <div className="bg-[#1F2937] border border-[#374151] rounded-lg px-3 py-2 shadow-xl">
-      <p className="text-xs font-medium text-white">{label}</p>
-      <p className="text-xs text-gray-400">
-        {payload[0].value} hazard{payload[0].value !== 1 ? 's' : ''}
+      <p className="text-xs font-semibold text-white">{label}</p>
+      <p className="text-xs text-cyan-300">
+        {payload[0].value} incident{payload[0].value !== 1 ? 's' : ''} in sample dataset
       </p>
     </div>
   );
 }
 
-// ═════════════════════════════════════════════════════════════════════
-// MAIN DASHBOARD PAGE
-// ═════════════════════════════════════════════════════════════════════
 export function DashboardPage() {
-  // ── State ──────────────────────────────────────────────────────────
+  const { incidents: allIncidents, hiddenHazards, metrics } = useStore();
+
   const [selectedCategory, setSelectedCategory] = useState<HazardCategory | 'all'>('all');
+  const [selectedSeverity, setSelectedSeverity] = useState<Severity | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState<'feed' | 'hidden_hazards'>('feed');
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
-  const [selectedHiddenHazardId, setSelectedHiddenHazardId] = useState<string | null>(null);
+  const [selectedHiddenHazardId, setSelectedHiddenHazardId] = useState<string | null>('HH-001');
 
-  // ── Data ───────────────────────────────────────────────────────────
-  const allIncidents = useMemo(() => getIncidents(), []);
-  const hiddenHazards = useMemo(() => getHiddenHazards(), []);
-  const metrics = useMemo(() => getMetrics(), []);
-
-  // ── Filtered & sorted incidents ────────────────────────────────────
+  // Filtered incidents
   const filteredIncidents = useMemo(() => {
-    const filters: any = {};
-    if (selectedCategory !== 'all') filters.categories = [selectedCategory];
-    if (searchQuery.trim()) filters.searchQuery = searchQuery.trim();
+    let result = [...allIncidents];
 
-    const result = filterIncidents(filters);
+    if (selectedCategory !== 'all') {
+      result = result.filter(i => i.category === selectedCategory);
+    }
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      result = result.filter(i =>
+        i.title.toLowerCase().includes(q) ||
+        i.location.road.toLowerCase().includes(q) ||
+        i.location.area.toLowerCase().includes(q) ||
+        i.id.toLowerCase().includes(q),
+      );
+    }
+
+    if (selectedSeverity !== 'all') {
+      result = result.filter(i => i.severity === selectedSeverity);
+    }
+
     return result.sort((a, b) => {
       const sevDiff = (SEVERITY_ORDER[a.severity] ?? 9) - (SEVERITY_ORDER[b.severity] ?? 9);
       if (sevDiff !== 0) return sevDiff;
       return new Date(b.reportedAt).getTime() - new Date(a.reportedAt).getTime();
     });
-  }, [selectedCategory, searchQuery]);
+  }, [allIncidents, selectedCategory, selectedSeverity, searchQuery]);
 
-  // ── Chart data ─────────────────────────────────────────────────────
+  // Chart data
   const chartData = useMemo(() => {
     const counts: Record<string, number> = {};
     allIncidents.forEach(inc => {
       const label = getCategoryLabel(inc.category);
       counts[label] = (counts[label] || 0) + 1;
     });
-    return Object.entries(counts).map(([name, count]) => ({
-      name,
-      count,
-      color: getCategoryMarkerColor(
-        Object.entries({
-          pothole: 'Pothole',
-          open_manhole: 'Open Manhole',
-          waterlogging: 'Waterlogging',
-          damaged_road: 'Damaged Road',
-          other: 'Other',
-        }).find(([, v]) => v === name)?.[0] as HazardCategory || 'other',
-      ),
-    }));
+    return Object.entries(counts).map(([name, count]) => {
+      let color = '#06B6D4';
+      if (name === 'Pothole') color = '#F97316';
+      if (name === 'Open Manhole') color = '#EF4444';
+      if (name === 'Waterlogging') color = '#06B6D4';
+      if (name === 'Damaged Road') color = '#F59E0B';
+      return { name, count, color };
+    });
   }, [allIncidents]);
 
-  // ── Selected items ─────────────────────────────────────────────────
   const selectedIncident = useMemo(
     () => allIncidents.find(i => i.id === selectedIncidentId) ?? null,
     [allIncidents, selectedIncidentId],
@@ -368,65 +349,69 @@ export function DashboardPage() {
     [hiddenHazards, selectedHiddenHazardId],
   );
 
-  // ── Handlers ───────────────────────────────────────────────────────
   const handleSelectIncident = useCallback((id: string) => {
-    setSelectedIncidentId(prev => prev === id ? null : id);
-    setSelectedHiddenHazardId(null);
+    setSelectedIncidentId(prev => (prev === id ? null : id));
   }, []);
 
   const handleSelectHiddenHazard = useCallback((id: string) => {
-    setSelectedHiddenHazardId(prev => prev === id ? null : id);
-    setSelectedIncidentId(null);
+    setSelectedHiddenHazardId(prev => (prev === id ? null : id));
+    setActiveTab('hidden_hazards');
   }, []);
 
   const handleResetFilters = useCallback(() => {
     setSelectedCategory('all');
+    setSelectedSeverity('all');
     setSearchQuery('');
   }, []);
 
-  const mapSelectedId = selectedIncidentId || selectedHiddenHazardId;
-  const hasActiveFilters = selectedCategory !== 'all' || searchQuery.trim().length > 0;
+  const hasActiveFilters = selectedCategory !== 'all' || selectedSeverity !== 'all' || searchQuery.trim().length > 0;
 
-  // ── Render ─────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-[#0B1220] text-white p-4 md:p-6 lg:p-8 space-y-6">
-
-      {/* ─── Header ───────────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+      {/* ─── Header & Notice ─────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#1F2937]/70 pb-4">
         <div>
-          <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight">
-            Command Center
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl md:text-2xl font-extrabold text-white tracking-tight">
+              Command Center
+            </h1>
+            <span className="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-[10px] font-bold text-amber-400">
+              DEMO DATASET
+            </span>
+          </div>
           <p className="text-xs text-gray-400 mt-0.5">
-            Real-time Delhi monsoon hazard intelligence · {allIncidents.length} reports tracked
+            Pre-monsoon defect memory combined with active waterlogging across central Delhi corridors.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-400 font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            Live Monitoring
-          </span>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="px-3 py-1.5 rounded-lg bg-navy-800 border border-navy-700/80 text-[11px] text-gray-300 flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span>USP Hidden Hazard Engine: <strong className="text-red-400">{hiddenHazards.length} Active Correlations</strong></span>
+          </div>
         </div>
       </div>
 
-      {/* ─── Metric Cards ─────────────────────────────────────────────── */}
+      {/* ─── Metric Cards (Directly derived from loaded dataset) ────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <MetricCard
           icon={Shield}
-          label="Total Reported Hazards"
+          label="Total Road Records"
           value={metrics.totalHazards}
+          sublabel="Historical + Current"
           color="#06B6D4"
         />
         <MetricCard
           icon={Droplets}
-          label="Active Waterlogging Zones"
+          label="Active Waterlogging"
           value={metrics.activeWaterlogging}
+          sublabel="Submerging roads"
           color="#14B8A6"
         />
         <MetricCard
           icon={AlertTriangle}
           label="Potential Hidden Hazards"
           value={metrics.hiddenHazards}
+          sublabel="Correlated underwater"
           highlight
           color="#EF4444"
         />
@@ -434,95 +419,149 @@ export function DashboardPage() {
           icon={Clock}
           label="Pending Verification"
           value={metrics.pendingVerification}
+          sublabel="Needs field review"
           color="#F59E0B"
         />
         <MetricCard
           icon={ShieldAlert}
-          label="Critical Alerts"
+          label="Critical Severity"
           value={metrics.criticalAlerts}
+          sublabel="Immediate safety risk"
           color="#F97316"
         />
         <MetricCard
           icon={CheckCircle2}
-          label="Resolved This Week"
+          label="Resolved / Cleared"
           value={metrics.resolvedThisWeek}
+          sublabel="Verified safe"
           color="#10B981"
         />
       </div>
 
-      {/* ─── Filter Bar ───────────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        {/* Category buttons */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {CATEGORY_FILTERS.map(({ key, label, icon: Icon }) => (
-            <button
-              key={key}
-              onClick={() => setSelectedCategory(key)}
-              className={cn(
-                'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-200',
-                selectedCategory === key
-                  ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40 shadow-[0_0_8px_rgba(6,182,212,0.1)]'
-                  : 'bg-[#111827] text-gray-400 border-[#1F2937]/50 hover:border-[#374151] hover:text-gray-300',
-              )}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {label}
-            </button>
-          ))}
-        </div>
+      {/* ─── Multi-factor Filter Bar ──────────────────────────────────── */}
+      <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-3 space-y-3">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          {/* Category buttons */}
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mr-1 flex items-center gap-1">
+              <Layers className="w-3 h-3 text-cyan-400" /> Type:
+            </span>
+            {CATEGORY_FILTERS.map(({ key, label, icon: Icon }) => (
+              <button
+                key={key}
+                onClick={() => setSelectedCategory(key)}
+                className={cn(
+                  'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all',
+                  selectedCategory === key
+                    ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/50 shadow-sm'
+                    : 'bg-navy-900/60 text-gray-400 border-navy-700/60 hover:text-gray-200 hover:border-gray-600',
+                )}
+              >
+                <Icon className="w-3 h-3" />
+                {label}
+              </button>
+            ))}
+          </div>
 
-        {/* Search + Reset */}
-        <div className="flex items-center gap-2 flex-1 w-full sm:w-auto">
-          <div className="relative flex-1 max-w-xs">
+          {/* Search Input */}
+          <div className="relative w-full md:w-64">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
             <input
               type="text"
-              placeholder="Search hazards..."
+              placeholder="Search roads, areas, IDs..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-[#111827] border border-[#1F2937]/50 text-xs text-gray-200 placeholder:text-gray-600 focus:border-cyan-500/40 focus:outline-none focus:ring-1 focus:ring-cyan-500/20 transition-all"
+              className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-navy-900 border border-navy-700 text-xs text-gray-200 placeholder:text-gray-500 focus:border-cyan-500/50 focus:outline-none"
             />
           </div>
+        </div>
+
+        {/* Severity Filter Row */}
+        <div className="flex items-center justify-between pt-2 border-t border-navy-800/80 flex-wrap gap-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mr-1 flex items-center gap-1">
+              <Filter className="w-3 h-3 text-amber-400" /> Severity:
+            </span>
+            {SEVERITY_FILTERS.map(({ key, label, color }) => (
+              <button
+                key={key}
+                onClick={() => setSelectedSeverity(key)}
+                className={cn(
+                  'px-2 py-1 rounded text-[11px] font-medium border transition-all',
+                  selectedSeverity === key
+                    ? 'bg-white/10 text-white font-bold border-white/30'
+                    : 'bg-transparent text-gray-400 border-navy-700 hover:text-gray-200',
+                )}
+                style={selectedSeverity === key && key !== 'all' ? { borderColor: `${color}60`, color } : {}}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
           {hasActiveFilters && (
             <button
               onClick={handleResetFilters}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] text-gray-400 bg-[#111827] border border-[#1F2937]/50 hover:border-red-500/30 hover:text-red-400 transition-all"
+              className="flex items-center gap-1 px-2.5 py-1 rounded text-xs text-red-400 bg-red-500/10 border border-red-500/25 hover:bg-red-500/20 transition-colors"
             >
               <X className="w-3 h-3" />
-              Reset
+              Reset Filters
             </button>
           )}
         </div>
       </div>
 
-      {/* ─── Main Content: Map + Sidebar ──────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-4">
-
-        {/* ── Map Panel ─────────────────────────────────────────────── */}
-        <div className="rounded-xl border border-[#1F2937]/50 bg-[#111827] overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-2.5 border-b border-[#1F2937]/50">
+      {/* ─── Main Geospatial Workspace: Map (Centerpiece) + Right Panel ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-5 items-start">
+        {/* Large Central Map Workspace */}
+        <div className="rounded-xl border border-[#1F2937] bg-[#111827] overflow-hidden shadow-2xl flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[#1F2937] bg-navy-900/60">
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-cyan-400" />
-              <h2 className="text-sm font-semibold text-gray-200">Hazard Map — Delhi NCR</h2>
+              <h2 className="text-sm font-bold text-gray-100">Delhi NCR Spatial Hazard Engine</h2>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono">
+                EPSG:4326
+              </span>
             </div>
-            <span className="text-[10px] text-gray-500">
-              {filteredIncidents.length} incident{filteredIncidents.length !== 1 ? 's' : ''} · {hiddenHazards.length} hidden hazards
-            </span>
+            <div className="text-[11px] text-gray-400">
+              Showing <strong className="text-white">{filteredIncidents.length}</strong> markers ·{' '}
+              <strong className="text-red-400">{hiddenHazards.length}</strong> hidden overlays
+            </div>
           </div>
-          <HazardMap
-            incidents={filteredIncidents}
-            hiddenHazards={hiddenHazards}
-            selectedId={mapSelectedId}
-            onSelectIncident={handleSelectIncident}
-            onSelectHiddenHazard={handleSelectHiddenHazard}
-            className="min-h-[400px] md:min-h-[500px] lg:min-h-[560px]"
-          />
+
+          <div className="relative">
+            <HazardMap
+              incidents={filteredIncidents}
+              hiddenHazards={hiddenHazards}
+              selectedId={selectedIncidentId || selectedHiddenHazardId}
+              onSelectIncident={handleSelectIncident}
+              onSelectHiddenHazard={handleSelectHiddenHazard}
+              className="h-[460px] md:h-[540px] lg:h-[620px]"
+            />
+          </div>
+
+          <div className="p-3 border-t border-navy-800 bg-[#0B1220]/80 flex items-center justify-between text-[11px] text-gray-400 flex-wrap gap-2">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#F97316]" /> Potholes
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" /> Open Manholes
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#06B6D4]" /> Waterlogging
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-2.5 h-2.5 rounded bg-[#EF4444] text-[8px] font-bold text-white flex items-center justify-center">!</span> Hidden Predictions
+              </span>
+            </div>
+            <span className="text-[10px] text-gray-500 italic">Click any marker to inspect evidence</span>
+          </div>
         </div>
 
-        {/* ── Right Sidebar ─────────────────────────────────────────── */}
+        {/* Right Intelligence Panel */}
         <div className="space-y-4">
-
-          {/* Hidden hazard alert (when selected) */}
+          {/* Active Hidden Hazard Spotlight */}
           {selectedHiddenHazard && (
             <HiddenHazardAlert
               hazard={selectedHiddenHazard}
@@ -530,78 +569,154 @@ export function DashboardPage() {
             />
           )}
 
-          {/* Category chart */}
-          <div className="rounded-xl border border-[#1F2937]/50 bg-[#111827] p-4">
-            <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-3">
-              Hazards by Category
-            </h3>
-            <div className="h-40">
+          {/* Tab Switcher: Incident Feed vs Inferred Hazards */}
+          <div className="flex rounded-lg bg-[#111827] border border-[#1F2937] p-1">
+            <button
+              onClick={() => setActiveTab('feed')}
+              className={cn(
+                'flex-1 py-1.5 rounded-md text-xs font-semibold transition-all',
+                activeTab === 'feed'
+                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                  : 'text-gray-400 hover:text-white',
+              )}
+            >
+              Incident Feed ({filteredIncidents.length})
+            </button>
+            <button
+              onClick={() => setActiveTab('hidden_hazards')}
+              className={cn(
+                'flex-1 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5',
+                activeTab === 'hidden_hazards'
+                  ? 'bg-red-500/20 text-red-300 border border-red-500/30'
+                  : 'text-gray-400 hover:text-white',
+              )}
+            >
+              <TriangleAlert className="w-3.5 h-3.5 text-red-400" />
+              Hidden Predictions ({hiddenHazards.length})
+            </button>
+          </div>
+
+          {/* Incident Feed Tab */}
+          {activeTab === 'feed' && (
+            <div className="rounded-xl border border-[#1F2937] bg-[#111827] overflow-hidden">
+              <div className="px-4 py-2.5 border-b border-[#1F2937] flex items-center justify-between bg-navy-900/40">
+                <h3 className="text-xs font-bold text-gray-200 uppercase tracking-wider">
+                  Reported Hazards Feed
+                </h3>
+                <span className="text-[10px] text-gray-400 font-mono">
+                  Sorted by Severity
+                </span>
+              </div>
+              <div className="p-2 space-y-2 max-h-[460px] overflow-y-auto">
+                {filteredIncidents.length === 0 ? (
+                  <div className="text-center py-10">
+                    <Search className="w-8 h-8 text-gray-600 mx-auto mb-2" />
+                    <p className="text-xs text-gray-400">No hazards match current filters</p>
+                    <button
+                      onClick={handleResetFilters}
+                      className="text-xs text-cyan-400 hover:underline mt-1.5 inline-block"
+                    >
+                      Clear all filters
+                    </button>
+                  </div>
+                ) : (
+                  filteredIncidents.map(inc => (
+                    <div key={inc.id}>
+                      <IncidentCard
+                        incident={inc}
+                        isSelected={selectedIncidentId === inc.id}
+                        onClick={() => handleSelectIncident(inc.id)}
+                      />
+                      {selectedIncidentId === inc.id && selectedIncident && (
+                        <IncidentDetail incident={selectedIncident} />
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Hidden Hazards List Tab */}
+          {activeTab === 'hidden_hazards' && (
+            <div className="rounded-xl border border-[#1F2937] bg-[#111827] overflow-hidden">
+              <div className="px-4 py-2.5 border-b border-[#1F2937] bg-red-500/10 flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <TriangleAlert className="w-3.5 h-3.5 text-red-400" />
+                  <h3 className="text-xs font-bold text-red-300 uppercase tracking-wider">
+                    Inferred Submerged Hazards
+                  </h3>
+                </div>
+                <span className="text-[10px] text-red-300 font-semibold">USP Engine</span>
+              </div>
+              <div className="p-2 space-y-2 max-h-[460px] overflow-y-auto">
+                {hiddenHazards.map(hh => (
+                  <div
+                    key={hh.id}
+                    onClick={() => handleSelectHiddenHazard(hh.id)}
+                    className={cn(
+                      'p-3 rounded-lg border cursor-pointer transition-all',
+                      selectedHiddenHazardId === hh.id
+                        ? 'bg-red-500/15 border-red-500/50 shadow-md'
+                        : 'bg-navy-900 border-navy-700/60 hover:border-red-500/30',
+                    )}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-bold text-white">
+                        {getCategoryLabel(hh.historicalDefectType)} submerged
+                      </span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 font-bold">
+                        {hh.confidence}% Conf.
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-gray-400 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-gray-500" />
+                      {hh.location.road}, {hh.location.area}
+                    </p>
+                    <p className="text-[10px] text-gray-500 mt-1 italic line-clamp-2">
+                      {hh.explanation}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Dataset Distribution Chart */}
+          <div className="rounded-xl border border-[#1F2937] bg-[#111827] p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-bold text-gray-300 uppercase tracking-wider">
+                Distribution by Category
+              </h3>
+              <span className="text-[10px] text-gray-500 font-mono">Real demo counts</span>
+            </div>
+            <div className="h-36">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} barCategoryGap="20%">
                   <XAxis
                     dataKey="name"
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 10, fill: '#6B7280' }}
+                    tick={{ fontSize: 9, fill: '#9CA3AF' }}
                     interval={0}
                   />
                   <YAxis
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fontSize: 10, fill: '#6B7280' }}
+                    tick={{ fontSize: 9, fill: '#9CA3AF' }}
                     allowDecimals={false}
-                    width={24}
+                    width={20}
                   />
                   <Tooltip content={<ChartTooltip />} cursor={{ fill: 'rgba(255,255,255,0.03)' }} />
-                  <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={36}>
+                  <Bar dataKey="count" radius={[4, 4, 0, 0]} maxBarSize={32}>
                     {chartData.map((entry, idx) => (
-                      <Cell key={idx} fill={entry.color} fillOpacity={0.85} />
+                      <Cell key={idx} fill={entry.color} fillOpacity={0.9} />
                     ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
-
-          {/* Incident Feed */}
-          <div className="rounded-xl border border-[#1F2937]/50 bg-[#111827]">
-            <div className="px-4 py-2.5 border-b border-[#1F2937]/50 flex items-center justify-between">
-              <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider">
-                Incident Feed
-              </h3>
-              <span className="text-[10px] text-gray-500">
-                {filteredIncidents.length} result{filteredIncidents.length !== 1 ? 's' : ''}
-              </span>
-            </div>
-            <div className="p-2 space-y-2 max-h-[400px] lg:max-h-[480px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
-              {filteredIncidents.length === 0 ? (
-                <div className="text-center py-8">
-                  <Search className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                  <p className="text-xs text-gray-500">No incidents match your filters</p>
-                  <button
-                    onClick={handleResetFilters}
-                    className="text-xs text-cyan-400 hover:text-cyan-300 mt-1 transition-colors"
-                  >
-                    Reset filters
-                  </button>
-                </div>
-              ) : (
-                filteredIncidents.map(inc => (
-                  <div key={inc.id}>
-                    <IncidentCard
-                      incident={inc}
-                      isSelected={selectedIncidentId === inc.id}
-                      onClick={() => handleSelectIncident(inc.id)}
-                    />
-                    {selectedIncidentId === inc.id && selectedIncident && (
-                      <IncidentDetail incident={selectedIncident} />
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-
         </div>
       </div>
     </div>

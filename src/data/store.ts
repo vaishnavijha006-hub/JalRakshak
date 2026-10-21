@@ -1,4 +1,5 @@
-// JalRakshak — Data Store with localStorage persistence
+// JalRakshak — Data Store with localStorage persistence and reactive listeners
+import { useState, useEffect } from 'react';
 import type { Incident, HiddenHazard, RoutePlan, MetricSummary, FilterState } from './types';
 import { DEMO_INCIDENTS, DEMO_HIDDEN_HAZARDS, DEMO_ROUTES } from './incidents';
 
@@ -31,6 +32,45 @@ let routes: RoutePlan[] = loadFromStorage(STORAGE_KEYS.routes, DEMO_ROUTES);
 // Persist initial data if not already stored
 if (!localStorage.getItem(STORAGE_KEYS.incidents)) {
   saveToStorage(STORAGE_KEYS.incidents, incidents);
+}
+
+// === Reactive Subscription Pattern ===
+type Listener = () => void;
+const listeners = new Set<Listener>();
+
+export function subscribeStore(listener: Listener): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function notifyListeners(): void {
+  listeners.forEach(fn => {
+    try {
+      fn();
+    } catch (e) {
+      console.error('Store listener error:', e);
+    }
+  });
+}
+
+// React hook to subscribe to store changes
+export function useStore() {
+  const [, setVersion] = useState(0);
+
+  useEffect(() => {
+    return subscribeStore(() => {
+      setVersion(v => v + 1);
+    });
+  }, []);
+
+  return {
+    incidents: getIncidents(),
+    hiddenHazards: getHiddenHazards(),
+    routes: getRoutes(),
+    metrics: getMetrics(),
+  };
 }
 
 // === READ operations ===
@@ -70,7 +110,7 @@ export function getMetrics(): MetricSummary {
       i.status === 'resolution_verified' &&
       i.lastVerifiedAt >= weekAgo
     ).length,
-    criticalAlerts: active.filter(i => i.severity === 'critical').length,
+    criticalAlerts: active.filter(i => i.severity === 'critical' && i.isActive).length,
   };
 }
 
@@ -91,6 +131,10 @@ export function filterIncidents(filters: Partial<FilterState>): Incident[] {
 
   if (filters.categories && filters.categories.length > 0) {
     result = result.filter(i => filters.categories!.includes(i.category));
+  }
+
+  if (filters.riskLevels && filters.riskLevels.length > 0) {
+    result = result.filter(i => filters.riskLevels!.includes(i.severity as any));
   }
 
   if (filters.verificationStatuses && filters.verificationStatuses.length > 0) {
@@ -119,6 +163,7 @@ export function filterIncidents(filters: Partial<FilterState>): Incident[] {
 export function addIncident(incident: Incident): void {
   incidents = [incident, ...incidents];
   saveToStorage(STORAGE_KEYS.incidents, incidents);
+  notifyListeners();
 }
 
 export function updateIncidentStatus(
@@ -145,6 +190,7 @@ export function updateIncidentStatus(
   incidents = [...incidents];
   incidents[idx] = updated;
   saveToStorage(STORAGE_KEYS.incidents, incidents);
+  notifyListeners();
   return updated;
 }
 
@@ -163,6 +209,7 @@ export function updateIncidentVerification(
   incidents = [...incidents];
   incidents[idx] = updated;
   saveToStorage(STORAGE_KEYS.incidents, incidents);
+  notifyListeners();
   return updated;
 }
 
@@ -176,6 +223,7 @@ export function resetDemoData(): void {
   saveToStorage(STORAGE_KEYS.hiddenHazards, hiddenHazards);
   saveToStorage(STORAGE_KEYS.routes, routes);
   localStorage.removeItem(STORAGE_KEYS.userReports);
+  notifyListeners();
 }
 
 // === Utility: generate next ID ===

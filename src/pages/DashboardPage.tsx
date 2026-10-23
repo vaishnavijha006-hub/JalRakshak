@@ -1,6 +1,8 @@
 // JalRakshak — Dashboard / Command Center Page
 // Professional geospatial intelligence dashboard for Delhi monsoon hazards
-// Visual identity: Jet Black (#050507), Deep Black (#0B1220/#0B0B10), Royal Amethyst (#8B5CF6), Electric Cyan (#00F5FF)
+// Core Brand: Jet Black (#050507), Deep Black (#0B0B10), Royal Amethyst (#8B5CF6), Electric Cyan (#00F5FF)
+// Semantic Alerts: Red (#FF4D6D), Orange (#FF9F43), Yellow (#FFD166), Green (#35D07F)
+
 import { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -35,13 +37,13 @@ const CATEGORY_FILTERS: { key: HazardCategory | 'all'; label: string; icon: type
 
 const SEVERITY_FILTERS: { key: Severity | 'all'; label: string; color: string }[] = [
   { key: 'all', label: 'All Severities', color: '#9CA3AF' },
-  { key: 'critical', label: 'Critical', color: '#00F5FF' },
-  { key: 'high', label: 'High', color: '#8B5CF6' },
-  { key: 'medium', label: 'Medium', color: '#A78BFA' },
+  { key: 'critical', label: 'Critical', color: '#FF4D6D' },
+  { key: 'high', label: 'High', color: '#FF9F43' },
+  { key: 'medium', label: 'Medium', color: '#FFD166' },
   { key: 'low', label: 'Low', color: '#71717A' },
 ];
 
-// Metric Card Component
+// Metric Card Component with interactive hover elevation
 function MetricCard({
   icon: Icon,
   label,
@@ -60,14 +62,14 @@ function MetricCard({
   return (
     <div
       className={cn(
-        'relative overflow-hidden rounded-xl border p-4 transition-all duration-300',
+        'relative overflow-hidden rounded-xl border p-4 transition-all duration-300 card-interactive',
         highlight
-          ? 'bg-[#00F5FF]/10 border-[#00F5FF]/40 shadow-[0_0_24px_rgba(0,245,255,0.12)]'
+          ? 'bg-[#FF4D6D]/10 border-[#FF4D6D]/40 shadow-[0_0_24px_rgba(255,77,109,0.15)]'
           : 'bg-[#0B0B10] border-[#1C1C28] hover:border-[#8B5CF6]/40',
       )}
     >
       {highlight && (
-        <div className="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 rounded-full bg-[#00F5FF]/15 blur-xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 rounded-full bg-[#FF4D6D]/15 blur-xl pointer-events-none" />
       )}
       <div className="flex items-start justify-between">
         <div
@@ -77,7 +79,7 @@ function MetricCard({
           <Icon className="w-4 h-4" style={{ color }} />
         </div>
         {highlight ? (
-          <span className="px-2 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full bg-[#00F5FF]/15 text-[#00F5FF] border border-[#00F5FF]/40 animate-pulse">
+          <span className="px-2 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full bg-[#FF4D6D]/15 text-[#FF4D6D] border border-[#FF4D6D]/40 animate-pulse">
             USP Inferred
           </span>
         ) : (
@@ -107,7 +109,7 @@ function IncidentCard({
     <button
       onClick={onClick}
       className={cn(
-        'w-full text-left rounded-lg border p-3 transition-all duration-200 focus:outline-none',
+        'w-full text-left rounded-lg border p-3 transition-all duration-200 focus:outline-none card-interactive',
         isSelected
           ? 'bg-[#1C1C28] border-[#00F5FF]/50 shadow-[0_0_12px_rgba(0,245,255,0.15)]'
           : 'bg-[#0B0B10] border-[#1C1C28] hover:bg-[#12121A] hover:border-[#8B5CF6]/40',
@@ -209,15 +211,15 @@ function IncidentDetail({ incident }: { incident: Incident }) {
 // Hidden hazard alert banner
 function HiddenHazardAlert({ hazard, onClose }: { hazard: HiddenHazard; onClose: () => void }) {
   return (
-    <div className="rounded-xl border border-[#00F5FF]/50 bg-[#0B0B10] p-4 relative shadow-[0_0_24px_rgba(0,245,255,0.12)]">
+    <div className="rounded-xl border border-[#FF4D6D]/50 bg-[#0B0B10] p-4 relative shadow-[0_0_24px_rgba(255,77,109,0.15)]">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#00F5FF]/15 border border-[#00F5FF]/40 flex items-center justify-center">
-            <TriangleAlert className="w-4 h-4 text-[#00F5FF]" />
+          <div className="w-8 h-8 rounded-lg bg-[#FF4D6D]/15 border border-[#FF4D6D]/40 flex items-center justify-center">
+            <TriangleAlert className="w-4 h-4 text-[#FF4D6D]" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-[#00F5FF]">USP — Inferred Hidden Hazard</h3>
-            <p className="text-[10px] text-[#C4B5FD]">Historical Defect Submerged Beneath Waterlogging</p>
+            <h3 className="text-sm font-bold text-[#FF4D6D]">USP — Inferred Hidden Hazard</h3>
+            <p className="text-[10px] text-[#FF9F43]">Historical Defect Submerged Beneath Waterlogging</p>
           </div>
         </div>
         <button onClick={onClose} className="p-1 rounded text-zinc-400 hover:text-white transition-colors">
@@ -227,7 +229,7 @@ function HiddenHazardAlert({ hazard, onClose }: { hazard: HiddenHazard; onClose:
 
       <div className="rounded-lg bg-[#050507] border border-[#1C1C28] p-3 mb-2 space-y-2">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-[#8B5CF6] font-semibold uppercase tracking-wider text-[10px]">1. Historical Defect</span>
+          <span className="text-[#FF9F43] font-semibold uppercase tracking-wider text-[10px]">1. Historical Defect</span>
           <span className="text-zinc-400 text-[10px]">{formatTimeAgo(hazard.historicalObservedAt)}</span>
         </div>
         <p className="text-xs text-zinc-200">
@@ -249,7 +251,7 @@ function HiddenHazardAlert({ hazard, onClose }: { hazard: HiddenHazard; onClose:
             className="h-full rounded-full transition-all duration-500"
             style={{
               width: `${hazard.confidence}%`,
-              background: hazard.confidence >= 75 ? '#00F5FF' : '#8B5CF6',
+              background: hazard.confidence >= 75 ? '#FF4D6D' : hazard.confidence >= 50 ? '#FF9F43' : '#FFD166',
             }}
           />
         </div>
@@ -261,8 +263,8 @@ function HiddenHazardAlert({ hazard, onClose }: { hazard: HiddenHazard; onClose:
         {hazard.explanation}
       </p>
 
-      <div className="flex items-start gap-1.5 text-[10px] text-[#C4B5FD] bg-[#8B5CF6]/10 rounded-lg p-2.5 border border-[#8B5CF6]/25">
-        <ShieldAlert className="w-3.5 h-3.5 text-[#00F5FF] shrink-0 mt-0.5" />
+      <div className="flex items-start gap-1.5 text-[10px] text-zinc-200 bg-[#FFD166]/10 rounded-lg p-2.5 border border-[#FFD166]/30">
+        <ShieldAlert className="w-3.5 h-3.5 text-[#FFD166] shrink-0 mt-0.5" />
         <span>
           <strong className="text-white">Inferred Decision-Support Alert:</strong> Submerged condition is statistically estimated from spatial and temporal correlation. Not directly confirmed by physical divers.
         </span>
@@ -323,7 +325,7 @@ export function DashboardPage() {
     });
   }, [allIncidents, selectedCategory, selectedSeverity, searchQuery]);
 
-  // Chart data with exclusive palette (Royal Amethyst & Electric Cyan shades)
+  // Chart data with semantic category colors
   const chartData = useMemo(() => {
     const counts: Record<string, number> = {};
     allIncidents.forEach(inc => {
@@ -332,10 +334,10 @@ export function DashboardPage() {
     });
     return Object.entries(counts).map(([name, count]) => {
       let color = '#8B5CF6';
-      if (name === 'Pothole') color = '#8B5CF6';
-      if (name === 'Open Manhole') color = '#00F5FF';
-      if (name === 'Waterlogging') color = '#67E8F9';
-      if (name === 'Damaged Road') color = '#A78BFA';
+      if (name === 'Pothole') color = '#FF9F43';
+      if (name === 'Open Manhole') color = '#FF4D6D';
+      if (name === 'Waterlogging') color = '#00F5FF';
+      if (name === 'Damaged Road') color = '#FFD166';
       return { name, count, color };
     });
   }, [allIncidents]);
@@ -368,7 +370,7 @@ export function DashboardPage() {
   const hasActiveFilters = selectedCategory !== 'all' || selectedSeverity !== 'all' || searchQuery.trim().length > 0;
 
   return (
-    <div className="min-h-screen bg-[#050507] text-white p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="min-h-screen bg-transparent text-white p-4 md:p-6 lg:p-8 space-y-6">
       {/* ─── Header & Notice ─────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#1C1C28] pb-4">
         <div>
@@ -387,7 +389,7 @@ export function DashboardPage() {
         <div className="flex items-center gap-2 self-start sm:self-auto">
           <div className="px-3 py-1.5 rounded-lg bg-[#0B0B10] border border-[#1C1C28] text-[11px] text-zinc-300 flex items-center gap-2">
             <Sparkles className="w-3.5 h-3.5 text-[#00F5FF]" />
-            <span>USP Hidden Hazard Engine: <strong className="text-[#00F5FF]">{hiddenHazards.length} Active Correlations</strong></span>
+            <span>USP Hidden Hazard Engine: <strong className="text-[#FF4D6D]">{hiddenHazards.length} Active Correlations</strong></span>
           </div>
         </div>
       </div>
@@ -414,28 +416,28 @@ export function DashboardPage() {
           value={metrics.hiddenHazards}
           sublabel="Correlated underwater"
           highlight
-          color="#00F5FF"
+          color="#FF4D6D"
         />
         <MetricCard
           icon={Clock}
           label="Pending Verification"
           value={metrics.pendingVerification}
           sublabel="Needs field review"
-          color="#A78BFA"
+          color="#FFD166"
         />
         <MetricCard
           icon={ShieldAlert}
           label="Critical Severity"
           value={metrics.criticalAlerts}
           sublabel="Immediate safety risk"
-          color="#00F5FF"
+          color="#FF4D6D"
         />
         <MetricCard
           icon={CheckCircle2}
           label="Resolved / Cleared"
           value={metrics.resolvedThisWeek}
           sublabel="Verified safe"
-          color="#8B5CF6"
+          color="#35D07F"
         />
       </div>
 
@@ -484,7 +486,7 @@ export function DashboardPage() {
         <div className="flex items-center justify-between pt-2 border-t border-[#1C1C28] flex-wrap gap-2">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mr-1 flex items-center gap-1">
-              <Filter className="w-3 h-3 text-[#8B5CF6]" /> Severity:
+              <Filter className="w-3 h-3 text-[#FF9F43]" /> Severity:
             </span>
             {SEVERITY_FILTERS.map(({ key, label, color }) => (
               <button
@@ -533,7 +535,7 @@ export function DashboardPage() {
             </div>
             <div className="text-[11px] text-zinc-400">
               Showing <strong className="text-white">{filteredIncidents.length}</strong> markers ·{' '}
-              <strong className="text-[#00F5FF]">{hiddenHazards.length}</strong> hidden overlays
+              <strong className="text-[#FF4D6D]">{hiddenHazards.length}</strong> hidden overlays
             </div>
           </div>
 
@@ -551,16 +553,16 @@ export function DashboardPage() {
           <div className="p-3 border-t border-[#1C1C28] bg-[#050507] flex items-center justify-between text-[11px] text-zinc-400 flex-wrap gap-2">
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6]" /> Potholes
+                <span className="w-2.5 h-2.5 rounded-full bg-[#FF9F43]" /> Potholes
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#A78BFA]" /> Open Manholes
+                <span className="w-2.5 h-2.5 rounded-full bg-[#FF4D6D]" /> Open Manholes
               </span>
               <span className="flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#00F5FF]" /> Waterlogging
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded bg-[#00F5FF] text-[8px] font-bold text-black flex items-center justify-center">!</span> Hidden Predictions
+                <span className="w-2.5 h-2.5 rounded bg-[#FF4D6D] text-[8px] font-bold text-white flex items-center justify-center">!</span> Hidden Predictions
               </span>
             </div>
             <span className="text-[10px] text-zinc-500 italic">Click any marker to inspect evidence</span>
@@ -617,13 +619,13 @@ export function DashboardPage() {
                 }
               }}
               className={cn(
-                'flex-1 py-2 px-3 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5 min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6]',
+                'flex-1 py-2 px-3 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5 min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4D6D]',
                 activeTab === 'hidden_hazards'
-                  ? 'bg-[#8B5CF6]/15 text-[#C4B5FD] border border-[#8B5CF6]/30'
+                  ? 'bg-[#FF4D6D]/15 text-[#FF4D6D] border border-[#FF4D6D]/30'
                   : 'text-zinc-400 hover:text-white',
               )}
             >
-              <TriangleAlert className="w-3.5 h-3.5 text-[#00F5FF]" />
+              <TriangleAlert className="w-3.5 h-3.5 text-[#FF4D6D]" />
               Hidden Predictions ({hiddenHazards.length})
             </button>
           </div>
@@ -682,14 +684,14 @@ export function DashboardPage() {
               aria-labelledby="dashboard-tab-hidden-hazards"
               className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] overflow-hidden"
             >
-              <div className="px-4 py-2.5 border-b border-[#1C1C28] bg-[#00F5FF]/10 flex items-center justify-between">
+              <div className="px-4 py-2.5 border-b border-[#1C1C28] bg-[#FF4D6D]/10 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <TriangleAlert className="w-3.5 h-3.5 text-[#00F5FF]" />
-                  <h3 className="text-xs font-bold text-[#00F5FF] uppercase tracking-wider">
+                  <TriangleAlert className="w-3.5 h-3.5 text-[#FF4D6D]" />
+                  <h3 className="text-xs font-bold text-[#FF4D6D] uppercase tracking-wider">
                     Inferred Submerged Hazards
                   </h3>
                 </div>
-                <span className="text-[10px] text-[#C4B5FD] font-semibold">USP Engine</span>
+                <span className="text-[10px] text-[#FF9F43] font-semibold">USP Engine</span>
               </div>
               <div className="p-2 space-y-2 max-h-[460px] overflow-y-auto">
                 {hiddenHazards.map(hh => (
@@ -697,17 +699,17 @@ export function DashboardPage() {
                     key={hh.id}
                     onClick={() => handleSelectHiddenHazard(hh.id)}
                     className={cn(
-                      'p-3 rounded-lg border cursor-pointer transition-all',
+                      'p-3 rounded-lg border cursor-pointer transition-all card-interactive',
                       selectedHiddenHazardId === hh.id
-                        ? 'bg-[#00F5FF]/10 border-[#00F5FF]/50 shadow-md'
-                        : 'bg-[#12121A] border-[#1C1C28] hover:border-[#8B5CF6]/40',
+                        ? 'bg-[#FF4D6D]/10 border-[#FF4D6D]/50 shadow-md'
+                        : 'bg-[#12121A] border-[#1C1C28] hover:border-[#FF9F43]/40',
                     )}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-bold text-white">
                         {getCategoryLabel(hh.historicalDefectType)} submerged
                       </span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#00F5FF]/15 text-[#00F5FF] font-bold">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#FF4D6D]/15 text-[#FF4D6D] font-bold">
                         {hh.confidence}% Conf.
                       </span>
                     </div>
@@ -725,7 +727,7 @@ export function DashboardPage() {
           )}
 
           {/* Dataset Distribution Chart */}
-          <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-4">
+          <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-4 shadow-xl">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
                 Distribution by Category

@@ -20,6 +20,9 @@ import {
   Radar,
   Crosshair,
   CloudRain,
+  AlertTriangle,
+  ArrowUpRight,
+  CheckCircle2,
 } from 'lucide-react';
 import { InteractiveBackground } from '../components/layout/InteractiveBackground';
 import { MonsoonRainEffect } from '../components/ui/MonsoonRainEffect';
@@ -124,133 +127,150 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Innovation Section ─────────────────────────────────────── */}
+      {/* ── SECTION 1: The Delhi Monsoon Crisis ───────────────────────── */}
       <section className="relative px-6 py-20 md:py-24 border-t border-[#1C1C28]/80 bg-[#0B0B10]/40">
-        <div className="mx-auto max-w-5xl text-center">
-          <span className="text-[10px] font-bold text-[#00F5FF] uppercase tracking-widest block mb-2">Core Differentiators</span>
-          <h2 className="text-2xl font-extrabold sm:text-3xl text-white">Two Core Innovations &amp; One USP</h2>
-          <p className="mx-auto mt-3 max-w-xl text-xs text-zinc-400 leading-relaxed">
-            JalRakshak moves beyond reactive flood alerts by combining
-            infrastructure baseline defect memory with real-time environmental waterlogging reports.
-          </p>
-        </div>
-
-        <div className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-2">
-          {/* Innovation 1 */}
-          <div className="group rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-7 transition card-interactive hover:border-[#8B5CF6]/50 hover:shadow-[0_0_24px_rgba(139,92,246,0.15)]">
-            <div className="mb-4 inline-flex rounded-lg bg-[#8B5CF6]/15 border border-[#8B5CF6]/35 p-2.5 text-[#8B5CF6]">
-              <Eye className="h-5 w-5 text-[#00F5FF]" />
-            </div>
-            <div className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-wider mb-1">Innovation 1</div>
-            <h3 className="text-base font-bold text-white">Pre-Monsoon Road Intelligence</h3>
-            <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-              Catalogues potholes, cave-ins, and surface structural damage observed
-              during dry months. When heavy monsoon rains flood the city, these records
-              anchor early warnings for submerged cavities hidden beneath standing water.
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center">
+            <span className="text-[10px] font-bold text-[#FF4D6D] uppercase tracking-widest block mb-2">
+              The Delhi Monsoon Reality
+            </span>
+            <h2 className="text-2xl font-extrabold sm:text-3xl text-white">
+              When 40mm/hr Rainfall Conceals Arterial Traps
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-xs text-zinc-400 leading-relaxed">
+              Every monsoon across Delhi—from Minto Bridge and the ITO junction to the Ring Road and Mathura Road—heavy
+              showers turn ordinary roads into dangerous waterscapes. The greatest risk is not the water itself,
+              but the deep potholes and collapsed drainage grates concealed beneath it.
             </p>
           </div>
 
-          {/* Innovation 2 */}
-          <div className="group rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-7 transition card-interactive hover:border-[#00F5FF]/50 hover:shadow-[0_0_24px_rgba(0,245,255,0.15)]">
-            <div className="mb-4 inline-flex rounded-lg bg-[#00F5FF]/15 border border-[#00F5FF]/35 p-2.5 text-[#00F5FF]">
-              <Route className="h-5 w-5 text-[#00F5FF]" />
+          <div className="mt-12 grid gap-6 md:grid-cols-2">
+            {/* What Commuters See */}
+            <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-6">
+              <div className="flex items-center justify-between pb-4 border-b border-[#1C1C28]">
+                <div className="flex items-center gap-2">
+                  <Droplets className="h-4 w-4 text-[#00F5FF]" />
+                  <span className="text-xs font-bold text-white uppercase tracking-wider">What The Commuter Sees</span>
+                </div>
+                <span className="text-[10px] font-mono text-zinc-500">Optical Illusion</span>
+              </div>
+              <div className="mt-4 space-y-3">
+                <div className="p-3.5 rounded-lg bg-[#12121A] border border-[#1C1C28]">
+                  <p className="text-xs text-zinc-300 font-medium">Uniform brown floodwater across Mathura Road</p>
+                  <p className="text-[11px] text-zinc-500 mt-1">Appears to be a shallow 2-3 inch surface puddle traversable at speed.</p>
+                </div>
+                <div className="flex items-center gap-2 text-[11px] text-zinc-400 pl-1">
+                  <AlertTriangle className="h-3.5 w-3.5 text-[#FF9F43] shrink-0" />
+                  <span>Standard navigation apps only report &quot;heavy traffic&quot; or slow speeds, unaware of physical underwater cavities.</span>
+                </div>
+              </div>
             </div>
-            <div className="text-[10px] font-bold text-[#00F5FF] uppercase tracking-wider mb-1">Innovation 2</div>
-            <h3 className="text-base font-bold text-white">Dynamic Risk-Based Routing</h3>
-            <p className="mt-2 text-xs leading-relaxed text-zinc-400">
-              SafeRoute evaluates alternative corridors by cross-referencing real-time
-              waterlogging reports, pre-monsoon defect severity, and report freshness —
-              recommending routes with lower hazard risk rather than raw shortest distance.
-            </p>
+
+            {/* What JalRakshak Unmasks */}
+            <div className="rounded-xl border border-[#FF4D6D]/40 bg-[#0B0B10] p-6 shadow-[0_0_24px_rgba(255,77,109,0.08)]">
+              <div className="flex items-center justify-between pb-4 border-b border-[#1C1C28]">
+                <div className="flex items-center gap-2">
+                  <Crosshair className="h-4 w-4 text-[#FF4D6D]" />
+                  <span className="text-xs font-bold text-[#FF4D6D] uppercase tracking-wider">What Lies Beneath</span>
+                </div>
+                <span className="text-[10px] font-mono text-[#00F5FF] font-bold">JalRakshak Detection</span>
+              </div>
+              <div className="mt-4 space-y-3">
+                <div className="p-3.5 rounded-lg bg-[#FF4D6D]/10 border border-[#FF4D6D]/30">
+                  <p className="text-xs text-white font-bold">32cm Submerged Cavity + Exposed Rebar</p>
+                  <p className="text-[11px] text-zinc-300 mt-1">
+                    Pre-monsoon dry defect #DL-4819 submerged under 1.8ft muddy water. Immediate two-wheeler inversion risk.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-[11px] text-zinc-300 pl-1">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-[#35D07F] shrink-0" />
+                  <span>Inferred predictive correlation warns riders 500m ahead to change lanes or take elevated bypasses.</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ── Three-Step Workflow ─────────────────────────────────────── */}
+      {/* ── SECTION 2: Anatomy of a Hidden Hazard ───────────────────── */}
       <section className="px-6 py-20 md:py-24 bg-[#050507]">
         <div className="mx-auto max-w-5xl text-center">
-          <span className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-widest block mb-2">Methodology</span>
-          <h2 className="text-2xl font-extrabold sm:text-3xl text-white">How It Works</h2>
+          <span className="text-[10px] font-bold text-[#00F5FF] uppercase tracking-widest block mb-2">
+            Temporal Correlation Lifecycle
+          </span>
+          <h2 className="text-2xl font-extrabold sm:text-3xl text-white">
+            Anatomy of a Hidden Hazard Prediction
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-xs text-zinc-400 leading-relaxed">
+            How JalRakshak fuses pre-monsoon baseline memory with active rainfall telemetry to expose invisible road dangers.
+          </p>
         </div>
 
         <div className="mx-auto mt-12 grid max-w-4xl gap-6 sm:grid-cols-3">
           <WorkflowStep
             step={1}
             icon={<Eye className="h-6 w-6 text-[#A78BFA]" />}
-            title="Observe"
-            description="Field surveys and commuters log potholes and road defects during dry weather, constructing a pre-monsoon baseline."
+            title="1. Pre-Monsoon Baseline"
+            description="During dry summer months, municipal records and commuter reports register road defects (potholes, cave-ins, open drains) with exact GPS coordinates."
             accent="amethyst"
           />
           <WorkflowStep
             step={2}
             icon={<GitMerge className="h-6 w-6 text-[#00F5FF]" />}
-            title="Correlate"
-            description="When waterlogging occurs, the system spatially cross-references flooded segments with baseline defect coordinates."
+            title="2. Monsoon Inundation"
+            description="When cloudbursts flood arterial low-lying stretches like Minto Bridge or ITO, real-time reports establish the boundaries and depth of standing water."
             accent="cyan"
           />
           <WorkflowStep
             step={3}
-            icon={<Bell className="h-6 w-6 text-[#00F5FF]" />}
-            title="Warn"
-            description="If a pre-monsoon defect coincides with surface water, JalRakshak flags an inferred hidden hazard to protect riders."
+            icon={<Bell className="h-6 w-6 text-[#FF4D6D]" />}
+            title="3. Inferred Predictive Warning"
+            description="JalRakshak calculates the geometric intersection of standing water with baseline defects, alerting riders that an invisible hazard lies beneath."
             accent="dual"
           />
         </div>
-      </section>
 
-      {/* ── Hidden Hazard Example (USP) ─────────────────────────────── */}
-      <section className="px-6 py-20 md:py-24 border-t border-[#1C1C28]/80 bg-[#0B0B10]/40">
-        <div className="mx-auto max-w-3xl">
-          <div className="text-center">
-            <span className="text-[10px] font-bold text-[#00F5FF] uppercase tracking-widest block mb-1">Unique Selling Proposition</span>
-            <h2 className="text-2xl font-extrabold sm:text-3xl text-white">
-              Hidden Hazard Prediction
-            </h2>
-            <p className="mx-auto mt-2 max-w-lg text-xs text-zinc-400">
-              Inferring invisible danger beneath floodwater through spatial and temporal evidence correlation.
-            </p>
-          </div>
-
-          {/* Card */}
-          <div className="relative mt-9 overflow-hidden rounded-xl border border-[#FF4D6D]/40 bg-[#0B0B10] shadow-2xl card-interactive">
-            {/* Top Amethyst/Cyan Accent Bar */}
+        {/* USP Inferred Prediction Card */}
+        <div className="mx-auto mt-12 max-w-3xl">
+          <div className="relative overflow-hidden rounded-xl border border-[#FF4D6D]/40 bg-[#0B0B10] shadow-2xl card-interactive">
             <div className="h-1 bg-gradient-to-r from-[#FF4D6D] via-[#FF9F43] to-[#00F5FF]" />
-
             <div className="p-6 sm:p-8">
-              {/* badge */}
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FF4D6D]/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#FF4D6D] border border-[#FF4D6D]/35">
-                <AlertOctagon className="h-3.5 w-3.5" />
-                USP Inferred Prediction Alert
-              </span>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FF4D6D]/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#FF4D6D] border border-[#FF4D6D]/35">
+                  <AlertOctagon className="h-3.5 w-3.5" />
+                  USP Inferred Prediction Alert
+                </span>
+                <span className="text-[10px] font-mono text-zinc-400">
+                  REF: DL-HAZ-2024-884 · MATHURA ROAD
+                </span>
+              </div>
 
               <div className="mt-6 space-y-4">
-                {/* historical */}
                 <HazardRow
                   icon={<CircleDot className="h-5 w-5 text-[#FF9F43]" />}
-                  label="Historical Road Defect"
-                  detail="30cm pothole observed 45 days ago"
-                  sublabel="Pre-monsoon baseline observation · Survey verified"
+                  label="Pre-Monsoon Defect Baseline"
+                  detail="30cm pothole logged 45 days ago"
+                  sublabel="Dry-season survey verified · Lat 28.6139° N, Lng 77.2410° E"
                   borderColor="border-[#FF9F43]/30"
                 />
 
-                {/* connector */}
                 <div className="flex items-center gap-2 pl-3 text-zinc-500">
                   <div className="h-6 w-px bg-[#1C1C28]" />
                   <GitMerge className="h-3.5 w-3.5 text-[#00F5FF]" />
-                  <span className="text-[11px] font-medium text-zinc-400">Spatial correlation overlap on Minto Road</span>
+                  <span className="text-[11px] font-medium text-zinc-400">
+                    Spatial-temporal intersection over submerged carriageway
+                  </span>
                 </div>
 
-                {/* current */}
                 <HazardRow
                   icon={<Droplets className="h-5 w-5 text-[#00F5FF]" />}
-                  label="Active Waterlogging"
-                  detail="Reported 4 hours ago"
-                  sublabel="Estimated depth: 2-3 ft · Direct commuter report"
+                  label="Active Monsoon Waterlogging"
+                  detail="Reported 3 hours ago · Depth 2.2 ft"
+                  sublabel="Direct commuter report · Low-lying drainage backup near Pragati Maidan"
                   borderColor="border-[#00F5FF]/30"
                 />
               </div>
 
-              {/* result banner */}
               <div className="mt-6 rounded-lg border border-[#FF4D6D]/30 bg-[#FF4D6D]/10 p-4">
                 <p className="flex items-start gap-2.5 text-xs text-zinc-300 leading-relaxed">
                   <AlertOctagon className="mt-0.5 h-4 w-4 shrink-0 text-[#FF4D6D]" />
@@ -264,32 +284,198 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Architecture Section ───────────────────────────────────── */}
+      {/* ── SECTION 3: Two Innovations & One USP ─────────────────────── */}
+      <section className="relative px-6 py-20 md:py-24 border-t border-[#1C1C28]/80 bg-[#0B0B10]/40">
+        <div className="mx-auto max-w-5xl text-center">
+          <span className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-widest block mb-2">
+            Technical Foundations
+          </span>
+          <h2 className="text-2xl font-extrabold sm:text-3xl text-white">
+            Two Core Innovations &amp; One USP
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-xs text-zinc-400 leading-relaxed">
+            Engineered specifically to solve Delhi&apos;s recurring urban monsoon mobility hazards.
+          </p>
+        </div>
+
+        <div className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-2">
+          {/* Innovation 1 */}
+          <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-7 transition card-interactive hover:border-[#8B5CF6]/50">
+            <div className="mb-4 inline-flex rounded-lg bg-[#8B5CF6]/15 border border-[#8B5CF6]/35 p-2.5 text-[#8B5CF6]">
+              <Eye className="h-5 w-5 text-[#00F5FF]" />
+            </div>
+            <div className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-wider mb-1">Innovation 1</div>
+            <h3 className="text-base font-bold text-white">Pre-Monsoon Road Intelligence</h3>
+            <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+              Systematic cataloguing of potholes, cave-ins, and structural defects during dry months.
+              These records provide the ground-truth baseline that turns ordinary flood warnings into life-saving hazard intelligence.
+            </p>
+          </div>
+
+          {/* Innovation 2 */}
+          <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-7 transition card-interactive hover:border-[#00F5FF]/50">
+            <div className="mb-4 inline-flex rounded-lg bg-[#00F5FF]/15 border border-[#00F5FF]/35 p-2.5 text-[#00F5FF]">
+              <Route className="h-5 w-5 text-[#00F5FF]" />
+            </div>
+            <div className="text-[10px] font-bold text-[#00F5FF] uppercase tracking-wider mb-1">Innovation 2</div>
+            <h3 className="text-base font-bold text-white">Dynamic Risk-Based Routing</h3>
+            <p className="mt-2 text-xs leading-relaxed text-zinc-400">
+              Unlike generic GPS navigators that prioritize raw shortest transit time, SafeRoute computes an evidence-weighted
+              Risk Index (0-100), steering drivers around submerged potholes even if an elevated alternate takes 4 extra minutes.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 4: Delhi Commuter Corridor Simulations ────────────── */}
       <section className="px-6 py-20 md:py-24 bg-[#050507]">
+        <div className="mx-auto max-w-5xl">
+          <div className="text-center">
+            <span className="text-[10px] font-bold text-[#00F5FF] uppercase tracking-widest block mb-2">
+              SafeRoute Corridor Trade-Offs
+            </span>
+            <h2 className="text-2xl font-extrabold sm:text-3xl text-white">
+              Real-World Delhi Commuter Simulations
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-xs text-zinc-400 leading-relaxed">
+              Compare direct flooded routes against verified elevated bypasses across Delhi&apos;s heaviest monsoon arteries.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {/* Corridor 1 */}
+            <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400 pb-2 border-b border-[#1C1C28]">
+                  <span>CORRIDOR 01</span>
+                  <span className="text-[#00F5FF] font-bold">BIDIRECTIONAL</span>
+                </div>
+                <h3 className="text-sm font-bold text-white mt-3">Connaught Place ↔ Lajpat Nagar</h3>
+                <div className="mt-4 space-y-2.5 text-xs">
+                  <div className="p-2.5 rounded bg-[#12121A] border border-[#FF4D6D]/30 flex items-center justify-between">
+                    <div>
+                      <span className="text-[11px] font-semibold text-zinc-300 block">Direct (Mathura Rd)</span>
+                      <span className="text-[10px] text-zinc-500">7.2 km · 28 min</span>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-[#FF4D6D]">Risk 82 (Critical)</span>
+                  </div>
+                  <div className="p-2.5 rounded bg-[#8B5CF6]/10 border border-[#8B5CF6]/40 flex items-center justify-between">
+                    <div>
+                      <span className="text-[11px] font-semibold text-white block">SafeRoute (Barapullah)</span>
+                      <span className="text-[10px] text-[#A78BFA]">9.8 km · 33 min (+5m)</span>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-[#35D07F]">Risk 26 (Low)</span>
+                  </div>
+                </div>
+              </div>
+              <p className="mt-4 text-[10px] text-zinc-400 leading-tight">
+                Elevated corridor bypasses ground-level waterlogging near Pragati Maidan and Nizamuddin.
+              </p>
+            </div>
+
+            {/* Corridor 2 */}
+            <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400 pb-2 border-b border-[#1C1C28]">
+                  <span>CORRIDOR 02</span>
+                  <span className="text-[#00F5FF] font-bold">BIDIRECTIONAL</span>
+                </div>
+                <h3 className="text-sm font-bold text-white mt-3">ITO ↔ Connaught Place</h3>
+                <div className="mt-4 space-y-2.5 text-xs">
+                  <div className="p-2.5 rounded bg-[#12121A] border border-[#FF4D6D]/30 flex items-center justify-between">
+                    <div>
+                      <span className="text-[11px] font-semibold text-zinc-300 block">Direct (DDU Marg)</span>
+                      <span className="text-[10px] text-zinc-500">3.8 km · 16 min</span>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-[#FF4D6D]">Risk 76 (High)</span>
+                  </div>
+                  <div className="p-2.5 rounded bg-[#8B5CF6]/10 border border-[#8B5CF6]/40 flex items-center justify-between">
+                    <div>
+                      <span className="text-[11px] font-semibold text-white block">SafeRoute (Sikandra Rd)</span>
+                      <span className="text-[10px] text-[#A78BFA]">4.6 km · 19 min (+3m)</span>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-[#35D07F]">Risk 22 (Low)</span>
+                  </div>
+                </div>
+              </div>
+              <p className="mt-4 text-[10px] text-zinc-400 leading-tight">
+                Circumvents Minto Bridge underpass choke point during peak cloudburst accumulation.
+              </p>
+            </div>
+
+            {/* Corridor 3 */}
+            <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-5 flex flex-col justify-between">
+              <div>
+                <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400 pb-2 border-b border-[#1C1C28]">
+                  <span>CORRIDOR 03</span>
+                  <span className="text-[#00F5FF] font-bold">BIDIRECTIONAL</span>
+                </div>
+                <h3 className="text-sm font-bold text-white mt-3">ITO ↔ Lajpat Nagar</h3>
+                <div className="mt-4 space-y-2.5 text-xs">
+                  <div className="p-2.5 rounded bg-[#12121A] border border-[#FF4D6D]/30 flex items-center justify-between">
+                    <div>
+                      <span className="text-[11px] font-semibold text-zinc-300 block">Direct (Ring Road)</span>
+                      <span className="text-[10px] text-zinc-500">8.5 km · 34 min</span>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-[#FF4D6D]">Risk 84 (Critical)</span>
+                  </div>
+                  <div className="p-2.5 rounded bg-[#8B5CF6]/10 border border-[#8B5CF6]/40 flex items-center justify-between">
+                    <div>
+                      <span className="text-[11px] font-semibold text-white block">SafeRoute (Lodhi Rd)</span>
+                      <span className="text-[10px] text-[#A78BFA]">10.2 km · 39 min (+5m)</span>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-[#35D07F]">Risk 31 (Low)</span>
+                  </div>
+                </div>
+              </div>
+              <p className="mt-4 text-[10px] text-zinc-400 leading-tight">
+                Navigates away from Yamuna floodplain drain backups near the Sarai Kale Khan stretch.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-8 text-center">
+            <Link
+              to="/safe-route"
+              className="inline-flex items-center gap-2 rounded-lg bg-[#00F5FF]/15 px-5 py-2.5 text-xs font-bold text-[#00F5FF] border border-[#00F5FF]/40 hover:bg-[#00F5FF]/25 transition"
+            >
+              Test SafeRoute Corridor Planner
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 5: Civic Reporting & Municipal Transparency ────── */}
+      <section className="px-6 py-20 md:py-24 border-t border-[#1C1C28]/80 bg-[#0B0B10]/40">
         <div className="mx-auto max-w-4xl text-center">
-          <span className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-widest block mb-1">Architecture</span>
-          <h2 className="text-2xl font-extrabold sm:text-3xl text-white">System Data Pipeline</h2>
+          <span className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-widest block mb-1">
+            Civic-Municipal Pipeline
+          </span>
+          <h2 className="text-2xl font-extrabold sm:text-3xl text-white">
+            From Commuter Incident to Municipal Resolution
+          </h2>
           <p className="mx-auto mt-2 max-w-lg text-xs text-zinc-400">
-            From crowdsourced observations to risk mitigation — designed for municipal interoperability.
+            A transparent four-stage lifecycle designed for rapid municipal interoperability.
           </p>
         </div>
 
         <div className="mx-auto mt-12 max-w-3xl">
           <div className="flex flex-col items-center gap-4 sm:flex-row sm:gap-0 sm:justify-between">
-            <ArchNode icon={<Users className="h-5 w-5" />} label="Riders &amp; Commuters" accent="cyan" />
+            <ArchNode icon={<Users className="h-5 w-5" />} label="Commuter Report" accent="cyan" />
             <ArrowConnector />
             <ArchNode icon={<Zap className="h-5 w-5" />} label="JalRakshak Engine" accent="amethyst" highlight />
             <ArrowConnector />
-            <ArchNode icon={<Building2 className="h-5 w-5" />} label="Municipal Review" accent="amethyst" proposed />
+            <ArchNode icon={<Building2 className="h-5 w-5" />} label="Municipal Handover" accent="amethyst" proposed />
             <ArrowConnector />
-            <ArchNode icon={<ShieldCheck className="h-5 w-5" />} label="Public Safety Feed" accent="cyan" />
+            <ArchNode icon={<ShieldCheck className="h-5 w-5" />} label="Verified Repair" accent="cyan" />
           </div>
 
           <p className="mt-8 text-center text-xs text-zinc-500">
             <span className="inline-flex items-center gap-1 rounded bg-[#8B5CF6]/15 px-2 py-0.5 text-[10px] font-semibold uppercase text-[#C4B5FD] border border-[#8B5CF6]/30">
               Proposed Pathway
             </span>{' '}
-            Municipal departmental integration represents a planned future interface.
+            Municipal departmental integration (PWD, MCD, NDMC) represents a planned civic-tech interface.
           </p>
         </div>
       </section>

@@ -23,10 +23,14 @@ import {
   AlertTriangle,
   ArrowUpRight,
   CheckCircle2,
+  MapPin,
 } from 'lucide-react';
 import { InteractiveBackground } from '../components/layout/InteractiveBackground';
 import { MonsoonRainEffect } from '../components/ui/MonsoonRainEffect';
 import delhiHeroImg from '../assets/delhi-monsoon-hero.jpg';
+import delhiRedFortImg from '../assets/delhi-red-fort.jpg';
+import delhiHumayunTombImg from '../assets/delhi-humayun-tomb.jpg';
+import delhiPuranaQilaImg from '../assets/delhi-purana-qila.jpg';
 
 /* ------------------------------------------------------------------ */
 /*  Landing Page – standalone (no shared Layout wrapper)               */
@@ -128,12 +132,24 @@ export function LandingPage() {
       </section>
 
       {/* ── SECTION 1: The Delhi Monsoon Crisis ───────────────────────── */}
-      <section className="relative px-6 py-20 md:py-24 border-t border-[#1C1C28]/80 bg-[#0B0B10]/40">
-        <div className="mx-auto max-w-5xl">
+      <section className="relative px-6 py-20 md:py-24 border-t border-[#1C1C28]/80 bg-[#0B0B10]/60 overflow-hidden">
+        {/* Atmospheric Delhi Landmark Background: Red Fort (Lal Qila) in Monsoon Downpour */}
+        <div className="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-25">
+          <img
+            src={delhiRedFortImg}
+            alt="Red Fort Lal Qila in Old Delhi during heavy monsoon downpour"
+            className="w-full h-full object-cover object-center filter saturate-[0.8] contrast-[1.15]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B10] via-[#0B0B10]/85 to-[#0B0B10]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0B0B10] via-transparent to-[#0B0B10]" />
+        </div>
+
+        <div className="mx-auto max-w-5xl relative z-10">
           <div className="text-center">
-            <span className="text-[10px] font-bold text-[#FF4D6D] uppercase tracking-widest block mb-2">
-              The Delhi Monsoon Reality
-            </span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8B5CF6]/15 border border-[#8B5CF6]/30 text-[10px] font-mono text-[#C4B5FD] uppercase tracking-wider mb-2">
+              <MapPin className="h-3 w-3 text-[#00F5FF]" />
+              Sector Landmark // Red Fort (Lal Qila) &amp; Yamuna Basin Corridor
+            </div>
             <h2 className="text-2xl font-extrabold sm:text-3xl text-white">
               When 40mm/hr Rainfall Conceals Arterial Traps
             </h2>
@@ -328,12 +344,24 @@ export function LandingPage() {
       </section>
 
       {/* ── SECTION 4: Delhi Commuter Corridor Simulations ────────────── */}
-      <section className="px-6 py-20 md:py-24 bg-[#050507]">
-        <div className="mx-auto max-w-5xl">
+      <section className="relative px-6 py-20 md:py-24 bg-[#050507] overflow-hidden">
+        {/* Atmospheric Delhi Landmark Background: Humayun's Tomb in Monsoon Downpour */}
+        <div className="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-25">
+          <img
+            src={delhiHumayunTombImg}
+            alt="Humayun's Tomb New Delhi during heavy monsoon downpour"
+            className="w-full h-full object-cover object-center filter saturate-[0.85] contrast-[1.1]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#050507] via-[#050507]/85 to-[#050507]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#050507] via-transparent to-[#050507]" />
+        </div>
+
+        <div className="mx-auto max-w-5xl relative z-10">
           <div className="text-center">
-            <span className="text-[10px] font-bold text-[#00F5FF] uppercase tracking-widest block mb-2">
-              SafeRoute Corridor Trade-Offs
-            </span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#00F5FF]/15 border border-[#00F5FF]/30 text-[10px] font-mono text-[#00F5FF] uppercase tracking-wider mb-2">
+              <MapPin className="h-3 w-3 text-[#8B5CF6]" />
+              Sector Landmark // Humayun&apos;s Tomb &amp; Barapullah Elevated Flyover
+            </div>
             <h2 className="text-2xl font-extrabold sm:text-3xl text-white">
               Real-World Delhi Commuter Simulations
             </h2>
@@ -446,12 +474,135 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* ── SECTION: Delhi Landmark Monsoon Surveillance Network ───────── */}
+      <section className="relative px-6 py-20 md:py-24 border-t border-[#1C1C28]/80 bg-[#050507]">
+        <div className="mx-auto max-w-6xl">
+          <div className="text-center">
+            <span className="text-[10px] font-bold text-[#00F5FF] uppercase tracking-widest block mb-2">
+              Citywide Geographic Coverage
+            </span>
+            <h2 className="text-2xl font-extrabold sm:text-3xl text-white">
+              Delhi Monsoon Landmark Surveillance Network
+            </h2>
+            <p className="mx-auto mt-3 max-w-2xl text-xs text-zinc-400 leading-relaxed">
+              Real-time atmospheric telemetry and road hazard correlation across Delhi&apos;s four iconic heritage sectors.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Monument 1: India Gate */}
+            <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] overflow-hidden group hover:border-[#00F5FF]/50 transition-all card-interactive">
+              <div className="relative h-44 overflow-hidden">
+                <img
+                  src={delhiHeroImg}
+                  alt="India Gate monsoon"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B10] via-transparent to-transparent" />
+                <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-[#050507]/80 border border-[#00F5FF]/40 text-[9px] font-mono text-[#00F5FF]">
+                  CENTRAL // RAJPATH
+                </span>
+              </div>
+              <div className="p-4">
+                <h3 className="text-sm font-bold text-white">India Gate (C-Hexagon)</h3>
+                <p className="text-[11px] text-zinc-400 mt-1">Concealed Cavity in Puddle #DL-4819</p>
+                <div className="mt-3 pt-2.5 border-t border-[#1C1C28] flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-zinc-500">42 mm/hr Rain</span>
+                  <span className="text-[#FF4D6D] font-bold">Critical Hazard</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Monument 2: Red Fort */}
+            <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] overflow-hidden group hover:border-[#8B5CF6]/50 transition-all card-interactive">
+              <div className="relative h-44 overflow-hidden">
+                <img
+                  src={delhiRedFortImg}
+                  alt="Red Fort monsoon"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B10] via-transparent to-transparent" />
+                <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-[#050507]/80 border border-[#8B5CF6]/40 text-[9px] font-mono text-[#A78BFA]">
+                  NORTH // OLD DELHI
+                </span>
+              </div>
+              <div className="p-4">
+                <h3 className="text-sm font-bold text-white">Red Fort (Lal Qila)</h3>
+                <p className="text-[11px] text-zinc-400 mt-1">Ring Road &amp; Chandni Chowk Inundation</p>
+                <div className="mt-3 pt-2.5 border-t border-[#1C1C28] flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-zinc-500">38 mm/hr Rain</span>
+                  <span className="text-[#FF9F43] font-bold">2.4 ft Floodwater</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Monument 3: Humayun's Tomb */}
+            <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] overflow-hidden group hover:border-[#35D07F]/50 transition-all card-interactive">
+              <div className="relative h-44 overflow-hidden">
+                <img
+                  src={delhiHumayunTombImg}
+                  alt="Humayun's Tomb monsoon"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B10] via-transparent to-transparent" />
+                <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-[#050507]/80 border border-[#35D07F]/40 text-[9px] font-mono text-[#35D07F]">
+                  SOUTH // NIZAMUDDIN
+                </span>
+              </div>
+              <div className="p-4">
+                <h3 className="text-sm font-bold text-white">Humayun&apos;s Tomb</h3>
+                <p className="text-[11px] text-zinc-400 mt-1">Barapullah Elevated Bypass Route</p>
+                <div className="mt-3 pt-2.5 border-t border-[#1C1C28] flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-zinc-500">45 mm/hr Rain</span>
+                  <span className="text-[#35D07F] font-bold">SafeRoute 26 (Low)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Monument 4: Purana Qila */}
+            <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] overflow-hidden group hover:border-[#00F5FF]/50 transition-all card-interactive">
+              <div className="relative h-44 overflow-hidden">
+                <img
+                  src={delhiPuranaQilaImg}
+                  alt="Purana Qila monsoon"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B10] via-transparent to-transparent" />
+                <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-[#050507]/80 border border-[#00F5FF]/40 text-[9px] font-mono text-[#00F5FF]">
+                  CENTRAL // BHAIRON MARG
+                </span>
+              </div>
+              <div className="p-4">
+                <h3 className="text-sm font-bold text-white">Purana Qila (Old Fort)</h3>
+                <p className="text-[11px] text-zinc-400 mt-1">Pragati Maidan Drainage Basin</p>
+                <div className="mt-3 pt-2.5 border-t border-[#1C1C28] flex items-center justify-between text-[10px] font-mono">
+                  <span className="text-zinc-500">40 mm/hr Rain</span>
+                  <span className="text-[#FFD166] font-bold">PWD Priority Zone</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── SECTION 5: Civic Reporting & Municipal Transparency ────── */}
-      <section className="px-6 py-20 md:py-24 border-t border-[#1C1C28]/80 bg-[#0B0B10]/40">
-        <div className="mx-auto max-w-4xl text-center">
-          <span className="text-[10px] font-bold text-[#A78BFA] uppercase tracking-widest block mb-1">
-            Civic-Municipal Pipeline
-          </span>
+      <section className="relative px-6 py-20 md:py-24 border-t border-[#1C1C28]/80 bg-[#0B0B10]/60 overflow-hidden">
+        {/* Atmospheric Delhi Landmark Background: Purana Qila in Monsoon Downpour */}
+        <div className="absolute inset-0 pointer-events-none select-none overflow-hidden opacity-25">
+          <img
+            src={delhiPuranaQilaImg}
+            alt="Purana Qila Old Fort New Delhi during heavy monsoon downpour"
+            className="w-full h-full object-cover object-center filter saturate-[0.8] contrast-[1.1]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B10] via-[#0B0B10]/85 to-[#0B0B10]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0B0B10] via-transparent to-[#0B0B10]" />
+        </div>
+
+        <div className="mx-auto max-w-4xl text-center relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#8B5CF6]/15 border border-[#8B5CF6]/30 text-[10px] font-mono text-[#C4B5FD] uppercase tracking-wider mb-2">
+            <MapPin className="h-3 w-3 text-[#00F5FF]" />
+            Sector Landmark // Purana Qila &amp; Bhairon Marg Watershed
+          </div>
           <h2 className="text-2xl font-extrabold sm:text-3xl text-white">
             From Commuter Incident to Municipal Resolution
           </h2>

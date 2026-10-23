@@ -375,15 +375,16 @@ export function DashboardPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#1C1C28] pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-xl md:text-2xl font-extrabold text-white tracking-tight">
-              Command Center
+            <h1 className="text-xl md:text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
+              <Activity className="w-5 h-5 text-[#00F5FF]" />
+              Delhi Monsoon Command Center
             </h1>
             <span className="px-2 py-0.5 rounded-full bg-[#8B5CF6]/15 border border-[#8B5CF6]/30 text-[10px] font-bold text-[#C4B5FD]">
-              DEMO DATASET
+              DELHI ARTERIAL SECTOR
             </span>
           </div>
           <p className="text-xs text-zinc-400 mt-0.5">
-            Pre-monsoon defect memory combined with active waterlogging across central Delhi corridors.
+            Pre-monsoon defect baseline combined with active inundation across Central &amp; South Delhi corridors (ITO, Minto Bridge, Mathura Rd, Ring Rd).
           </p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">

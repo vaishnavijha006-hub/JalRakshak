@@ -277,14 +277,14 @@ export function SafeRoutePage() {
           <div className="flex items-center gap-2">
             <h1 className="text-xl md:text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
               <Navigation className="w-6 h-6 text-[#00F5FF]" />
-              SafeRoute — Dynamic Risk Navigation
+              SafeRoute — Delhi Dynamic Risk Navigation
             </h1>
             <span className="px-2 py-0.5 rounded-full bg-[#00F5FF]/15 border border-[#00F5FF]/30 text-[10px] font-bold text-[#00F5FF]">
               INNOVATION 2
             </span>
           </div>
           <p className="text-xs text-zinc-400 mt-1">
-            Evaluates alternative paths by cross-referencing pre-monsoon road defects, active waterlogging depth, and spatial confidence.
+            Evaluates alternative paths by cross-referencing pre-monsoon road defects, active waterlogging depth, and spatial confidence across Delhi&apos;s arterial corridors.
           </p>
         </div>
       </div>

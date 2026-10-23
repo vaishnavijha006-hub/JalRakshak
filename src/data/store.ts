@@ -29,6 +29,18 @@ let incidents: Incident[] = loadFromStorage(STORAGE_KEYS.incidents, DEMO_INCIDEN
 let hiddenHazards: HiddenHazard[] = loadFromStorage(STORAGE_KEYS.hiddenHazards, DEMO_HIDDEN_HAZARDS);
 let routes: RoutePlan[] = loadFromStorage(STORAGE_KEYS.routes, DEMO_ROUTES);
 
+// Ensure all baseline demo route plans are present even if an older cache exists
+let routesUpdated = false;
+for (const plan of DEMO_ROUTES) {
+  if (!routes.some(r => r.id === plan.id)) {
+    routes.push(plan);
+    routesUpdated = true;
+  }
+}
+if (routesUpdated) {
+  saveToStorage(STORAGE_KEYS.routes, routes);
+}
+
 // Persist initial data if not already stored
 if (!localStorage.getItem(STORAGE_KEYS.incidents)) {
   saveToStorage(STORAGE_KEYS.incidents, incidents);

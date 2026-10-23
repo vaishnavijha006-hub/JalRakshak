@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { MonsoonRainEffect } from '../ui/MonsoonRainEffect';
 
 interface InteractiveBackgroundProps {
   mode?: 'restrained' | 'landing';
@@ -139,6 +140,12 @@ export function InteractiveBackground({
             ? 'radial-gradient(circle, rgba(0, 245, 255, 0.16) 0%, rgba(139, 92, 246, 0.14) 40%, transparent 70%)'
             : 'radial-gradient(circle, rgba(0, 245, 255, 0.09) 0%, rgba(139, 92, 246, 0.08) 45%, transparent 70%)',
         }}
+      />
+
+      {/* 4. Continuous Ambient Monsoon Rain Simulation across background */}
+      <MonsoonRainEffect
+        intensity={isLanding ? 'moderate' : 'subtle'}
+        className="absolute inset-0 pointer-events-none z-[1] opacity-75"
       />
     </div>
   );

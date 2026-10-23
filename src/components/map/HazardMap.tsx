@@ -144,23 +144,23 @@ export function HazardMap({
 
     // Add hidden hazard markers
     hiddenHazards.forEach(hh => {
-      const icon = createSvgIcon('#EF4444', 30, true, true);
+      const icon = createSvgIcon('#00F5FF', 30, true, true);
       const marker = L.marker([hh.location.coordinates.lat, hh.location.coordinates.lng], { icon });
       marker.on('click', () => onSelectHiddenHazard?.(hh.id));
 
       const popupContent = `
         <div style="min-width: 200px; font-family: Inter, sans-serif;">
           <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-            <span style="font-size: 10px; padding: 2px 8px; border-radius: 4px; background: #EF444433; color: #EF4444; border: 1px solid #EF444444; font-weight: 600;">
-              ⚠ HIDDEN HAZARD
+            <span style="font-size: 10px; padding: 2px 8px; border-radius: 4px; background: rgba(0,245,255,0.15); color: #00F5FF; border: 1px solid rgba(0,245,255,0.35); font-weight: 700;">
+              ⚡ HIDDEN HAZARD
             </span>
           </div>
-          <div style="font-size: 11px; font-weight: 600; color: #E5E7EB; margin-bottom: 4px;">
+          <div style="font-size: 11px; font-weight: 600; color: #F3F4F6; margin-bottom: 4px;">
             ${hh.historicalDefectType.replace('_', ' ')} beneath waterlogging
           </div>
           <div style="font-size: 10px; color: #9CA3AF; margin-bottom: 4px;">${hh.location.road}, ${hh.location.area}</div>
-          <div style="font-size: 10px; color: #F59E0B;">Confidence: ${hh.confidence}% — ${hh.confidenceLabel}</div>
-          <div style="font-size: 9px; color: #6B7280; margin-top: 4px; font-style: italic;">
+          <div style="font-size: 10px; color: #00F5FF; font-weight: 600;">Confidence: ${hh.confidence}% — ${hh.confidenceLabel}</div>
+          <div style="font-size: 9px; color: #A78BFA; margin-top: 4px; font-style: italic;">
             ⚠ Inferred hazard, not directly confirmed
           </div>
         </div>
@@ -179,8 +179,8 @@ export function HazardMap({
       const polyline = L.polyline(route.points, {
         color: route.color,
         weight: 4,
-        opacity: 0.8,
-        dashArray: route.color === '#10B981' ? undefined : '8 6',
+        opacity: 0.85,
+        dashArray: route.color === '#00F5FF' ? undefined : '8 6',
       });
       polyline.bindTooltip(route.label, {
         permanent: false,

@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { resetDemoData } from '../../data/store';
 import { cn } from '../../utils/format';
+import { BackendStatusBadge } from './BackendStatusBadge';
 
 const NAV_ITEMS = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Command Center', desc: 'Hazard overview & map' },
@@ -80,14 +81,8 @@ export function Layout() {
 
         {/* Bottom Controls */}
         <div className="p-3 border-t border-navy-700/50 space-y-2">
-          {/* Demo Mode Indicator */}
-          <div className={cn(
-            'flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20',
-            !sidebarOpen && 'justify-center px-2'
-          )}>
-            <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
-            {sidebarOpen && <span className="text-[10px] font-medium text-amber-400 uppercase tracking-wider">Demo Mode</span>}
-          </div>
+          {/* Backend Mode Indicator */}
+          <BackendStatusBadge sidebarOpen={sidebarOpen} />
 
           {sidebarOpen && (
             <button
@@ -150,10 +145,7 @@ export function Layout() {
               ))}
             </nav>
             <div className="p-3 border-t border-navy-700/50 space-y-2">
-              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                <span className="text-[10px] font-medium text-amber-400 uppercase tracking-wider">Demo Mode</span>
-              </div>
+              <BackendStatusBadge />
               <button
                 onClick={() => { handleReset(); setMobileMenuOpen(false); }}
                 className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-navy-400 hover:text-white hover:bg-navy-700/50 transition-colors text-xs"
@@ -194,10 +186,7 @@ export function Layout() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-              <span className="text-[10px] font-medium text-amber-400 uppercase tracking-wider">Demo</span>
-            </div>
+            <BackendStatusBadge compact className="hidden sm:flex" />
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-navy-700/50 border border-navy-600/50">
               <User className="w-3.5 h-3.5 text-navy-400" />
               <span className="text-xs text-navy-300">Demo Reviewer</span>

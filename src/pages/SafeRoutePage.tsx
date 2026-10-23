@@ -48,8 +48,17 @@ function RouteCard({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-pressed={selected}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect();
+        }
+      }}
       className={cn(
-        'rounded-xl border p-4 transition-all duration-200 cursor-pointer',
+        'rounded-xl border p-4 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
         selected
           ? 'border-cyan-500/60 bg-cyan-950/20 shadow-lg shadow-cyan-950/40 ring-1 ring-cyan-500/30'
           : 'border-navy-700/60 bg-[#111827] hover:border-gray-600',
@@ -113,8 +122,9 @@ function RouteCard({
           {route.riskLevel} Risk Profile
         </span>
         <button
+          type="button"
           onClick={(e) => { e.stopPropagation(); setExpanded(!expanded); }}
-          className="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors"
+          className="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors p-1"
         >
           {expanded ? 'Hide Risk Breakdown' : 'Inspect Risk Factors'}
           {expanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -157,9 +167,10 @@ function RouteCard({
           {selected ? 'Active on map view' : 'Click to render this path'}
         </span>
         <button
+          type="button"
           onClick={(e) => { e.stopPropagation(); onSelect(); }}
           className={cn(
-            'px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
+            'px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
             selected
               ? 'bg-cyan-500 text-navy-950 shadow-md'
               : 'bg-navy-800 text-gray-300 hover:text-white border border-navy-700 hover:bg-navy-700',
@@ -177,40 +188,50 @@ export function SafeRoutePage() {
 
   const [origin, setOrigin] = useState<string>('Connaught Place');
   const [destination, setDestination] = useState<string>('Lajpat Nagar');
-  const [selectedRouteId, setSelectedRouteId] = useState<string | null>('R-001B');
+  const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
   const [showMethodology, setShowMethodology] = useState<boolean>(false);
 
   // Available locations
   const availableLocations = ['Connaught Place', 'Lajpat Nagar', 'ITO'];
 
-  // Find matching route plan
-  const selectedPlan = useMemo(() => {
-    const match = routePlans.find(
-      p => (p.origin === origin && p.destination === destination) ||
-           (p.origin === destination && p.destination === origin),
-    );
-    return match || routePlans[0];
+  // Find matching route plan deterministically (bidirectional check)
+  const matchResult = useMemo(() => {
+    const forward = routePlans.find(p => p.origin === origin && p.destination === destination);
+    if (forward) return { plan: forward, isReversed: false };
+    const backward = routePlans.find(p => p.origin === destination && p.destination === origin);
+    if (backward) return { plan: backward, isReversed: true };
+    return null;
   }, [routePlans, origin, destination]);
 
-  // Keep route ID in sync when plan changes
+  const selectedPlan = matchResult?.plan ?? null;
+  const isReversed = matchResult?.isReversed ?? false;
+
+  // Derive active route: if selectedRouteId matches current plan, use it; otherwise pick recommended
   const activeRoute = useMemo(() => {
-    return selectedPlan?.routes.find(r => r.id === selectedRouteId) || selectedPlan?.routes[0];
+    if (!selectedPlan) return null;
+    if (selectedRouteId) {
+      const match = selectedPlan.routes.find(r => r.id === selectedRouteId);
+      if (match) return match;
+    }
+    return selectedPlan.routes.find(r => r.recommended) || selectedPlan.routes[0] || null;
   }, [selectedPlan, selectedRouteId]);
 
   const handleSwap = () => {
     const oldOrigin = origin;
     setOrigin(destination);
     setDestination(oldOrigin);
+    setSelectedRouteId(null);
   };
 
   const routeWaypoints = useMemo(() => {
     if (!activeRoute) return [];
+    const waypoints = isReversed ? [...activeRoute.waypoints].reverse() : activeRoute.waypoints;
     return [{
-      points: activeRoute.waypoints.map(w => [w.lat, w.lng] as [number, number]),
+      points: waypoints.map(w => [w.lat, w.lng] as [number, number]),
       color: RISK_SCORE_BAR_COLOR[activeRoute.riskLevel] ?? '#06B6D4',
-      label: activeRoute.name,
+      label: `${activeRoute.name} (${origin} → ${destination})`,
     }];
-  }, [activeRoute]);
+  }, [activeRoute, isReversed, origin, destination]);
 
   const mapCenter = useMemo<[number, number]>(() => {
     if (!selectedPlan) return [28.6139, 77.2090];
@@ -222,15 +243,15 @@ export function SafeRoutePage() {
 
   // Trade-off calculation
   const tradeOff = useMemo(() => {
-    if (!selectedPlan) return null;
+    if (!selectedPlan || selectedPlan.routes.length < 2) return null;
     const recommended = selectedPlan.routes.find(r => r.recommended);
     const highestRisk = selectedPlan.routes.reduce(
       (max, r) => (r.riskScore > max.riskScore ? r : max),
       selectedPlan.routes[0],
     );
-    if (!recommended || recommended.id === highestRisk.id) return null;
+    if (!recommended || !highestRisk || recommended.id === highestRisk.id) return null;
 
-    const timeDiff = recommended.estimatedMinutes - highestRisk.estimatedMinutes;
+    const timeDiff = Math.max(0, recommended.estimatedMinutes - highestRisk.estimatedMinutes);
     const distDiff = (recommended.distanceKm - highestRisk.distanceKm).toFixed(1);
     const riskReduction = Math.round(
       ((highestRisk.riskScore - recommended.riskScore) / highestRisk.riskScore) * 100,
@@ -284,18 +305,20 @@ export function SafeRoutePage() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
             {/* Origin Select */}
             <div className="flex-1">
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+              <label htmlFor="origin-select" className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 flex items-center gap-1">
                 <MapPin className="w-3 h-3 text-emerald-400" /> Origin Point
               </label>
               <select
+                id="origin-select"
                 value={origin}
                 onChange={e => {
                   setOrigin(e.target.value);
+                  setSelectedRouteId(null);
                   if (e.target.value === destination) {
                     setDestination(availableLocations.find(l => l !== e.target.value) || 'Lajpat Nagar');
                   }
                 }}
-                className="w-full bg-navy-900 border border-navy-700 rounded-lg px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-cyan-500"
+                className="w-full min-h-[44px] bg-navy-900 border border-navy-700 rounded-lg px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-cyan-500"
               >
                 {availableLocations.map(loc => (
                   <option key={loc} value={loc} disabled={loc === destination}>
@@ -307,27 +330,31 @@ export function SafeRoutePage() {
 
             {/* Swap Button */}
             <button
+              type="button"
               onClick={handleSwap}
+              aria-label="Swap Origin and Destination"
               title="Swap Origin and Destination"
-              className="self-center p-2 rounded-lg bg-navy-800 border border-navy-700 hover:bg-navy-700 text-gray-300 hover:text-white transition-colors mt-4 sm:mt-0"
+              className="self-center p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg bg-navy-800 border border-navy-700 hover:bg-navy-700 text-gray-300 hover:text-white transition-colors mt-4 sm:mt-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             >
               <ArrowLeftRight className="w-4 h-4 text-cyan-400" />
             </button>
 
             {/* Destination Select */}
             <div className="flex-1">
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+              <label htmlFor="dest-select" className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 flex items-center gap-1">
                 <Compass className="w-3 h-3 text-red-400" /> Destination Point
               </label>
               <select
+                id="dest-select"
                 value={destination}
                 onChange={e => {
                   setDestination(e.target.value);
+                  setSelectedRouteId(null);
                   if (e.target.value === origin) {
                     setOrigin(availableLocations.find(l => l !== e.target.value) || 'Connaught Place');
                   }
                 }}
-                className="w-full bg-navy-900 border border-navy-700 rounded-lg px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-cyan-500"
+                className="w-full min-h-[44px] bg-navy-900 border border-navy-700 rounded-lg px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-cyan-500"
               >
                 {availableLocations.map(loc => (
                   <option key={loc} value={loc} disabled={loc === origin}>
@@ -339,197 +366,265 @@ export function SafeRoutePage() {
           </div>
 
           {/* Quick preset selector */}
-          <div className="flex items-center gap-2 self-start lg:self-center pt-2 lg:pt-0 border-t lg:border-t-0 border-navy-800">
-            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Presets:</span>
+          <div className="flex items-center gap-1.5 self-start lg:self-center pt-2 lg:pt-0 border-t lg:border-t-0 border-navy-800 flex-wrap">
+            <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mr-1">Corridors:</span>
             <button
-              onClick={() => { setOrigin('Connaught Place'); setDestination('Lajpat Nagar'); }}
-              className="px-2.5 py-1 rounded bg-navy-800 border border-navy-700 text-[11px] text-gray-300 hover:text-white"
+              type="button"
+              onClick={() => { setOrigin('Connaught Place'); setDestination('Lajpat Nagar'); setSelectedRouteId(null); }}
+              className={cn(
+                "px-2.5 py-1.5 min-h-[36px] rounded border text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400",
+                (origin === 'Connaught Place' && destination === 'Lajpat Nagar') || (origin === 'Lajpat Nagar' && destination === 'Connaught Place')
+                  ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/50 font-bold"
+                  : "bg-navy-800 border-navy-700 text-gray-300 hover:text-white"
+              )}
             >
-              CP → Lajpat
+              CP ↔ Lajpat
             </button>
             <button
-              onClick={() => { setOrigin('ITO'); setDestination('Connaught Place'); }}
-              className="px-2.5 py-1 rounded bg-navy-800 border border-navy-700 text-[11px] text-gray-300 hover:text-white"
+              type="button"
+              onClick={() => { setOrigin('ITO'); setDestination('Connaught Place'); setSelectedRouteId(null); }}
+              className={cn(
+                "px-2.5 py-1.5 min-h-[36px] rounded border text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400",
+                (origin === 'ITO' && destination === 'Connaught Place') || (origin === 'Connaught Place' && destination === 'ITO')
+                  ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/50 font-bold"
+                  : "bg-navy-800 border-navy-700 text-gray-300 hover:text-white"
+              )}
             >
-              ITO → CP
+              ITO ↔ CP
+            </button>
+            <button
+              type="button"
+              onClick={() => { setOrigin('ITO'); setDestination('Lajpat Nagar'); setSelectedRouteId(null); }}
+              className={cn(
+                "px-2.5 py-1.5 min-h-[36px] rounded border text-[11px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400",
+                (origin === 'ITO' && destination === 'Lajpat Nagar') || (origin === 'Lajpat Nagar' && destination === 'ITO')
+                  ? "bg-cyan-500/20 text-cyan-300 border-cyan-500/50 font-bold"
+                  : "bg-navy-800 border-navy-700 text-gray-300 hover:text-white"
+              )}
+            >
+              ITO ↔ Lajpat
             </button>
           </div>
         </div>
       </div>
 
-      {/* Main Grid: Comparison Panel (Left) & Map Centerpiece (Right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-6 items-start">
-        {/* Left: Route Comparison Cards */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
-              <Layers className="w-4 h-4 text-cyan-400" />
-              Comparing {selectedPlan?.routes.length ?? 0} Route Options
-            </h2>
-            <span className="text-[11px] text-gray-400">
-              Risk Range: <strong className="text-emerald-400">{Math.min(...(selectedPlan?.routes.map(r => r.riskScore) || [0]))}</strong> to{' '}
-              <strong className="text-red-400">{Math.max(...(selectedPlan?.routes.map(r => r.riskScore) || [100]))}</strong>
-            </span>
+      {!selectedPlan ? (
+        /* Explicit corridor unavailable card instead of silent wrong fallback */
+        <div className="rounded-xl border border-navy-700 bg-[#111827] p-8 text-center space-y-4">
+          <div className="w-12 h-12 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center mx-auto text-amber-400">
+            <TriangleAlert className="w-6 h-6" />
+          </div>
+          <div className="max-w-md mx-auto">
+            <h3 className="text-base font-bold text-white mb-1">Corridor Simulation Not Configured</h3>
+            <p className="text-xs text-gray-400 leading-relaxed">
+              JalRakshak currently models dynamic risk evaluations for the three primary commuter corridors shown below.
+              Please select one of these corridors to view hazard predictions:
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
+            <button
+              type="button"
+              onClick={() => { setOrigin('Connaught Place'); setDestination('Lajpat Nagar'); }}
+              className="px-3 py-2 min-h-[44px] rounded-lg bg-navy-800 border border-navy-700 hover:border-cyan-500 text-xs font-semibold text-gray-200 hover:text-white transition-colors"
+            >
+              Connaught Place ↔ Lajpat Nagar
+            </button>
+            <button
+              type="button"
+              onClick={() => { setOrigin('ITO'); setDestination('Connaught Place'); }}
+              className="px-3 py-2 min-h-[44px] rounded-lg bg-navy-800 border border-navy-700 hover:border-cyan-500 text-xs font-semibold text-gray-200 hover:text-white transition-colors"
+            >
+              ITO ↔ Connaught Place
+            </button>
+            <button
+              type="button"
+              onClick={() => { setOrigin('ITO'); setDestination('Lajpat Nagar'); }}
+              className="px-3 py-2 min-h-[44px] rounded-lg bg-navy-800 border border-navy-700 hover:border-cyan-500 text-xs font-semibold text-gray-200 hover:text-white transition-colors"
+            >
+              ITO ↔ Lajpat Nagar
+            </button>
+          </div>
+        </div>
+      ) : (
+        /* Main Grid: Comparison Panel (Left) & Map Centerpiece (Right) */
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-6 items-start">
+          {/* Left: Route Comparison Cards */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-bold text-gray-200 uppercase tracking-wider flex items-center gap-2">
+                <Layers className="w-4 h-4 text-cyan-400" />
+                Comparing {selectedPlan.routes.length} Route Options ({origin} → {destination})
+              </h2>
+              <span className="text-[11px] text-gray-400">
+                Risk Range: <strong className="text-emerald-400">{Math.min(...selectedPlan.routes.map(r => r.riskScore))}</strong> to{' '}
+                <strong className="text-red-400">{Math.max(...selectedPlan.routes.map(r => r.riskScore))}</strong>
+              </span>
+            </div>
+
+            {/* Trade-off Highlight Card */}
+            {tradeOff && (
+              <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4">
+                <div className="flex items-start gap-2.5">
+                  <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-1">
+                      Recommended Risk/Time Trade-off
+                    </h4>
+                    <p className="text-xs text-gray-200 leading-relaxed">
+                      By taking <strong>{tradeOff.recommended.name}</strong> over {tradeOff.highestRisk.name}, the journey is{' '}
+                      <strong>{Number(tradeOff.distDiff) >= 0 ? `+${tradeOff.distDiff}` : tradeOff.distDiff} km</strong> and <strong>~{tradeOff.timeDiff} minutes longer</strong>, but circumvents high-risk submerged segments — yielding an estimated{' '}
+                      <strong className="text-emerald-300">{tradeOff.riskReduction}% lower hazard risk</strong>.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Route Options List */}
+            <div className="space-y-3">
+              {selectedPlan.routes.map(route => (
+                <RouteCard
+                  key={route.id}
+                  route={route}
+                  selected={activeRoute?.id === route.id}
+                  onSelect={() => setSelectedRouteId(route.id)}
+                />
+              ))}
+            </div>
+
+            {/* Methodology Disclosure Accordion */}
+            <div className="rounded-xl border border-[#1F2937] bg-[#111827] overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setShowMethodology(!showMethodology)}
+                className="w-full flex items-center justify-between p-3.5 text-left hover:bg-navy-900/40 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+              >
+                <div className="flex items-center gap-2">
+                  <Info className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xs font-bold text-gray-200">How the Route Risk Score is Computed</span>
+                </div>
+                {showMethodology ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+              </button>
+
+              {showMethodology && (
+                <div className="p-4 pt-1 border-t border-navy-800 text-xs text-gray-300 space-y-2.5">
+                  <p className="text-gray-400">
+                    The prototype applies a deterministic multi-factor weighting formula across intersected road segments:
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                    <div className="p-2 rounded bg-navy-900 border border-navy-800">
+                      <span className="font-bold text-cyan-400 block">35% Waterlogging Factor</span>
+                      Active surface flooding depth and reported impassability
+                    </div>
+                    <div className="p-2 rounded bg-navy-900 border border-navy-800">
+                      <span className="font-bold text-red-400 block">30% Hidden Hazard Factor</span>
+                      Pre-monsoon defects concealed under current water
+                    </div>
+                    <div className="p-2 rounded bg-navy-900 border border-navy-800">
+                      <span className="font-bold text-amber-400 block">20% Historical Defect Severity</span>
+                      Pothole depth, broken manhole structural risk
+                    </div>
+                    <div className="p-2 rounded bg-navy-900 border border-navy-800">
+                      <span className="font-bold text-emerald-400 block">15% Freshness &amp; Verification</span>
+                      Decay weighting over time + volunteer confirmation
+                    </div>
+                  </div>
+                  <p className="text-[10px] text-gray-500 italic">
+                    Note: Illustrative decision-support model built for hackathon demonstration. Not calibrated against official municipal sensors.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Trade-off Highlight Card */}
-          {tradeOff && (
-            <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/10 p-4">
-              <div className="flex items-start gap-2.5">
-                <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+          {/* Right: Map Workspace with Active Route Corridor */}
+          <div className="space-y-4">
+            <div className="rounded-xl border border-[#1F2937] bg-[#111827] overflow-hidden shadow-2xl">
+              <div className="px-4 py-3 border-b border-[#1F2937] bg-navy-900/60 flex items-center justify-between">
                 <div>
-                  <h4 className="text-xs font-bold text-emerald-300 uppercase tracking-wider mb-1">
-                    Recommended Risk/Time Trade-off
-                  </h4>
-                  <p className="text-xs text-gray-200 leading-relaxed">
-                    By taking <strong>{tradeOff.recommended.name}</strong> over {tradeOff.highestRisk.name}, the journey is{' '}
-                    <strong>+{tradeOff.distDiff} km</strong> and <strong>~{tradeOff.timeDiff} minutes longer</strong>, but avoids submerged cavities at Minto Bridge — yielding an estimated{' '}
-                    <strong className="text-emerald-300">{tradeOff.riskReduction}% lower hazard risk</strong>.
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Compass className="w-4 h-4 text-cyan-400" />
+                    Route Hazard Overlay Map
+                  </h3>
+                  <p className="text-[10px] text-gray-400">
+                    Viewing: <strong className="text-cyan-300">{activeRoute?.name}</strong> ({origin} → {destination})
                   </p>
+                </div>
+                {activeRoute && (
+                  <span
+                    className="text-xs px-2.5 py-1 rounded-full border font-bold"
+                    style={{
+                      color: RISK_SCORE_BAR_COLOR[activeRoute.riskLevel],
+                      borderColor: `${RISK_SCORE_BAR_COLOR[activeRoute.riskLevel]}40`,
+                      backgroundColor: `${RISK_SCORE_BAR_COLOR[activeRoute.riskLevel]}15`,
+                    }}
+                  >
+                    Score: {activeRoute.riskScore}/100
+                  </span>
+                )}
+              </div>
+
+              <div className="relative">
+                <HazardMap
+                  incidents={allIncidents.filter(i => i.isActive)}
+                  hiddenHazards={hiddenHazards}
+                  routeWaypoints={routeWaypoints}
+                  center={mapCenter}
+                  zoom={13}
+                  className="h-[460px] md:h-[520px]"
+                />
+
+                {/* Map floating disclaimer */}
+                <div className="absolute top-3 left-3 z-[1000] px-2.5 py-1 rounded bg-navy-900/90 border border-navy-700/80 text-[10px] text-gray-400 backdrop-blur-sm pointer-events-none">
+                  Schematic corridor overlay · Non-navigable representation
                 </div>
               </div>
             </div>
-          )}
 
-          {/* Route Options List */}
-          <div className="space-y-3">
-            {selectedPlan?.routes.map(route => (
-              <RouteCard
-                key={route.id}
-                route={route}
-                selected={activeRoute?.id === route.id}
-                onSelect={() => setSelectedRouteId(route.id)}
-              />
-            ))}
-          </div>
-
-          {/* Methodology Disclosure Accordion */}
-          <div className="rounded-xl border border-[#1F2937] bg-[#111827] overflow-hidden">
-            <button
-              onClick={() => setShowMethodology(!showMethodology)}
-              className="w-full flex items-center justify-between p-3.5 text-left hover:bg-navy-900/40 transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <Info className="w-4 h-4 text-cyan-400" />
-                <span className="text-xs font-bold text-gray-200">How the Route Risk Score is Computed</span>
-              </div>
-              {showMethodology ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
-            </button>
-
-            {showMethodology && (
-              <div className="p-4 pt-1 border-t border-navy-800 text-xs text-gray-300 space-y-2.5">
-                <p className="text-gray-400">
-                  The prototype applies a deterministic multi-factor weighting formula across intersected road segments:
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
-                  <div className="p-2 rounded bg-navy-900 border border-navy-800">
-                    <span className="font-bold text-cyan-400 block">35% Waterlogging Factor</span>
-                    Active surface flooding depth and reported impassability
-                  </div>
-                  <div className="p-2 rounded bg-navy-900 border border-navy-800">
-                    <span className="font-bold text-red-400 block">30% Hidden Hazard Factor</span>
-                    Pre-monsoon defects concealed under current water
-                  </div>
-                  <div className="p-2 rounded bg-navy-900 border border-navy-800">
-                    <span className="font-bold text-amber-400 block">20% Historical Defect Severity</span>
-                    Pothole depth, broken manhole structural risk
-                  </div>
-                  <div className="p-2 rounded bg-navy-900 border border-navy-800">
-                    <span className="font-bold text-emerald-400 block">15% Freshness &amp; Verification</span>
-                    Decay weighting over time + volunteer confirmation
+            {/* Deep-Dive USP Correlation Card */}
+            {activeRoute && activeRoute.hiddenHazardCount > 0 && (
+              <div className="rounded-xl border-2 border-red-500/40 bg-red-500/10 p-4 space-y-3">
+                <div className="flex items-start gap-2.5">
+                  <AlertOctagon className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
+                  <div>
+                    <h4 className="text-xs font-bold text-red-300 uppercase tracking-wider">
+                      USP Demonstration — Hidden Hazard Correlation Detected on Path
+                    </h4>
+                    <p className="text-xs text-gray-300 mt-1 leading-relaxed">
+                      This corridor intersects with a <strong>pre-monsoon road cavity</strong> now submerged beneath flooding along {origin} ↔ {destination}. Under dry weather, riders can see and avoid this pothole; flooded, it becomes an invisible hazard.
+                    </p>
                   </div>
                 </div>
-                <p className="text-[10px] text-gray-500 italic">
-                  Note: Illustrative decision-support model built for hackathon demonstration. Not calibrated against official municipal sensors.
-                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <div className="p-2.5 rounded-lg bg-navy-950/80 border border-navy-800">
+                    <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block mb-1">
+                      Pre-Monsoon Defect
+                    </span>
+                    <span className="text-gray-200">
+                      {activeRoute.hazardDetails.find(d => d.toLowerCase().includes('cavity') || d.toLowerCase().includes('pothole') || d.toLowerCase().includes('drain')) || 'Pre-monsoon defect recorded on road segment'}
+                    </span>
+                    <span className="text-[10px] text-gray-500 block mt-0.5">Historical Baseline Observation</span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-navy-950/80 border border-navy-800">
+                    <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider block mb-1">
+                      Active Waterlogging
+                    </span>
+                    <span className="text-gray-200">
+                      {activeRoute.hazardDetails.find(d => d.toLowerCase().includes('waterlogging') || d.toLowerCase().includes('flood')) || 'Monsoon water accumulation on corridor'}
+                    </span>
+                    <span className="text-[10px] text-gray-500 block mt-0.5">Current Condition Report</span>
+                  </div>
+                </div>
+
+                <div className="text-[11px] text-red-200 bg-red-500/15 p-2.5 rounded-lg border border-red-500/30">
+                  <strong>Why risk is elevated:</strong> The water level conceals roadbed damage, dramatically elevating crash risk for two-wheelers and delivery riders navigating through standing water.
+                </div>
               </div>
             )}
           </div>
         </div>
-
-        {/* Right: Map Workspace with Active Route Corridor */}
-        <div className="space-y-4">
-          <div className="rounded-xl border border-[#1F2937] bg-[#111827] overflow-hidden shadow-2xl">
-            <div className="px-4 py-3 border-b border-[#1F2937] bg-navy-900/60 flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <Compass className="w-4 h-4 text-cyan-400" />
-                  Route Hazard Overlay Map
-                </h3>
-                <p className="text-[10px] text-gray-400">
-                  Viewing: <strong className="text-cyan-300">{activeRoute?.name}</strong>
-                </p>
-              </div>
-              {activeRoute && (
-                <span
-                  className="text-xs px-2.5 py-1 rounded-full border font-bold"
-                  style={{
-                    color: RISK_SCORE_BAR_COLOR[activeRoute.riskLevel],
-                    borderColor: `${RISK_SCORE_BAR_COLOR[activeRoute.riskLevel]}40`,
-                    backgroundColor: `${RISK_SCORE_BAR_COLOR[activeRoute.riskLevel]}15`,
-                  }}
-                >
-                  Score: {activeRoute.riskScore}/100
-                </span>
-              )}
-            </div>
-
-            <div className="relative">
-              <HazardMap
-                incidents={allIncidents.filter(i => i.isActive)}
-                hiddenHazards={hiddenHazards}
-                routeWaypoints={routeWaypoints}
-                center={mapCenter}
-                zoom={13}
-                className="h-[460px] md:h-[520px]"
-              />
-
-              {/* Map floating disclaimer */}
-              <div className="absolute top-3 left-3 z-[1000] px-2.5 py-1 rounded bg-navy-900/90 border border-navy-700/80 text-[10px] text-gray-400 backdrop-blur-sm pointer-events-none">
-                Schematic corridor overlay · Non-navigable representation
-              </div>
-            </div>
-          </div>
-
-          {/* Deep-Dive USP Correlation Card */}
-          {activeRoute && activeRoute.hiddenHazardCount > 0 && (
-            <div className="rounded-xl border-2 border-red-500/40 bg-red-500/10 p-4 space-y-3">
-              <div className="flex items-start gap-2.5">
-                <AlertOctagon className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
-                <div>
-                  <h4 className="text-xs font-bold text-red-300 uppercase tracking-wider">
-                    USP Demonstration — Hidden Hazard Correlation Detected on Path
-                  </h4>
-                  <p className="text-xs text-gray-300 mt-1 leading-relaxed">
-                    This corridor intersects with a <strong>pre-monsoon road cavity</strong> now submerged beneath flooding. Under dry weather, riders can see and avoid this pothole; flooded, it becomes an invisible hazard.
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                <div className="p-2.5 rounded-lg bg-navy-950/80 border border-navy-800">
-                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider block mb-1">
-                    Pre-Monsoon Observation
-                  </span>
-                  <span className="text-gray-200">Deep 30cm pothole on Minto Road</span>
-                  <span className="text-[10px] text-gray-500 block mt-0.5">Recorded 45 days ago</span>
-                </div>
-                <div className="p-2.5 rounded-lg bg-navy-950/80 border border-navy-800">
-                  <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider block mb-1">
-                    Active Waterlogging
-                  </span>
-                  <span className="text-gray-200">2-3 feet deep floodwater</span>
-                  <span className="text-[10px] text-gray-500 block mt-0.5">Reported 4 hours ago</span>
-                </div>
-              </div>
-
-              <div className="text-[11px] text-red-200 bg-red-500/15 p-2.5 rounded-lg border border-red-500/30">
-                <strong>Why risk is elevated:</strong> The water level exceeds motorcycle wheel clearance, making the submerged cavity invisible and increasing fall or engine hydrostatic lock risk.
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

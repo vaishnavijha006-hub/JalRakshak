@@ -1,5 +1,6 @@
 // JalRakshak — Dashboard / Command Center Page
 // Professional geospatial intelligence dashboard for Delhi monsoon hazards
+// Visual identity: Jet Black (#050507), Deep Black (#0B1220/#0B0B10), Royal Amethyst (#8B5CF6), Electric Cyan (#00F5FF)
 import { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -34,10 +35,10 @@ const CATEGORY_FILTERS: { key: HazardCategory | 'all'; label: string; icon: type
 
 const SEVERITY_FILTERS: { key: Severity | 'all'; label: string; color: string }[] = [
   { key: 'all', label: 'All Severities', color: '#9CA3AF' },
-  { key: 'critical', label: 'Critical', color: '#EF4444' },
-  { key: 'high', label: 'High', color: '#F97316' },
-  { key: 'medium', label: 'Medium', color: '#F59E0B' },
-  { key: 'low', label: 'Low', color: '#10B981' },
+  { key: 'critical', label: 'Critical', color: '#00F5FF' },
+  { key: 'high', label: 'High', color: '#8B5CF6' },
+  { key: 'medium', label: 'Medium', color: '#A78BFA' },
+  { key: 'low', label: 'Low', color: '#71717A' },
 ];
 
 // Metric Card Component
@@ -61,12 +62,12 @@ function MetricCard({
       className={cn(
         'relative overflow-hidden rounded-xl border p-4 transition-all duration-300',
         highlight
-          ? 'bg-red-500/10 border-red-500/40 shadow-[0_0_24px_rgba(239,68,68,0.12)]'
-          : 'bg-[#111827] border-[#1F2937]/70 hover:border-[#374151]',
+          ? 'bg-[#00F5FF]/10 border-[#00F5FF]/40 shadow-[0_0_24px_rgba(0,245,255,0.12)]'
+          : 'bg-[#0B0B10] border-[#1C1C28] hover:border-[#8B5CF6]/40',
       )}
     >
       {highlight && (
-        <div className="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 rounded-full bg-red-500/15 blur-xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-20 h-20 -mr-6 -mt-6 rounded-full bg-[#00F5FF]/15 blur-xl pointer-events-none" />
       )}
       <div className="flex items-start justify-between">
         <div
@@ -76,17 +77,17 @@ function MetricCard({
           <Icon className="w-4 h-4" style={{ color }} />
         </div>
         {highlight ? (
-          <span className="px-2 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse">
+          <span className="px-2 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full bg-[#00F5FF]/15 text-[#00F5FF] border border-[#00F5FF]/40 animate-pulse">
             USP Inferred
           </span>
         ) : (
-          <span className="text-[10px] text-gray-500 font-mono">SYNTHETIC</span>
+          <span className="text-[10px] text-zinc-500 font-mono">SYNTHETIC</span>
         )}
       </div>
       <div className="mt-3">
         <p className="text-2xl font-extrabold text-white tracking-tight">{value}</p>
-        <p className="text-xs font-medium text-gray-300 mt-0.5">{label}</p>
-        {sublabel && <p className="text-[10px] text-gray-500 mt-0.5">{sublabel}</p>}
+        <p className="text-xs font-medium text-zinc-300 mt-0.5">{label}</p>
+        {sublabel && <p className="text-[10px] text-zinc-500 mt-0.5">{sublabel}</p>}
       </div>
     </div>
   );
@@ -108,8 +109,8 @@ function IncidentCard({
       className={cn(
         'w-full text-left rounded-lg border p-3 transition-all duration-200 focus:outline-none',
         isSelected
-          ? 'bg-[#1F2937]/90 border-cyan-500/50 shadow-[0_0_12px_rgba(6,182,212,0.1)]'
-          : 'bg-[#111827] border-[#1F2937]/60 hover:bg-[#1F2937]/50 hover:border-gray-600/50',
+          ? 'bg-[#1C1C28] border-[#00F5FF]/50 shadow-[0_0_12px_rgba(0,245,255,0.15)]'
+          : 'bg-[#0B0B10] border-[#1C1C28] hover:bg-[#12121A] hover:border-[#8B5CF6]/40',
       )}
     >
       <div className="flex items-start gap-2.5">
@@ -122,30 +123,30 @@ function IncidentCard({
             <span className={cn('text-[9px] font-bold px-1.5 py-0.5 rounded border', getSeverityBg(incident.severity))}>
               {incident.severity.toUpperCase()}
             </span>
-            <span className="text-[10px] text-gray-400 font-medium">
+            <span className="text-[10px] text-zinc-400 font-medium">
               {getCategoryLabel(incident.category)}
             </span>
             {incident.isHistorical && (
-              <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-300 border border-purple-500/30">
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#8B5CF6]/15 text-[#C4B5FD] border border-[#8B5CF6]/30">
                 Pre-Monsoon
               </span>
             )}
           </div>
-          <p className="text-xs font-semibold text-gray-200 truncate">{incident.title}</p>
-          <div className="flex items-center gap-3 mt-1.5 text-[11px] text-gray-400">
+          <p className="text-xs font-semibold text-zinc-200 truncate">{incident.title}</p>
+          <div className="flex items-center gap-3 mt-1.5 text-[11px] text-zinc-400">
             <span className="flex items-center gap-1 truncate">
-              <MapPin className="w-3 h-3 text-gray-500 shrink-0" />
+              <MapPin className="w-3 h-3 text-zinc-500 shrink-0" />
               {incident.location.area}
             </span>
             <span className="flex items-center gap-1 shrink-0">
-              <Clock className="w-3 h-3 text-gray-500" />
+              <Clock className="w-3 h-3 text-zinc-500" />
               {formatTimeAgo(incident.reportedAt)}
             </span>
           </div>
         </div>
         <ChevronRight className={cn(
-          'w-4 h-4 text-gray-500 shrink-0 mt-1 transition-transform',
-          isSelected && 'rotate-90 text-cyan-400',
+          'w-4 h-4 text-zinc-500 shrink-0 mt-1 transition-transform',
+          isSelected && 'rotate-90 text-[#00F5FF]',
         )} />
       </div>
     </button>
@@ -156,14 +157,14 @@ function IncidentCard({
 function IncidentDetail({ incident }: { incident: Incident }) {
   return (
     <div className="mt-1 space-y-3">
-      <div className="bg-[#0B1220] rounded-lg border border-[#1F2937] p-3 text-left">
-        <p className="text-xs text-gray-300 leading-relaxed">{incident.description}</p>
+      <div className="bg-[#050507] rounded-lg border border-[#1C1C28] p-3 text-left">
+        <p className="text-xs text-zinc-300 leading-relaxed">{incident.description}</p>
 
         <div className="flex flex-wrap gap-1.5 mt-3">
           <span className={cn('text-[10px] px-2 py-0.5 rounded border font-semibold', getSeverityBg(incident.severity))}>
             {incident.severity.toUpperCase()} SEVERITY
           </span>
-          <span className="text-[10px] px-2 py-0.5 rounded border bg-cyan-500/15 text-cyan-300 border-cyan-500/30">
+          <span className="text-[10px] px-2 py-0.5 rounded border bg-[#00F5FF]/10 text-[#00F5FF] border-[#00F5FF]/30">
             {getCategoryLabel(incident.category)}
           </span>
           <span className={cn('text-[10px] px-2 py-0.5 rounded border', getStatusBg(incident.status))}>
@@ -174,31 +175,31 @@ function IncidentDetail({ incident }: { incident: Incident }) {
           </span>
         </div>
 
-        <div className="mt-3 text-[11px] text-gray-300 flex items-start gap-1.5">
-          <MapPin className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
+        <div className="mt-3 text-[11px] text-zinc-300 flex items-start gap-1.5">
+          <MapPin className="w-3.5 h-3.5 text-[#00F5FF] shrink-0 mt-0.5" />
           <span>{incident.location.road}, {incident.location.area}</span>
         </div>
 
-        <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] text-gray-400">
-          <div className="p-2 rounded bg-navy-900 border border-navy-700/50">
-            <span className="text-gray-500 block">First Observed</span>
-            <span className="font-mono text-gray-200">{formatTimeAgo(incident.observedAt)}</span>
+        <div className="mt-2 grid grid-cols-2 gap-2 text-[10px] text-zinc-400">
+          <div className="p-2 rounded bg-[#0B0B10] border border-[#1C1C28]">
+            <span className="text-zinc-500 block">First Observed</span>
+            <span className="font-mono text-zinc-200">{formatTimeAgo(incident.observedAt)}</span>
           </div>
-          <div className="p-2 rounded bg-navy-900 border border-navy-700/50">
-            <span className="text-gray-500 block">Last Verified</span>
-            <span className="font-mono text-gray-200">{formatTimeAgo(incident.lastVerifiedAt)}</span>
+          <div className="p-2 rounded bg-[#0B0B10] border border-[#1C1C28]">
+            <span className="text-zinc-500 block">Last Verified</span>
+            <span className="font-mono text-zinc-200">{formatTimeAgo(incident.lastVerifiedAt)}</span>
           </div>
         </div>
 
         <Link
           to={`/incidents/${incident.id}`}
-          className="mt-3 flex items-center justify-between px-3 py-2 rounded-lg bg-cyan-500/10 border border-cyan-500/25 text-xs text-cyan-400 hover:bg-cyan-500/20 transition-colors"
+          className="mt-3 flex items-center justify-between px-3 py-2 rounded-lg bg-[#8B5CF6]/10 border border-[#8B5CF6]/30 text-xs text-[#C4B5FD] hover:bg-[#8B5CF6]/20 transition-colors"
         >
           <span className="flex items-center gap-1.5">
-            <ExternalLink className="w-3.5 h-3.5" />
+            <ExternalLink className="w-3.5 h-3.5 text-[#00F5FF]" />
             Inspect Incident Evidence &amp; Timeline
           </span>
-          <ArrowUpRight className="w-3.5 h-3.5" />
+          <ArrowUpRight className="w-3.5 h-3.5 text-[#00F5FF]" />
         </Link>
       </div>
     </div>
@@ -208,62 +209,62 @@ function IncidentDetail({ incident }: { incident: Incident }) {
 // Hidden hazard alert banner
 function HiddenHazardAlert({ hazard, onClose }: { hazard: HiddenHazard; onClose: () => void }) {
   return (
-    <div className="rounded-xl border-2 border-red-500/50 bg-red-500/10 p-4 relative">
+    <div className="rounded-xl border border-[#00F5FF]/50 bg-[#0B0B10] p-4 relative shadow-[0_0_24px_rgba(0,245,255,0.12)]">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-red-500/20 border border-red-500/40 flex items-center justify-center">
-            <TriangleAlert className="w-4 h-4 text-red-400" />
+          <div className="w-8 h-8 rounded-lg bg-[#00F5FF]/15 border border-[#00F5FF]/40 flex items-center justify-center">
+            <TriangleAlert className="w-4 h-4 text-[#00F5FF]" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-red-400">USP — Inferred Hidden Hazard</h3>
-            <p className="text-[10px] text-red-300/80">Historical Defect Submerged Beneath Waterlogging</p>
+            <h3 className="text-sm font-bold text-[#00F5FF]">USP — Inferred Hidden Hazard</h3>
+            <p className="text-[10px] text-[#C4B5FD]">Historical Defect Submerged Beneath Waterlogging</p>
           </div>
         </div>
-        <button onClick={onClose} className="p-1 rounded text-gray-400 hover:text-white transition-colors">
+        <button onClick={onClose} className="p-1 rounded text-zinc-400 hover:text-white transition-colors">
           <X className="w-4 h-4" />
         </button>
       </div>
 
-      <div className="rounded-lg bg-[#0B1220] border border-[#1F2937] p-3 mb-2 space-y-2">
+      <div className="rounded-lg bg-[#050507] border border-[#1C1C28] p-3 mb-2 space-y-2">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-amber-400 font-semibold uppercase tracking-wider text-[10px]">1. Historical Defect</span>
-          <span className="text-gray-400 text-[10px]">{formatTimeAgo(hazard.historicalObservedAt)}</span>
+          <span className="text-[#8B5CF6] font-semibold uppercase tracking-wider text-[10px]">1. Historical Defect</span>
+          <span className="text-zinc-400 text-[10px]">{formatTimeAgo(hazard.historicalObservedAt)}</span>
         </div>
-        <p className="text-xs text-gray-200">
+        <p className="text-xs text-zinc-200">
           Known <strong className="text-white">{getCategoryLabel(hazard.historicalDefectType)}</strong> recorded on {hazard.location.road}.
         </p>
 
-        <div className="flex items-center justify-between text-xs pt-2 border-t border-navy-800">
-          <span className="text-cyan-400 font-semibold uppercase tracking-wider text-[10px]">2. Active Waterlogging</span>
-          <span className="text-gray-400 text-[10px]">{formatTimeAgo(hazard.waterloggingReportedAt)}</span>
+        <div className="flex items-center justify-between text-xs pt-2 border-t border-[#1C1C28]">
+          <span className="text-[#00F5FF] font-semibold uppercase tracking-wider text-[10px]">2. Active Waterlogging</span>
+          <span className="text-zinc-400 text-[10px]">{formatTimeAgo(hazard.waterloggingReportedAt)}</span>
         </div>
-        <p className="text-xs text-gray-200">
+        <p className="text-xs text-zinc-200">
           Heavy surface water reported overlapping the exact road segment.
         </p>
       </div>
 
       <div className="flex items-center gap-2 mb-2">
-        <div className="flex-1 h-2 rounded-full bg-[#1F2937] overflow-hidden">
+        <div className="flex-1 h-2 rounded-full bg-[#1C1C28] overflow-hidden">
           <div
             className="h-full rounded-full transition-all duration-500"
             style={{
               width: `${hazard.confidence}%`,
-              background: hazard.confidence >= 75 ? '#EF4444' : hazard.confidence >= 50 ? '#F97316' : '#F59E0B',
+              background: hazard.confidence >= 75 ? '#00F5FF' : '#8B5CF6',
             }}
           />
         </div>
         <span className="text-xs font-bold text-white">{hazard.confidence}%</span>
-        <span className="text-[10px] text-gray-400 font-medium">{hazard.confidenceLabel}</span>
+        <span className="text-[10px] text-zinc-400 font-medium">{hazard.confidenceLabel}</span>
       </div>
 
-      <p className="text-[11px] text-gray-300 leading-relaxed mb-3">
+      <p className="text-[11px] text-zinc-300 leading-relaxed mb-3">
         {hazard.explanation}
       </p>
 
-      <div className="flex items-start gap-1.5 text-[10px] text-amber-300 bg-amber-500/10 rounded-lg p-2.5 border border-amber-500/25">
-        <ShieldAlert className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+      <div className="flex items-start gap-1.5 text-[10px] text-[#C4B5FD] bg-[#8B5CF6]/10 rounded-lg p-2.5 border border-[#8B5CF6]/25">
+        <ShieldAlert className="w-3.5 h-3.5 text-[#00F5FF] shrink-0 mt-0.5" />
         <span>
-          <strong>Inferred Decision-Support Alert:</strong> Submerged condition is statistically estimated from spatial and temporal correlation. Not directly confirmed by physical divers.
+          <strong className="text-white">Inferred Decision-Support Alert:</strong> Submerged condition is statistically estimated from spatial and temporal correlation. Not directly confirmed by physical divers.
         </span>
       </div>
     </div>
@@ -274,9 +275,9 @@ function HiddenHazardAlert({ hazard, onClose }: { hazard: HiddenHazard; onClose:
 function ChartTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-[#1F2937] border border-[#374151] rounded-lg px-3 py-2 shadow-xl">
+    <div className="bg-[#0B0B10] border border-[#1C1C28] rounded-lg px-3 py-2 shadow-xl">
       <p className="text-xs font-semibold text-white">{label}</p>
-      <p className="text-xs text-cyan-300">
+      <p className="text-xs text-[#00F5FF]">
         {payload[0].value} incident{payload[0].value !== 1 ? 's' : ''} in sample dataset
       </p>
     </div>
@@ -322,7 +323,7 @@ export function DashboardPage() {
     });
   }, [allIncidents, selectedCategory, selectedSeverity, searchQuery]);
 
-  // Chart data
+  // Chart data with exclusive palette (Royal Amethyst & Electric Cyan shades)
   const chartData = useMemo(() => {
     const counts: Record<string, number> = {};
     allIncidents.forEach(inc => {
@@ -330,11 +331,11 @@ export function DashboardPage() {
       counts[label] = (counts[label] || 0) + 1;
     });
     return Object.entries(counts).map(([name, count]) => {
-      let color = '#06B6D4';
-      if (name === 'Pothole') color = '#F97316';
-      if (name === 'Open Manhole') color = '#EF4444';
-      if (name === 'Waterlogging') color = '#06B6D4';
-      if (name === 'Damaged Road') color = '#F59E0B';
+      let color = '#8B5CF6';
+      if (name === 'Pothole') color = '#8B5CF6';
+      if (name === 'Open Manhole') color = '#00F5FF';
+      if (name === 'Waterlogging') color = '#67E8F9';
+      if (name === 'Damaged Road') color = '#A78BFA';
       return { name, count, color };
     });
   }, [allIncidents]);
@@ -367,26 +368,26 @@ export function DashboardPage() {
   const hasActiveFilters = selectedCategory !== 'all' || selectedSeverity !== 'all' || searchQuery.trim().length > 0;
 
   return (
-    <div className="min-h-screen bg-[#0B1220] text-white p-4 md:p-6 lg:p-8 space-y-6">
+    <div className="min-h-screen bg-[#050507] text-white p-4 md:p-6 lg:p-8 space-y-6">
       {/* ─── Header & Notice ─────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#1F2937]/70 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#1C1C28] pb-4">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl md:text-2xl font-extrabold text-white tracking-tight">
               Command Center
             </h1>
-            <span className="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-[10px] font-bold text-amber-400">
+            <span className="px-2 py-0.5 rounded-full bg-[#8B5CF6]/15 border border-[#8B5CF6]/30 text-[10px] font-bold text-[#C4B5FD]">
               DEMO DATASET
             </span>
           </div>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-xs text-zinc-400 mt-0.5">
             Pre-monsoon defect memory combined with active waterlogging across central Delhi corridors.
           </p>
         </div>
         <div className="flex items-center gap-2 self-start sm:self-auto">
-          <div className="px-3 py-1.5 rounded-lg bg-navy-800 border border-navy-700/80 text-[11px] text-gray-300 flex items-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span>USP Hidden Hazard Engine: <strong className="text-red-400">{hiddenHazards.length} Active Correlations</strong></span>
+          <div className="px-3 py-1.5 rounded-lg bg-[#0B0B10] border border-[#1C1C28] text-[11px] text-zinc-300 flex items-center gap-2">
+            <Sparkles className="w-3.5 h-3.5 text-[#00F5FF]" />
+            <span>USP Hidden Hazard Engine: <strong className="text-[#00F5FF]">{hiddenHazards.length} Active Correlations</strong></span>
           </div>
         </div>
       </div>
@@ -398,14 +399,14 @@ export function DashboardPage() {
           label="Total Road Records"
           value={metrics.totalHazards}
           sublabel="Historical + Current"
-          color="#06B6D4"
+          color="#8B5CF6"
         />
         <MetricCard
           icon={Droplets}
           label="Active Waterlogging"
           value={metrics.activeWaterlogging}
           sublabel="Submerging roads"
-          color="#14B8A6"
+          color="#00F5FF"
         />
         <MetricCard
           icon={AlertTriangle}
@@ -413,38 +414,38 @@ export function DashboardPage() {
           value={metrics.hiddenHazards}
           sublabel="Correlated underwater"
           highlight
-          color="#EF4444"
+          color="#00F5FF"
         />
         <MetricCard
           icon={Clock}
           label="Pending Verification"
           value={metrics.pendingVerification}
           sublabel="Needs field review"
-          color="#F59E0B"
+          color="#A78BFA"
         />
         <MetricCard
           icon={ShieldAlert}
           label="Critical Severity"
           value={metrics.criticalAlerts}
           sublabel="Immediate safety risk"
-          color="#F97316"
+          color="#00F5FF"
         />
         <MetricCard
           icon={CheckCircle2}
           label="Resolved / Cleared"
           value={metrics.resolvedThisWeek}
           sublabel="Verified safe"
-          color="#10B981"
+          color="#8B5CF6"
         />
       </div>
 
       {/* ─── Multi-factor Filter Bar ──────────────────────────────────── */}
-      <div className="bg-[#111827] border border-[#1F2937] rounded-xl p-3 space-y-3">
+      <div className="bg-[#0B0B10] border border-[#1C1C28] rounded-xl p-3 space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* Category buttons */}
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mr-1 flex items-center gap-1">
-              <Layers className="w-3 h-3 text-cyan-400" /> Type:
+            <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mr-1 flex items-center gap-1">
+              <Layers className="w-3 h-3 text-[#00F5FF]" /> Type:
             </span>
             {CATEGORY_FILTERS.map(({ key, label, icon: Icon }) => (
               <button
@@ -454,10 +455,10 @@ export function DashboardPage() {
                 aria-pressed={selectedCategory === key}
                 onClick={() => setSelectedCategory(key)}
                 className={cn(
-                  'flex items-center gap-1.5 px-2.5 py-1.5 min-h-[36px] rounded-lg text-xs font-medium border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
+                  'flex items-center gap-1.5 px-2.5 py-1.5 min-h-[36px] rounded-lg text-xs font-medium border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]',
                   selectedCategory === key
-                    ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/50 shadow-sm'
-                    : 'bg-navy-900/60 text-gray-400 border-navy-700/60 hover:text-gray-200 hover:border-gray-600',
+                    ? 'bg-[#00F5FF]/15 text-[#00F5FF] border-[#00F5FF]/50 shadow-sm'
+                    : 'bg-[#12121A] text-zinc-400 border-[#1C1C28] hover:text-zinc-200 hover:border-[#8B5CF6]/40',
                 )}
               >
                 <Icon className="w-3 h-3" />
@@ -468,22 +469,22 @@ export function DashboardPage() {
 
           {/* Search Input */}
           <div className="relative w-full md:w-64">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500" />
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
             <input
               type="text"
               placeholder="Search roads, areas, IDs..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full min-h-[38px] pl-8 pr-3 py-1.5 rounded-lg bg-navy-900 border border-navy-700 text-xs text-gray-200 placeholder:text-gray-500 focus:border-cyan-500/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+              className="w-full min-h-[38px] pl-8 pr-3 py-1.5 rounded-lg bg-[#12121A] border border-[#1C1C28] text-xs text-zinc-200 placeholder:text-zinc-500 focus:border-[#00F5FF]/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]"
             />
           </div>
         </div>
 
         {/* Severity Filter Row */}
-        <div className="flex items-center justify-between pt-2 border-t border-navy-800/80 flex-wrap gap-2">
+        <div className="flex items-center justify-between pt-2 border-t border-[#1C1C28] flex-wrap gap-2">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mr-1 flex items-center gap-1">
-              <Filter className="w-3 h-3 text-amber-400" /> Severity:
+            <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mr-1 flex items-center gap-1">
+              <Filter className="w-3 h-3 text-[#8B5CF6]" /> Severity:
             </span>
             {SEVERITY_FILTERS.map(({ key, label, color }) => (
               <button
@@ -493,10 +494,10 @@ export function DashboardPage() {
                 aria-pressed={selectedSeverity === key}
                 onClick={() => setSelectedSeverity(key)}
                 className={cn(
-                  'px-2.5 py-1 min-h-[32px] rounded text-[11px] font-medium border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
+                  'px-2.5 py-1 min-h-[32px] rounded text-[11px] font-medium border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]',
                   selectedSeverity === key
                     ? 'bg-white/10 text-white font-bold border-white/30'
-                    : 'bg-transparent text-gray-400 border-navy-700 hover:text-gray-200',
+                    : 'bg-transparent text-zinc-400 border-[#1C1C28] hover:text-zinc-200',
                 )}
                 style={selectedSeverity === key && key !== 'all' ? { borderColor: `${color}60`, color } : {}}
               >
@@ -509,7 +510,7 @@ export function DashboardPage() {
             <button
               type="button"
               onClick={handleResetFilters}
-              className="flex items-center gap-1 px-2.5 py-1 min-h-[32px] rounded text-xs text-red-400 bg-red-500/10 border border-red-500/25 hover:bg-red-500/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+              className="flex items-center gap-1 px-2.5 py-1 min-h-[32px] rounded text-xs text-[#00F5FF] bg-[#00F5FF]/10 border border-[#00F5FF]/30 hover:bg-[#00F5FF]/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]"
             >
               <X className="w-3 h-3" />
               Reset Filters
@@ -521,18 +522,18 @@ export function DashboardPage() {
       {/* ─── Main Geospatial Workspace: Map (Centerpiece) + Right Panel ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-5 items-start">
         {/* Large Central Map Workspace */}
-        <div className="rounded-xl border border-[#1F2937] bg-[#111827] overflow-hidden shadow-2xl flex flex-col">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#1F2937] bg-navy-900/60">
+        <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] overflow-hidden shadow-2xl flex flex-col">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-[#1C1C28] bg-[#12121A]">
             <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4 text-cyan-400" />
-              <h2 className="text-sm font-bold text-gray-100">Delhi NCR Spatial Hazard Engine</h2>
-              <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-mono">
+              <MapPin className="w-4 h-4 text-[#00F5FF]" />
+              <h2 className="text-sm font-bold text-zinc-100">Delhi NCR Spatial Hazard Engine</h2>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-[#00F5FF]/10 text-[#00F5FF] border border-[#00F5FF]/25 font-mono">
                 EPSG:4326
               </span>
             </div>
-            <div className="text-[11px] text-gray-400">
+            <div className="text-[11px] text-zinc-400">
               Showing <strong className="text-white">{filteredIncidents.length}</strong> markers ·{' '}
-              <strong className="text-red-400">{hiddenHazards.length}</strong> hidden overlays
+              <strong className="text-[#00F5FF]">{hiddenHazards.length}</strong> hidden overlays
             </div>
           </div>
 
@@ -547,22 +548,22 @@ export function DashboardPage() {
             />
           </div>
 
-          <div className="p-3 border-t border-navy-800 bg-[#0B1220]/80 flex items-center justify-between text-[11px] text-gray-400 flex-wrap gap-2">
+          <div className="p-3 border-t border-[#1C1C28] bg-[#050507] flex items-center justify-between text-[11px] text-zinc-400 flex-wrap gap-2">
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#F97316]" /> Potholes
+                <span className="w-2.5 h-2.5 rounded-full bg-[#8B5CF6]" /> Potholes
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#EF4444]" /> Open Manholes
+                <span className="w-2.5 h-2.5 rounded-full bg-[#A78BFA]" /> Open Manholes
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#06B6D4]" /> Waterlogging
+                <span className="w-2.5 h-2.5 rounded-full bg-[#00F5FF]" /> Waterlogging
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded bg-[#EF4444] text-[8px] font-bold text-white flex items-center justify-center">!</span> Hidden Predictions
+                <span className="w-2.5 h-2.5 rounded bg-[#00F5FF] text-[8px] font-bold text-black flex items-center justify-center">!</span> Hidden Predictions
               </span>
             </div>
-            <span className="text-[10px] text-gray-500 italic">Click any marker to inspect evidence</span>
+            <span className="text-[10px] text-zinc-500 italic">Click any marker to inspect evidence</span>
           </div>
         </div>
 
@@ -577,7 +578,7 @@ export function DashboardPage() {
           )}
 
           {/* Tab Switcher: Incident Feed vs Inferred Hazards */}
-          <div role="tablist" aria-label="Geospatial feed views" className="flex rounded-lg bg-[#111827] border border-[#1F2937] p-1">
+          <div role="tablist" aria-label="Geospatial feed views" className="flex rounded-lg bg-[#0B0B10] border border-[#1C1C28] p-1">
             <button
               type="button"
               role="tab"
@@ -593,10 +594,10 @@ export function DashboardPage() {
                 }
               }}
               className={cn(
-                'flex-1 py-2 px-3 rounded-md text-xs font-semibold transition-all min-h-[40px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
+                'flex-1 py-2 px-3 rounded-md text-xs font-semibold transition-all min-h-[40px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]',
                 activeTab === 'feed'
-                  ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
-                  : 'text-gray-400 hover:text-white',
+                  ? 'bg-[#00F5FF]/15 text-[#00F5FF] border border-[#00F5FF]/30'
+                  : 'text-zinc-400 hover:text-white',
               )}
             >
               Incident Feed ({filteredIncidents.length})
@@ -616,13 +617,13 @@ export function DashboardPage() {
                 }
               }}
               className={cn(
-                'flex-1 py-2 px-3 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5 min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400',
+                'flex-1 py-2 px-3 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5 min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8B5CF6]',
                 activeTab === 'hidden_hazards'
-                  ? 'bg-red-500/20 text-red-300 border border-red-500/30'
-                  : 'text-gray-400 hover:text-white',
+                  ? 'bg-[#8B5CF6]/15 text-[#C4B5FD] border border-[#8B5CF6]/30'
+                  : 'text-zinc-400 hover:text-white',
               )}
             >
-              <TriangleAlert className="w-3.5 h-3.5 text-red-400" />
+              <TriangleAlert className="w-3.5 h-3.5 text-[#00F5FF]" />
               Hidden Predictions ({hiddenHazards.length})
             </button>
           </div>
@@ -633,24 +634,24 @@ export function DashboardPage() {
               role="tabpanel"
               id="dashboard-panel-feed"
               aria-labelledby="dashboard-tab-feed"
-              className="rounded-xl border border-[#1F2937] bg-[#111827] overflow-hidden"
+              className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] overflow-hidden"
             >
-              <div className="px-4 py-2.5 border-b border-[#1F2937] flex items-center justify-between bg-navy-900/40">
-                <h3 className="text-xs font-bold text-gray-200 uppercase tracking-wider">
+              <div className="px-4 py-2.5 border-b border-[#1C1C28] flex items-center justify-between bg-[#12121A]">
+                <h3 className="text-xs font-bold text-zinc-200 uppercase tracking-wider">
                   Reported Hazards Feed
                 </h3>
-                <span className="text-[10px] text-gray-400 font-mono">
+                <span className="text-[10px] text-zinc-400 font-mono">
                   Sorted by Severity
                 </span>
               </div>
               <div className="p-2 space-y-2 max-h-[460px] overflow-y-auto">
                 {filteredIncidents.length === 0 ? (
                   <div className="text-center py-10">
-                    <Search className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-                    <p className="text-xs text-gray-400">No hazards match current filters</p>
+                    <Search className="w-8 h-8 text-zinc-600 mx-auto mb-2" />
+                    <p className="text-xs text-zinc-400">No hazards match current filters</p>
                     <button
                       onClick={handleResetFilters}
-                      className="text-xs text-cyan-400 hover:underline mt-1.5 inline-block"
+                      className="text-xs text-[#00F5FF] hover:underline mt-1.5 inline-block"
                     >
                       Clear all filters
                     </button>
@@ -679,16 +680,16 @@ export function DashboardPage() {
               role="tabpanel"
               id="dashboard-panel-hidden-hazards"
               aria-labelledby="dashboard-tab-hidden-hazards"
-              className="rounded-xl border border-[#1F2937] bg-[#111827] overflow-hidden"
+              className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] overflow-hidden"
             >
-              <div className="px-4 py-2.5 border-b border-[#1F2937] bg-red-500/10 flex items-center justify-between">
+              <div className="px-4 py-2.5 border-b border-[#1C1C28] bg-[#00F5FF]/10 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <TriangleAlert className="w-3.5 h-3.5 text-red-400" />
-                  <h3 className="text-xs font-bold text-red-300 uppercase tracking-wider">
+                  <TriangleAlert className="w-3.5 h-3.5 text-[#00F5FF]" />
+                  <h3 className="text-xs font-bold text-[#00F5FF] uppercase tracking-wider">
                     Inferred Submerged Hazards
                   </h3>
                 </div>
-                <span className="text-[10px] text-red-300 font-semibold">USP Engine</span>
+                <span className="text-[10px] text-[#C4B5FD] font-semibold">USP Engine</span>
               </div>
               <div className="p-2 space-y-2 max-h-[460px] overflow-y-auto">
                 {hiddenHazards.map(hh => (
@@ -698,23 +699,23 @@ export function DashboardPage() {
                     className={cn(
                       'p-3 rounded-lg border cursor-pointer transition-all',
                       selectedHiddenHazardId === hh.id
-                        ? 'bg-red-500/15 border-red-500/50 shadow-md'
-                        : 'bg-navy-900 border-navy-700/60 hover:border-red-500/30',
+                        ? 'bg-[#00F5FF]/10 border-[#00F5FF]/50 shadow-md'
+                        : 'bg-[#12121A] border-[#1C1C28] hover:border-[#8B5CF6]/40',
                     )}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs font-bold text-white">
                         {getCategoryLabel(hh.historicalDefectType)} submerged
                       </span>
-                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-400 font-bold">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#00F5FF]/15 text-[#00F5FF] font-bold">
                         {hh.confidence}% Conf.
                       </span>
                     </div>
-                    <p className="text-[11px] text-gray-400 flex items-center gap-1">
-                      <MapPin className="w-3 h-3 text-gray-500" />
+                    <p className="text-[11px] text-zinc-400 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 text-zinc-500" />
                       {hh.location.road}, {hh.location.area}
                     </p>
-                    <p className="text-[10px] text-gray-500 mt-1 italic line-clamp-2">
+                    <p className="text-[10px] text-zinc-500 mt-1 italic line-clamp-2">
                       {hh.explanation}
                     </p>
                   </div>
@@ -724,12 +725,12 @@ export function DashboardPage() {
           )}
 
           {/* Dataset Distribution Chart */}
-          <div className="rounded-xl border border-[#1F2937] bg-[#111827] p-4">
+          <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold text-gray-300 uppercase tracking-wider">
+              <h3 className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
                 Distribution by Category
               </h3>
-              <span className="text-[10px] text-gray-500 font-mono">Real demo counts</span>
+              <span className="text-[10px] text-zinc-500 font-mono">Real demo counts</span>
             </div>
             <div className="h-36">
               <ResponsiveContainer width="100%" height="100%">

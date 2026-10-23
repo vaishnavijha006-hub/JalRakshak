@@ -17,10 +17,10 @@ const CATEGORIES: { value: HazardCategory; label: string; icon: string; desc: st
 ];
 
 const SEVERITIES: { value: Severity; label: string; color: string; desc: string }[] = [
-  { value: 'low', label: 'Low', color: '#10B981', desc: 'Minor inconvenience, caution needed' },
-  { value: 'medium', label: 'Medium', color: '#F59E0B', desc: 'Significant hazard, reduce speed' },
-  { value: 'high', label: 'High', color: '#F97316', desc: 'Dangerous, avoid if possible' },
-  { value: 'critical', label: 'Critical', color: '#EF4444', desc: 'Extreme danger, do not proceed' },
+  { value: 'low', label: 'Low', color: '#71717A', desc: 'Minor inconvenience, caution needed' },
+  { value: 'medium', label: 'Medium', color: '#A78BFA', desc: 'Significant hazard, reduce speed' },
+  { value: 'high', label: 'High', color: '#8B5CF6', desc: 'Dangerous, avoid if possible' },
+  { value: 'critical', label: 'Critical', color: '#00F5FF', desc: 'Extreme danger, do not proceed' },
 ];
 
 interface FormData {
@@ -119,23 +119,23 @@ export function ReportPage() {
   };
 
   return (
-    <div className="p-4 lg:p-6 max-w-2xl mx-auto space-y-4">
+    <div className="p-4 lg:p-6 max-w-2xl mx-auto space-y-4 bg-[#050507] min-h-screen text-white">
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-white flex items-center gap-2">
-          <AlertTriangle className="w-5 h-5 text-amber-400" />
+          <AlertTriangle className="w-5 h-5 text-[#00F5FF]" />
           Report a Hazard
         </h1>
-        <p className="text-sm text-navy-400 mt-0.5">Submit a road hazard observation to the community database</p>
+        <p className="text-sm text-zinc-400 mt-0.5">Submit a road hazard observation to the community database</p>
       </div>
 
       {/* Safety Banner */}
-      <div className="flex items-start gap-3 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
-        <Shield className="w-4 h-4 text-red-400 mt-0.5 shrink-0" />
+      <div className="flex items-start gap-3 p-3 rounded-lg bg-[#12121A] border border-[#8B5CF6]/30">
+        <Shield className="w-4 h-4 text-[#00F5FF] mt-0.5 shrink-0" />
         <div>
-          <p className="text-xs font-semibold text-red-400 mb-0.5">Safety First</p>
-          <p className="text-xs text-red-300">
-            Please report only when <strong>safely stopped</strong>. Never use your phone while riding or driving.
+          <p className="text-xs font-semibold text-[#00F5FF] mb-0.5">Safety First</p>
+          <p className="text-xs text-zinc-300">
+            Please report only when <strong className="text-white">safely stopped</strong>. Never use your phone while riding or driving.
           </p>
         </div>
       </div>
@@ -146,24 +146,24 @@ export function ReportPage() {
           <div key={s} className="flex items-center gap-2 flex-1">
             <div className={cn(
               'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all',
-              step === s ? 'border-cyan-500 bg-cyan-500/20 text-cyan-400' :
+              step === s ? 'border-[#00F5FF] bg-[#00F5FF]/20 text-[#00F5FF]' :
                 (step === 'review' && s === 'form') || step === 'success'
-                  ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
-                  : 'border-navy-600 bg-navy-700 text-navy-500'
+                  ? 'border-[#8B5CF6] bg-[#8B5CF6]/20 text-[#C4B5FD]'
+                  : 'border-[#1C1C28] bg-[#12121A] text-zinc-500'
             )}>
               {((step === 'review' && s === 'form') || step === 'success') && s !== 'success'
                 ? <CheckCircle className="w-3.5 h-3.5" />
                 : i + 1}
             </div>
-            <span className="text-[10px] text-navy-400 capitalize hidden sm:block">{s === 'form' ? 'Details' : s}</span>
-            {i < 2 && <div className={cn('flex-1 h-px', s === 'form' && step !== 'form' ? 'bg-emerald-500/50' : 'bg-navy-700/50')} />}
+            <span className="text-[10px] text-zinc-400 capitalize hidden sm:block">{s === 'form' ? 'Details' : s}</span>
+            {i < 2 && <div className={cn('flex-1 h-px', s === 'form' && step !== 'form' ? 'bg-[#8B5CF6]/50' : 'bg-[#1C1C28]')} />}
           </div>
         ))}
       </div>
 
       {/* FORM Step */}
       {step === 'form' && (
-        <div className="bg-navy-800 border border-navy-700/50 rounded-xl p-5 space-y-5">
+        <div className="bg-[#0B0B10] border border-[#1C1C28] rounded-xl p-5 space-y-5 shadow-xl">
           {/* Category */}
           <div>
             <label id="category-label" className="block text-xs font-semibold text-white mb-2">Hazard Category *</label>
@@ -176,16 +176,16 @@ export function ReportPage() {
                   aria-checked={form.category === cat.value}
                   onClick={() => setForm(f => ({ ...f, category: cat.value }))}
                   className={cn(
-                    'flex flex-col items-center justify-center gap-1 p-3 rounded-lg border text-center transition-all min-h-[58px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
+                    'flex flex-col items-center justify-center gap-1 p-3 rounded-lg border text-center transition-all min-h-[58px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]',
                     form.category === cat.value
-                      ? 'border-cyan-500/50 bg-cyan-500/15 text-cyan-300 shadow-sm'
-                      : 'border-navy-700/50 text-navy-400 hover:border-navy-600 hover:text-navy-200',
+                      ? 'border-[#00F5FF]/60 bg-[#00F5FF]/15 text-[#00F5FF] shadow-sm'
+                      : 'border-[#1C1C28] bg-[#12121A] text-zinc-400 hover:border-[#8B5CF6]/40 hover:text-zinc-200',
                     cat.value === 'other' ? 'col-span-2 sm:col-span-1' : ''
                   )}
                 >
                   <span className="text-xl">{cat.icon}</span>
                   <span className="text-[10px] font-bold">{cat.label}</span>
-                  <span className="text-[9px] text-navy-500">{cat.desc}</span>
+                  <span className="text-[9px] text-zinc-500">{cat.desc}</span>
                 </button>
               ))}
             </div>
@@ -195,7 +195,7 @@ export function ReportPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label htmlFor="road-input" className="block text-xs font-semibold text-white mb-1.5">
-                <MapPin className="inline w-3 h-3 mr-1" />Road / Street Name *
+                <MapPin className="inline w-3 h-3 mr-1 text-[#00F5FF]" />Road / Street Name *
               </label>
               <input
                 id="road-input"
@@ -204,11 +204,11 @@ export function ReportPage() {
                 onChange={e => setForm(f => ({ ...f, road: e.target.value }))}
                 placeholder="e.g. Ring Road, Mathura Road"
                 className={cn(
-                  'w-full min-h-[44px] px-3 py-2.5 bg-navy-700/50 border rounded-lg text-sm text-white placeholder:text-navy-500 focus:outline-none focus:border-cyan-500/50 transition-colors',
-                  errors.road ? 'border-red-500/50' : 'border-navy-600/50'
+                  'w-full min-h-[44px] px-3 py-2.5 bg-[#12121A] border rounded-lg text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#00F5FF]/50 transition-colors',
+                  errors.road ? 'border-[#00F5FF]' : 'border-[#1C1C28]'
                 )}
               />
-              {errors.road && <p className="text-[10px] text-red-400 mt-1">{errors.road}</p>}
+              {errors.road && <p className="text-[10px] text-[#00F5FF] mt-1">{errors.road}</p>}
             </div>
             <div>
               <label htmlFor="area-input" className="block text-xs font-semibold text-white mb-1.5">Area / Landmark *</label>
@@ -219,30 +219,30 @@ export function ReportPage() {
                 onChange={e => setForm(f => ({ ...f, area: e.target.value }))}
                 placeholder="e.g. Lajpat Nagar, ITO"
                 className={cn(
-                  'w-full min-h-[44px] px-3 py-2.5 bg-navy-700/50 border rounded-lg text-sm text-white placeholder:text-navy-500 focus:outline-none focus:border-cyan-500/50 transition-colors',
-                  errors.area ? 'border-red-500/50' : 'border-navy-600/50'
+                  'w-full min-h-[44px] px-3 py-2.5 bg-[#12121A] border rounded-lg text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#00F5FF]/50 transition-colors',
+                  errors.area ? 'border-[#00F5FF]' : 'border-[#1C1C28]'
                 )}
               />
               {/* Quick Area Chips */}
               <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                <span className="text-[10px] text-navy-400 font-medium">Quick select:</span>
+                <span className="text-[10px] text-zinc-500 font-medium">Quick select:</span>
                 {['Connaught Place', 'Lajpat Nagar', 'ITO', 'Minto Bridge', 'Pragati Maidan', 'Vikas Marg'].map(a => (
                   <button
                     key={a}
                     type="button"
                     onClick={() => setForm(f => ({ ...f, area: a }))}
                     className={cn(
-                      'text-[10px] px-2 py-0.5 rounded border transition-colors min-h-[28px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
+                      'text-[10px] px-2 py-0.5 rounded border transition-colors min-h-[28px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]',
                       form.area.toLowerCase() === a.toLowerCase()
-                        ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 font-semibold'
-                        : 'bg-navy-800/80 border-navy-700/70 text-navy-300 hover:text-white hover:border-navy-600'
+                        ? 'bg-[#00F5FF]/15 border-[#00F5FF]/50 text-[#00F5FF] font-semibold'
+                        : 'bg-[#12121A] border-[#1C1C28] text-zinc-400 hover:text-white hover:border-[#8B5CF6]/40'
                     )}
                   >
                     {a}
                   </button>
                 ))}
               </div>
-              {errors.area && <p className="text-[10px] text-red-400 mt-1">{errors.area}</p>}
+              {errors.area && <p className="text-[10px] text-[#00F5FF] mt-1">{errors.area}</p>}
             </div>
           </div>
 
@@ -258,10 +258,10 @@ export function ReportPage() {
                   aria-checked={form.severity === sev.value}
                   onClick={() => setForm(f => ({ ...f, severity: sev.value }))}
                   className={cn(
-                    'p-3 min-h-[58px] rounded-lg border text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
+                    'p-3 min-h-[58px] rounded-lg border text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]',
                     form.severity === sev.value
                       ? 'border-opacity-50 text-white shadow-sm'
-                      : 'border-navy-700/50 text-navy-400 hover:border-navy-600'
+                      : 'border-[#1C1C28] bg-[#12121A] text-zinc-400 hover:border-[#8B5CF6]/40'
                   )}
                   style={form.severity === sev.value ? {
                     borderColor: `${sev.color}60`,
@@ -271,7 +271,7 @@ export function ReportPage() {
                   <div className="text-xs font-bold mb-0.5" style={{ color: form.severity === sev.value ? sev.color : undefined }}>
                     {sev.label}
                   </div>
-                  <div className="text-[9px] text-navy-500">{sev.desc}</div>
+                  <div className="text-[9px] text-zinc-500">{sev.desc}</div>
                 </button>
               ))}
             </div>
@@ -286,51 +286,51 @@ export function ReportPage() {
               rows={4}
               placeholder="Describe the hazard in detail — size, exact location, any visible danger..."
               className={cn(
-                'w-full px-3 py-2.5 bg-navy-700/50 border rounded-lg text-sm text-white placeholder:text-navy-500 focus:outline-none focus:border-cyan-500/50 transition-colors resize-none',
-                errors.description ? 'border-red-500/50' : 'border-navy-600/50'
+                'w-full px-3 py-2.5 bg-[#12121A] border rounded-lg text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#00F5FF]/50 transition-colors resize-none',
+                errors.description ? 'border-[#00F5FF]' : 'border-[#1C1C28]'
               )}
             />
-            {errors.description && <p className="text-[10px] text-red-400 mt-1">{errors.description}</p>}
+            {errors.description && <p className="text-[10px] text-[#00F5FF] mt-1">{errors.description}</p>}
           </div>
 
           {/* Time */}
           <div>
             <label className="block text-xs font-semibold text-white mb-1.5">
-              <Clock className="inline w-3 h-3 mr-1" />When did you observe this? *
+              <Clock className="inline w-3 h-3 mr-1 text-[#00F5FF]" />When did you observe this? *
             </label>
             <input
               type="datetime-local"
               value={form.observedAt}
               onChange={e => setForm(f => ({ ...f, observedAt: e.target.value }))}
-              className="w-full px-3 py-2.5 bg-navy-700/50 border border-navy-600/50 rounded-lg text-sm text-white focus:outline-none focus:border-cyan-500/50"
+              className="w-full px-3 py-2.5 bg-[#12121A] border border-[#1C1C28] rounded-lg text-sm text-white focus:outline-none focus:border-[#00F5FF]/50"
             />
           </div>
 
           {/* Photo */}
           <div>
             <label className="block text-xs font-semibold text-white mb-1.5">
-              <Camera className="inline w-3 h-3 mr-1" />Photo (Optional)
+              <Camera className="inline w-3 h-3 mr-1 text-[#00F5FF]" />Photo (Optional)
             </label>
             <div
               onClick={() => fileRef.current?.click()}
-              className="flex items-center justify-center gap-3 h-20 border-2 border-dashed border-navy-600/50 rounded-lg cursor-pointer hover:border-cyan-500/40 transition-colors"
+              className="flex items-center justify-center gap-3 h-20 border-2 border-dashed border-[#1C1C28] bg-[#12121A] rounded-lg cursor-pointer hover:border-[#00F5FF]/40 transition-colors"
             >
               {form.photoName ? (
                 <div className="flex items-center gap-2">
-                  <Camera className="w-4 h-4 text-emerald-400" />
-                  <span className="text-xs text-emerald-400">{form.photoName}</span>
+                  <Camera className="w-4 h-4 text-[#00F5FF]" />
+                  <span className="text-xs text-[#00F5FF]">{form.photoName}</span>
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setForm(f => ({ ...f, photoName: '' })); }}
-                    className="text-navy-400 hover:text-red-400"
+                    className="text-zinc-400 hover:text-white"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
               ) : (
                 <div className="text-center">
-                  <Camera className="w-5 h-5 text-navy-500 mx-auto mb-1" />
-                  <span className="text-[10px] text-navy-500">Click to attach photo</span>
+                  <Camera className="w-5 h-5 text-zinc-500 mx-auto mb-1" />
+                  <span className="text-[10px] text-zinc-500">Click to attach photo</span>
                 </div>
               )}
             </div>
@@ -345,7 +345,7 @@ export function ReportPage() {
 
           <button
             onClick={handleSubmit}
-            className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-navy-950 font-semibold text-sm transition-all"
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-lg bg-[#00F5FF] hover:bg-[#00F5FF]/90 text-black font-bold text-sm transition-all"
           >
             <Send className="w-4 h-4" />
             Review & Submit Report
@@ -355,7 +355,7 @@ export function ReportPage() {
 
       {/* REVIEW Step */}
       {step === 'review' && (
-        <div className="bg-navy-800 border border-navy-700/50 rounded-xl p-5 space-y-4">
+        <div className="bg-[#0B0B10] border border-[#1C1C28] rounded-xl p-5 space-y-4 shadow-xl">
           <h2 className="text-sm font-semibold text-white">Review Your Report</h2>
 
           <div className="space-y-3">
@@ -366,21 +366,21 @@ export function ReportPage() {
               { label: 'Observed', value: new Date(form.observedAt).toLocaleString('en-IN') },
               { label: 'Photo', value: form.photoName || 'None attached' },
             ].map(item => (
-              <div key={item.label} className="flex justify-between gap-3 py-2 border-b border-navy-700/30 last:border-0">
-                <span className="text-xs text-navy-400 font-medium">{item.label}</span>
+              <div key={item.label} className="flex justify-between gap-3 py-2 border-b border-[#1C1C28] last:border-0">
+                <span className="text-xs text-zinc-400 font-medium">{item.label}</span>
                 <span className="text-xs text-white text-right">{item.value}</span>
               </div>
             ))}
             <div className="py-2">
-              <span className="text-xs text-navy-400 font-medium block mb-1">Description</span>
+              <span className="text-xs text-zinc-400 font-medium block mb-1">Description</span>
               <p className="text-xs text-white">{form.description}</p>
             </div>
           </div>
 
-          <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <div className="p-3 rounded-lg bg-[#8B5CF6]/10 border border-[#8B5CF6]/30">
             <div className="flex items-start gap-2">
-              <Info className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
-              <p className="text-[10px] text-amber-300">
+              <Info className="w-4 h-4 text-[#00F5FF] mt-0.5 shrink-0" />
+              <p className="text-[10px] text-[#C4B5FD]">
                 This browser demo does <strong>not</strong> automatically notify government departments.
                 Submitted reports are stored locally for demonstration purposes only.
               </p>
@@ -390,13 +390,13 @@ export function ReportPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setStep('form')}
-              className="flex-1 py-2.5 rounded-lg border border-navy-600/50 text-navy-300 hover:text-white hover:border-navy-500 text-sm font-medium transition-all"
+              className="flex-1 py-2.5 rounded-lg border border-[#1C1C28] text-zinc-300 hover:text-white hover:border-[#8B5CF6]/50 text-sm font-medium transition-all"
             >
               ← Edit
             </button>
             <button
               onClick={handleConfirm}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-navy-950 font-semibold text-sm transition-all"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#00F5FF] hover:bg-[#00F5FF]/90 text-black font-bold text-sm transition-all"
             >
               <Send className="w-4 h-4" />
               Submit Report
@@ -407,33 +407,33 @@ export function ReportPage() {
 
       {/* SUCCESS Step */}
       {step === 'success' && (
-        <div className="bg-navy-800 border border-emerald-500/30 rounded-xl p-8 text-center space-y-4">
-          <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-            <CheckCircle className="w-8 h-8 text-emerald-400" />
+        <div className="bg-[#0B0B10] border border-[#00F5FF]/30 rounded-xl p-8 text-center space-y-4 shadow-xl">
+          <div className="w-16 h-16 mx-auto rounded-full bg-[#00F5FF]/15 border border-[#00F5FF]/40 flex items-center justify-center">
+            <CheckCircle className="w-8 h-8 text-[#00F5FF]" />
           </div>
           <div>
             <h2 className="text-lg font-bold text-white mb-1">Report Submitted</h2>
-            <p className="text-sm text-navy-400">Your hazard report has been added to the local demo database.</p>
+            <p className="text-sm text-zinc-400">Your hazard report has been added to the local demo database.</p>
           </div>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-navy-700/50 border border-navy-600/50">
-            <span className="text-xs text-navy-400">Incident ID:</span>
-            <span className="text-sm font-mono font-bold text-cyan-400">{submittedId}</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#12121A] border border-[#1C1C28]">
+            <span className="text-xs text-zinc-400">Incident ID:</span>
+            <span className="text-sm font-mono font-bold text-[#00F5FF]">{submittedId}</span>
           </div>
-          <div className="p-3 rounded-lg bg-navy-700/30 border border-navy-700/50 text-left">
-            <p className="text-[10px] text-navy-400">
+          <div className="p-3 rounded-lg bg-[#12121A] border border-[#1C1C28] text-left">
+            <p className="text-[10px] text-zinc-400">
               ✓ Added to incident database · ✓ Reflected in dashboard metrics · ✗ Not submitted to any government system
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 pt-2">
             <button
               onClick={handleReset}
-              className="flex-1 py-2.5 rounded-lg bg-navy-700/60 hover:bg-navy-700 border border-navy-600/50 text-white font-medium text-xs transition-all"
+              className="flex-1 py-2.5 rounded-lg bg-[#12121A] hover:bg-[#1C1C28] border border-[#1C1C28] text-white font-medium text-xs transition-all"
             >
               Report Another Hazard
             </button>
             <Link
               to="/dashboard"
-              className="flex-1 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-navy-950 font-bold text-xs text-center transition-all flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
+              className="flex-1 py-2.5 rounded-lg bg-[#00F5FF] hover:bg-[#00F5FF]/90 text-black font-bold text-xs text-center transition-all flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]"
             >
               View on Dashboard Map →
             </Link>

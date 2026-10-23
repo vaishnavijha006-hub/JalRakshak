@@ -19,6 +19,7 @@ import {
   Route,
   AlertOctagon,
 } from 'lucide-react';
+import { InteractiveBackground } from '../components/layout/InteractiveBackground';
 
 /* ------------------------------------------------------------------ */
 /*  Landing Page – standalone (no shared Layout wrapper)               */
@@ -26,7 +27,10 @@ import {
 
 export function LandingPage() {
   return (
-    <div className="min-h-screen bg-[#050507] text-[#F3F4F6] font-[Inter,sans-serif] overflow-x-hidden">
+    <div className="min-h-screen bg-[#050507] text-[#F3F4F6] font-[Inter,sans-serif] overflow-x-hidden relative">
+      {/* ── Cursor-Reactive Ambient Lighting & Technical Grid Depth ── */}
+      <InteractiveBackground mode="landing" />
+
       {/* ── Top Navbar ─────────────────────────────────────────────── */}
       <nav className="fixed top-0 inset-x-0 z-50 border-b border-[#1C1C28] bg-[#050507]/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
@@ -113,7 +117,7 @@ export function LandingPage() {
 
         <div className="mx-auto mt-12 grid max-w-5xl gap-6 md:grid-cols-2">
           {/* Innovation 1 */}
-          <div className="group rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-7 transition hover:border-[#8B5CF6]/50 hover:shadow-[0_0_24px_rgba(139,92,246,0.12)]">
+          <div className="group rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-7 transition card-interactive hover:border-[#8B5CF6]/50 hover:shadow-[0_0_24px_rgba(139,92,246,0.15)]">
             <div className="mb-4 inline-flex rounded-lg bg-[#8B5CF6]/15 border border-[#8B5CF6]/35 p-2.5 text-[#8B5CF6]">
               <Eye className="h-5 w-5 text-[#00F5FF]" />
             </div>
@@ -127,7 +131,7 @@ export function LandingPage() {
           </div>
 
           {/* Innovation 2 */}
-          <div className="group rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-7 transition hover:border-[#00F5FF]/50 hover:shadow-[0_0_24px_rgba(0,245,255,0.12)]">
+          <div className="group rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-7 transition card-interactive hover:border-[#00F5FF]/50 hover:shadow-[0_0_24px_rgba(0,245,255,0.15)]">
             <div className="mb-4 inline-flex rounded-lg bg-[#00F5FF]/15 border border-[#00F5FF]/35 p-2.5 text-[#00F5FF]">
               <Route className="h-5 w-5 text-[#00F5FF]" />
             </div>
@@ -188,13 +192,13 @@ export function LandingPage() {
           </div>
 
           {/* Card */}
-          <div className="relative mt-9 overflow-hidden rounded-xl border border-[#1C1C28] bg-[#0B0B10] shadow-2xl">
+          <div className="relative mt-9 overflow-hidden rounded-xl border border-[#FF4D6D]/40 bg-[#0B0B10] shadow-2xl card-interactive">
             {/* Top Amethyst/Cyan Accent Bar */}
-            <div className="h-1 bg-gradient-to-r from-[#8B5CF6] via-[#A78BFA] to-[#00F5FF]" />
+            <div className="h-1 bg-gradient-to-r from-[#FF4D6D] via-[#FF9F43] to-[#00F5FF]" />
 
             <div className="p-6 sm:p-8">
               {/* badge */}
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#00F5FF]/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#00F5FF] border border-[#00F5FF]/30">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#FF4D6D]/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#FF4D6D] border border-[#FF4D6D]/35">
                 <AlertOctagon className="h-3.5 w-3.5" />
                 USP Inferred Prediction Alert
               </span>
@@ -202,11 +206,11 @@ export function LandingPage() {
               <div className="mt-6 space-y-4">
                 {/* historical */}
                 <HazardRow
-                  icon={<CircleDot className="h-5 w-5 text-[#8B5CF6]" />}
+                  icon={<CircleDot className="h-5 w-5 text-[#FF9F43]" />}
                   label="Historical Road Defect"
                   detail="30cm pothole observed 45 days ago"
                   sublabel="Pre-monsoon baseline observation · Survey verified"
-                  borderColor="border-[#8B5CF6]/30"
+                  borderColor="border-[#FF9F43]/30"
                 />
 
                 {/* connector */}
@@ -227,11 +231,11 @@ export function LandingPage() {
               </div>
 
               {/* result banner */}
-              <div className="mt-6 rounded-lg border border-[#00F5FF]/30 bg-[#00F5FF]/5 p-4">
+              <div className="mt-6 rounded-lg border border-[#FF4D6D]/30 bg-[#FF4D6D]/10 p-4">
                 <p className="flex items-start gap-2.5 text-xs text-zinc-300 leading-relaxed">
-                  <AlertOctagon className="mt-0.5 h-4 w-4 shrink-0 text-[#00F5FF]" />
+                  <AlertOctagon className="mt-0.5 h-4 w-4 shrink-0 text-[#FF4D6D]" />
                   <span>
-                    <strong className="text-[#00F5FF]">Inferred hazard notice:</strong> The defect is statistically predicted beneath current floodwater based on GPS intersection. It is not physically visible under standing water.
+                    <strong className="text-[#FF4D6D]">Inferred hazard notice:</strong> The defect is statistically predicted beneath current floodwater based on GPS intersection. It is not physically visible under standing water.
                   </span>
                 </p>
               </div>
@@ -449,7 +453,7 @@ function WorkflowStep({
       : 'bg-[#00F5FF] text-[#050507]';
 
   return (
-    <div className="flex flex-col items-center text-center p-6 rounded-xl border border-[#1C1C28] bg-[#0B0B10]">
+    <div className="flex flex-col items-center text-center p-6 rounded-xl border border-[#1C1C28] bg-[#0B0B10] card-interactive hover:border-[#8B5CF6]/50">
       <div className={`relative mb-4 inline-flex rounded-xl p-3 border ${accentClass}`}>
         {icon}
         <span

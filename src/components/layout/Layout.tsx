@@ -31,65 +31,69 @@ export function Layout() {
   };
 
   return (
-    <div className="min-h-screen bg-navy-950 flex">
+    <div className="min-h-screen bg-[#050507] text-[#F3F4F6] flex">
       {/* Desktop Sidebar */}
       <aside
         className={cn(
-          'hidden lg:flex flex-col border-r border-navy-700/50 bg-navy-900 transition-all duration-300 relative z-20',
+          'hidden lg:flex flex-col border-r border-[#1C1C28] bg-[#0B0B10] transition-all duration-300 relative z-20',
           sidebarOpen ? 'w-64' : 'w-16'
         )}
       >
         {/* Logo */}
-        <div className={cn('p-4 border-b border-navy-700/50 flex items-center', sidebarOpen ? 'gap-3' : 'justify-center')}>
+        <div className={cn('p-4 border-b border-[#1C1C28] flex items-center', sidebarOpen ? 'gap-3' : 'justify-center')}>
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center shrink-0">
-              <Shield className="w-4 h-4 text-cyan-400" />
+            <div className="w-8 h-8 rounded-lg bg-[#8B5CF6]/15 border border-[#8B5CF6]/35 flex items-center justify-center shrink-0 shadow-[0_0_12px_rgba(139,92,246,0.2)]">
+              <Shield className="w-4 h-4 text-[#00F5FF]" />
             </div>
             {sidebarOpen && (
               <div>
-                <h1 className="text-sm font-bold text-white group-hover:text-cyan-400 transition-colors">JalRakshak</h1>
-                <p className="text-[10px] text-navy-400 leading-tight">Road Intelligence</p>
+                <h1 className="text-sm font-extrabold text-white tracking-tight group-hover:text-[#00F5FF] transition-colors">JalRakshak</h1>
+                <p className="text-[10px] text-[#A78BFA] font-medium leading-tight tracking-wider uppercase">Road Intelligence</p>
               </div>
             )}
           </Link>
         </div>
 
         {/* Nav Items */}
-        <nav className="flex-1 py-3 px-2 space-y-1">
+        <nav className="flex-1 py-3 px-2 space-y-1.5">
           {NAV_ITEMS.map(item => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) => cn(
-                'flex items-center gap-3 rounded-lg transition-all duration-200 group',
+                'flex items-center gap-3 rounded-lg transition-all duration-200 group border',
                 sidebarOpen ? 'px-3 py-2.5' : 'px-2 py-2.5 justify-center',
                 isActive
-                  ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/20'
-                  : 'text-navy-300 hover:bg-navy-700/50 hover:text-white border border-transparent'
+                  ? 'bg-[#8B5CF6]/15 text-white border-[#8B5CF6]/40 shadow-[0_0_14px_rgba(139,92,246,0.18)]'
+                  : 'text-zinc-400 hover:bg-[#12121A] hover:text-white border-transparent'
               )}
             >
-              <item.icon className="w-4 h-4 shrink-0" />
-              {sidebarOpen && (
-                <div>
-                  <div className="text-sm font-medium">{item.label}</div>
-                  <div className="text-[10px] text-navy-400 group-hover:text-navy-300">{item.desc}</div>
-                </div>
+              {({ isActive }) => (
+                <>
+                  <item.icon className={cn('w-4 h-4 shrink-0 transition-colors', isActive ? 'text-[#00F5FF]' : 'text-zinc-400 group-hover:text-zinc-200')} />
+                  {sidebarOpen && (
+                    <div>
+                      <div className={cn('text-xs font-bold tracking-wide', isActive ? 'text-white' : 'text-zinc-300')}>{item.label}</div>
+                      <div className="text-[10px] text-zinc-500 group-hover:text-zinc-400">{item.desc}</div>
+                    </div>
+                  )}
+                </>
               )}
             </NavLink>
           ))}
         </nav>
 
         {/* Bottom Controls */}
-        <div className="p-3 border-t border-navy-700/50 space-y-2">
+        <div className="p-3 border-t border-[#1C1C28] space-y-2">
           {/* Backend Mode Indicator */}
           <BackendStatusBadge sidebarOpen={sidebarOpen} />
 
           {sidebarOpen && (
             <button
               onClick={handleReset}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-navy-400 hover:text-white hover:bg-navy-700/50 transition-colors text-xs"
+              className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-zinc-400 hover:text-white bg-[#0B0B10] hover:bg-[#12121A] border border-[#1C1C28] hover:border-[#8B5CF6]/40 transition-colors text-xs font-semibold"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
+              <RotateCcw className="w-3.5 h-3.5 text-[#8B5CF6]" />
               Reset Demo Data
             </button>
           )}
@@ -98,7 +102,8 @@ export function Layout() {
         {/* Collapse Toggle */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-navy-700 border border-navy-600 flex items-center justify-center text-navy-300 hover:text-white hover:bg-navy-600 transition-colors z-30"
+          aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#0B0B10] border border-[#1C1C28] flex items-center justify-center text-zinc-400 hover:text-[#00F5FF] hover:border-[#8B5CF6]/50 transition-colors z-30 shadow-md"
         >
           {sidebarOpen ? <ChevronLeft className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
         </button>
@@ -107,50 +112,54 @@ export function Layout() {
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-black/60" onClick={() => setMobileMenuOpen(false)} />
-          <div className="absolute left-0 top-0 bottom-0 w-72 bg-navy-900 border-r border-navy-700/50 flex flex-col">
-            <div className="p-4 border-b border-navy-700/50 flex items-center justify-between">
+          <div className="absolute inset-0 bg-[#050507]/80 backdrop-blur-md" onClick={() => setMobileMenuOpen(false)} />
+          <div className="absolute left-0 top-0 bottom-0 w-72 bg-[#0B0B10] border-r border-[#1C1C28] flex flex-col shadow-2xl">
+            <div className="p-4 border-b border-[#1C1C28] flex items-center justify-between">
               <Link to="/" className="flex items-center gap-3" onClick={() => setMobileMenuOpen(false)}>
-                <div className="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center">
-                  <Shield className="w-4 h-4 text-cyan-400" />
+                <div className="w-8 h-8 rounded-lg bg-[#8B5CF6]/15 border border-[#8B5CF6]/35 flex items-center justify-center">
+                  <Shield className="w-4 h-4 text-[#00F5FF]" />
                 </div>
                 <div>
-                  <h1 className="text-sm font-bold text-white">JalRakshak</h1>
-                  <p className="text-[10px] text-navy-400">Road Intelligence</p>
+                  <h1 className="text-sm font-extrabold text-white">JalRakshak</h1>
+                  <p className="text-[10px] text-[#A78BFA] font-medium tracking-wider uppercase">Road Intelligence</p>
                 </div>
               </Link>
-              <button onClick={() => setMobileMenuOpen(false)} className="text-navy-400 hover:text-white">
+              <button onClick={() => setMobileMenuOpen(false)} aria-label="Close menu" className="text-zinc-400 hover:text-white p-1">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <nav className="flex-1 py-3 px-2 space-y-1">
+            <nav className="flex-1 py-3 px-2 space-y-1.5">
               {NAV_ITEMS.map(item => (
                 <NavLink
                   key={item.to}
                   to={item.to}
                   onClick={() => setMobileMenuOpen(false)}
                   className={({ isActive }) => cn(
-                    'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200',
+                    'flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 border',
                     isActive
-                      ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/20'
-                      : 'text-navy-300 hover:bg-navy-700/50 hover:text-white border border-transparent'
+                      ? 'bg-[#8B5CF6]/15 text-white border-[#8B5CF6]/40 shadow-[0_0_12px_rgba(139,92,246,0.18)]'
+                      : 'text-zinc-400 hover:bg-[#12121A] hover:text-white border-transparent'
                   )}
                 >
-                  <item.icon className="w-4 h-4" />
-                  <div>
-                    <div className="text-sm font-medium">{item.label}</div>
-                    <div className="text-[10px] text-navy-400">{item.desc}</div>
-                  </div>
+                  {({ isActive }) => (
+                    <>
+                      <item.icon className={cn('w-4 h-4', isActive ? 'text-[#00F5FF]' : 'text-zinc-400')} />
+                      <div>
+                        <div className="text-xs font-bold">{item.label}</div>
+                        <div className="text-[10px] text-zinc-500">{item.desc}</div>
+                      </div>
+                    </>
+                  )}
                 </NavLink>
               ))}
             </nav>
-            <div className="p-3 border-t border-navy-700/50 space-y-2">
+            <div className="p-3 border-t border-[#1C1C28] space-y-2">
               <BackendStatusBadge />
               <button
                 onClick={() => { handleReset(); setMobileMenuOpen(false); }}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-navy-400 hover:text-white hover:bg-navy-700/50 transition-colors text-xs"
+                className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-zinc-400 hover:text-white bg-[#0B0B10] hover:bg-[#12121A] border border-[#1C1C28] transition-colors text-xs font-semibold"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw className="w-3.5 h-3.5 text-[#8B5CF6]" />
                 Reset Demo Data
               </button>
             </div>
@@ -161,25 +170,26 @@ export function Layout() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Toolbar */}
-        <header className="h-14 border-b border-navy-700/50 bg-navy-900/80 backdrop-blur-sm flex items-center justify-between px-4 lg:px-6 sticky top-0 z-10">
+        <header className="h-14 border-b border-[#1C1C28] bg-[#050507]/90 backdrop-blur-md flex items-center justify-between px-4 lg:px-6 sticky top-0 z-10">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden text-navy-300 hover:text-white"
+              aria-label="Open navigation menu"
+              className="lg:hidden text-zinc-300 hover:text-white p-1"
             >
               <Menu className="w-5 h-5" />
             </button>
             <div className="lg:hidden flex items-center gap-2">
-              <div className="w-6 h-6 rounded bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center">
-                <Shield className="w-3 h-3 text-cyan-400" />
+              <div className="w-6 h-6 rounded bg-[#8B5CF6]/20 border border-[#8B5CF6]/35 flex items-center justify-center">
+                <Shield className="w-3.5 h-3.5 text-[#00F5FF]" />
               </div>
-              <span className="text-sm font-bold text-white">JalRakshak</span>
+              <span className="text-sm font-extrabold text-white tracking-tight">JalRakshak</span>
             </div>
             <div className="hidden lg:block">
               {currentNav && (
                 <div>
-                  <h2 className="text-sm font-semibold text-white">{currentNav.label}</h2>
-                  <p className="text-[11px] text-navy-400">{currentNav.desc}</p>
+                  <h2 className="text-sm font-bold text-white tracking-wide">{currentNav.label}</h2>
+                  <p className="text-[10px] text-zinc-400">{currentNav.desc}</p>
                 </div>
               )}
             </div>
@@ -187,15 +197,15 @@ export function Layout() {
 
           <div className="flex items-center gap-3">
             <BackendStatusBadge compact className="hidden sm:flex" />
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-navy-700/50 border border-navy-600/50">
-              <User className="w-3.5 h-3.5 text-navy-400" />
-              <span className="text-xs text-navy-300">Demo Reviewer</span>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0B0B10] border border-[#1C1C28]">
+              <User className="w-3.5 h-3.5 text-[#8B5CF6]" />
+              <span className="text-xs font-semibold text-zinc-300">Demo Reviewer</span>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto bg-[#050507]">
           <Outlet />
         </main>
       </div>

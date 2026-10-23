@@ -19,10 +19,10 @@ const STATUS_STEPS: IncidentStatus[] = [
 
 const STEP_CONFIG = [
   { status: 'reported' as IncidentStatus, label: 'Reported', color: '#00F5FF', actor: 'Platform', icon: AlertTriangle },
-  { status: 'under_verification' as IncidentStatus, label: 'Under Verification', color: '#A78BFA', actor: 'Platform', icon: Eye },
-  { status: 'forwarded_for_review' as IncidentStatus, label: 'Forwarded for Review', color: '#8B5CF6', actor: 'Platform → External (Proposed)', icon: FileCheck },
-  { status: 'repair_reported' as IncidentStatus, label: 'Repair Reported', color: '#C4B5FD', actor: 'External (Proposed)', icon: Wrench },
-  { status: 'resolution_verified' as IncidentStatus, label: 'Resolution Verified', color: '#00F5FF', actor: 'Platform', icon: CheckCircle },
+  { status: 'under_verification' as IncidentStatus, label: 'Under Verification', color: '#FFD166', actor: 'Platform', icon: Eye },
+  { status: 'forwarded_for_review' as IncidentStatus, label: 'Forwarded for Review', color: '#FF9F43', actor: 'Platform → External (Proposed)', icon: FileCheck },
+  { status: 'repair_reported' as IncidentStatus, label: 'Repair Reported', color: '#8B5CF6', actor: 'External (Proposed)', icon: Wrench },
+  { status: 'resolution_verified' as IncidentStatus, label: 'Resolution Verified', color: '#35D07F', actor: 'Platform', icon: CheckCircle },
 ];
 
 function WorkflowDiagram({ counts }: { counts: Record<string, number> }) {
@@ -112,7 +112,7 @@ function IncidentRow({
   return (
     <div
       className={cn(
-        'rounded-xl border transition-all duration-150',
+        'rounded-xl border transition-all duration-150 card-interactive',
         selected ? 'border-[#00F5FF]/50 bg-[#00F5FF]/10 shadow-[0_0_12px_rgba(0,245,255,0.1)]' : 'border-[#1C1C28] bg-[#0B0B10] hover:border-[#8B5CF6]/40'
       )}
     >
@@ -197,7 +197,7 @@ export function MaintenancePage() {
   };
 
   return (
-    <div className="p-4 lg:p-6 space-y-4 bg-[#050507] min-h-screen text-white">
+    <div className="p-4 lg:p-6 space-y-4 bg-transparent min-h-screen text-white">
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-white flex items-center gap-2">
@@ -363,9 +363,9 @@ export function MaintenancePage() {
               {[
                 { icon: Users, label: 'Public Observations', desc: 'Community reporters, survey teams', color: '#00F5FF' },
                 { icon: Database, label: 'JalRakshak Intelligence', desc: 'Risk correlation engine', color: '#8B5CF6' },
-                { icon: Building2, label: 'Departmental Review', desc: 'Authorized gov. reviewers (proposed)', color: '#A78BFA' },
+                { icon: Building2, label: 'Departmental Review', desc: 'Authorized gov. reviewers (proposed)', color: '#FF9F43' },
                 { icon: Wrench, label: 'Repair Verification', desc: 'Field verification of repairs', color: '#C4B5FD' },
-                { icon: Shield, label: 'Public Hazard Map', desc: 'Updated community safety info', color: '#00F5FF' },
+                { icon: Shield, label: 'Public Hazard Map', desc: 'Updated community safety info', color: '#35D07F' },
               ].map((item, i, arr) => (
                 <div key={item.label} className="flex sm:flex-col items-center w-full sm:flex-1">
                   <div

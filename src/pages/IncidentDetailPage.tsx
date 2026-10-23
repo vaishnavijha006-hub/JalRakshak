@@ -67,7 +67,7 @@ export function IncidentDetailPage() {
     : null;
 
   return (
-    <div className="p-4 lg:p-6 space-y-4 max-w-5xl mx-auto bg-[#050507] min-h-screen text-white">
+    <div className="p-4 lg:p-6 space-y-4 max-w-5xl mx-auto bg-transparent min-h-screen text-white">
       {/* Back Button + Header */}
       <div className="flex items-start gap-4">
         <button
@@ -100,19 +100,19 @@ export function IncidentDetailPage() {
         </div>
       </div>
 
-      {/* Hidden Hazard Warning */}
+      {/* Hidden Hazard Warning with Semantic Red Alert */}
       {relatedHH.length > 0 && (
-        <div className="flex items-start gap-3 p-4 rounded-xl bg-[#00F5FF]/10 border border-[#00F5FF]/30 shadow-[0_0_16px_rgba(0,245,255,0.08)]">
-          <TriangleAlert className="w-5 h-5 text-[#00F5FF] mt-0.5 shrink-0" />
+        <div className="flex items-start gap-3 p-4 rounded-xl bg-[#FF4D6D]/10 border border-[#FF4D6D]/30 shadow-[0_0_16px_rgba(255,77,109,0.12)]">
+          <TriangleAlert className="w-5 h-5 text-[#FF4D6D] mt-0.5 shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-[#00F5FF] mb-1">
+            <p className="text-sm font-semibold text-[#FF4D6D] mb-1">
               Related Hidden Hazard Detected
             </p>
             {relatedHH.map(hh => (
               <p key={hh.id} className="text-xs text-zinc-300">
                 {hh.id}: {hh.historicalDefectType.replace('_', ' ')} potentially submerged beneath waterlogging —{' '}
-                <span className="font-medium text-[#00F5FF]">{hh.confidence}% confidence</span>.
-                {' '}<em className="text-[#C4B5FD]">Inferred, not directly confirmed.</em>
+                <span className="font-bold text-[#FF4D6D]">{hh.confidence}% confidence</span>.
+                {' '}<em className="text-[#FF9F43]">Inferred, not directly confirmed.</em>
               </p>
             ))}
           </div>

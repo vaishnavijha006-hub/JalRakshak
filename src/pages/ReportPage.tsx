@@ -119,7 +119,7 @@ export function ReportPage() {
   };
 
   return (
-    <div className="p-4 lg:p-6 max-w-2xl mx-auto space-y-4 bg-[#050507] min-h-screen text-white">
+    <div className="p-4 lg:p-6 max-w-2xl mx-auto space-y-4 bg-transparent min-h-screen text-white">
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-white flex items-center gap-2">
@@ -130,10 +130,10 @@ export function ReportPage() {
       </div>
 
       {/* Safety Banner */}
-      <div className="flex items-start gap-3 p-3 rounded-lg bg-[#12121A] border border-[#8B5CF6]/30">
-        <Shield className="w-4 h-4 text-[#00F5FF] mt-0.5 shrink-0" />
+      <div className="flex items-start gap-3 p-3 rounded-lg bg-[#FF4D6D]/10 border border-[#FF4D6D]/30 shadow-[0_0_16px_rgba(255,77,109,0.08)]">
+        <Shield className="w-4 h-4 text-[#FF4D6D] mt-0.5 shrink-0" />
         <div>
-          <p className="text-xs font-semibold text-[#00F5FF] mb-0.5">Safety First</p>
+          <p className="text-xs font-semibold text-[#FF4D6D] mb-0.5">Safety First</p>
           <p className="text-xs text-zinc-300">
             Please report only when <strong className="text-white">safely stopped</strong>. Never use your phone while riding or driving.
           </p>
@@ -148,7 +148,7 @@ export function ReportPage() {
               'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold border-2 transition-all',
               step === s ? 'border-[#00F5FF] bg-[#00F5FF]/20 text-[#00F5FF]' :
                 (step === 'review' && s === 'form') || step === 'success'
-                  ? 'border-[#8B5CF6] bg-[#8B5CF6]/20 text-[#C4B5FD]'
+                  ? 'border-[#35D07F] bg-[#35D07F]/20 text-[#35D07F]'
                   : 'border-[#1C1C28] bg-[#12121A] text-zinc-500'
             )}>
               {((step === 'review' && s === 'form') || step === 'success') && s !== 'success'
@@ -156,7 +156,7 @@ export function ReportPage() {
                 : i + 1}
             </div>
             <span className="text-[10px] text-zinc-400 capitalize hidden sm:block">{s === 'form' ? 'Details' : s}</span>
-            {i < 2 && <div className={cn('flex-1 h-px', s === 'form' && step !== 'form' ? 'bg-[#8B5CF6]/50' : 'bg-[#1C1C28]')} />}
+            {i < 2 && <div className={cn('flex-1 h-px', s === 'form' && step !== 'form' ? 'bg-[#35D07F]/50' : 'bg-[#1C1C28]')} />}
           </div>
         ))}
       </div>
@@ -176,7 +176,7 @@ export function ReportPage() {
                   aria-checked={form.category === cat.value}
                   onClick={() => setForm(f => ({ ...f, category: cat.value }))}
                   className={cn(
-                    'flex flex-col items-center justify-center gap-1 p-3 rounded-lg border text-center transition-all min-h-[58px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]',
+                    'flex flex-col items-center justify-center gap-1 p-3 rounded-lg border text-center transition-all min-h-[58px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF] card-interactive',
                     form.category === cat.value
                       ? 'border-[#00F5FF]/60 bg-[#00F5FF]/15 text-[#00F5FF] shadow-sm'
                       : 'border-[#1C1C28] bg-[#12121A] text-zinc-400 hover:border-[#8B5CF6]/40 hover:text-zinc-200',
@@ -258,7 +258,7 @@ export function ReportPage() {
                   aria-checked={form.severity === sev.value}
                   onClick={() => setForm(f => ({ ...f, severity: sev.value }))}
                   className={cn(
-                    'p-3 min-h-[58px] rounded-lg border text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]',
+                    'p-3 min-h-[58px] rounded-lg border text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF] card-interactive',
                     form.severity === sev.value
                       ? 'border-opacity-50 text-white shadow-sm'
                       : 'border-[#1C1C28] bg-[#12121A] text-zinc-400 hover:border-[#8B5CF6]/40'
@@ -407,9 +407,9 @@ export function ReportPage() {
 
       {/* SUCCESS Step */}
       {step === 'success' && (
-        <div className="bg-[#0B0B10] border border-[#00F5FF]/30 rounded-xl p-8 text-center space-y-4 shadow-xl">
-          <div className="w-16 h-16 mx-auto rounded-full bg-[#00F5FF]/15 border border-[#00F5FF]/40 flex items-center justify-center">
-            <CheckCircle className="w-8 h-8 text-[#00F5FF]" />
+        <div className="bg-[#0B0B10] border border-[#35D07F]/40 rounded-xl p-8 text-center space-y-4 shadow-xl">
+          <div className="w-16 h-16 mx-auto rounded-full bg-[#35D07F]/15 border border-[#35D07F]/40 flex items-center justify-center">
+            <CheckCircle className="w-8 h-8 text-[#35D07F]" />
           </div>
           <div>
             <h2 className="text-lg font-bold text-white mb-1">Report Submitted</h2>

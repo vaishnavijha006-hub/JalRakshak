@@ -29,7 +29,7 @@ function IncidentRow({ incident, selected, onClick }: { incident: Incident; sele
     <div
       onClick={onClick}
       className={cn(
-        'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all duration-150 group',
+        'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all duration-150 group card-interactive',
         selected
           ? 'border-[#00F5FF]/50 bg-[#00F5FF]/10 shadow-[0_0_12px_rgba(0,245,255,0.1)]'
           : 'border-[#1C1C28] bg-[#0B0B10] hover:border-[#8B5CF6]/40 hover:bg-[#12121A]'
@@ -64,13 +64,13 @@ function HiddenHazardRow({ hh, selected, onClick }: { hh: HiddenHazard; selected
     <div
       onClick={onClick}
       className={cn(
-        'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all duration-150 group',
+        'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all duration-150 group card-interactive',
         selected
-          ? 'border-[#00F5FF]/50 bg-[#00F5FF]/10 shadow-[0_0_12px_rgba(0,245,255,0.1)]'
-          : 'border-[#1C1C28] bg-[#0B0B10] hover:border-[#8B5CF6]/40 hover:bg-[#12121A]'
+          ? 'border-[#FF4D6D]/50 bg-[#FF4D6D]/10 shadow-[0_0_12px_rgba(255,77,109,0.15)]'
+          : 'border-[#1C1C28] bg-[#0B0B10] hover:border-[#FF9F43]/40 hover:bg-[#12121A]'
       )}
     >
-      <TriangleAlert className="w-4 h-4 text-[#00F5FF] shrink-0" />
+      <TriangleAlert className="w-4 h-4 text-[#FF4D6D] shrink-0" />
       <div className="flex-1 min-w-0">
         <p className="text-xs font-medium text-white truncate">
           {hh.historicalDefectType.replace('_', ' ')} beneath waterlogging
@@ -78,10 +78,10 @@ function HiddenHazardRow({ hh, selected, onClick }: { hh: HiddenHazard; selected
         <p className="text-[10px] text-zinc-400 truncate">{hh.location.road}, {hh.location.area}</p>
       </div>
       <div className="text-right shrink-0">
-        <p className="text-[10px] text-[#00F5FF] font-semibold">{hh.confidence}% confident</p>
+        <p className="text-[10px] text-[#FF4D6D] font-bold">{hh.confidence}% confident</p>
         <p className="text-[9px] text-zinc-500">{formatTimeAgo(hh.detectedAt)}</p>
       </div>
-      <ChevronRight className={cn('w-3.5 h-3.5 shrink-0', selected ? 'text-[#00F5FF]' : 'text-zinc-600 group-hover:text-zinc-400')} />
+      <ChevronRight className={cn('w-3.5 h-3.5 shrink-0', selected ? 'text-[#FF4D6D]' : 'text-zinc-600 group-hover:text-zinc-400')} />
     </div>
   );
 }
@@ -219,16 +219,16 @@ function DetailPanel({ incident, onClose }: { incident: Incident; onClose: () =>
 
 function HiddenHazardDetail({ hh, onClose }: { hh: HiddenHazard; onClose: () => void }) {
   return (
-    <div className="bg-[#0B0B10] border border-[#00F5FF]/30 rounded-xl overflow-hidden shadow-xl">
-      <div className="p-4 border-b border-[#00F5FF]/20 flex items-start justify-between gap-3 bg-[#00F5FF]/10">
+    <div className="bg-[#0B0B10] border border-[#FF4D6D]/30 rounded-xl overflow-hidden shadow-xl">
+      <div className="p-4 border-b border-[#FF4D6D]/20 flex items-start justify-between gap-3 bg-[#FF4D6D]/10">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[10px] font-mono text-zinc-400">{hh.id}</span>
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#00F5FF]/20 text-[#00F5FF] border border-[#00F5FF]/30 font-medium">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#FF4D6D]/20 text-[#FF4D6D] border border-[#FF4D6D]/30 font-medium">
               Hidden Hazard
             </span>
           </div>
-          <h3 className="text-sm font-semibold text-[#00F5FF]">
+          <h3 className="text-sm font-semibold text-[#FF4D6D]">
             {hh.historicalDefectType.replace('_', ' ')} beneath waterlogging
           </h3>
         </div>
@@ -237,8 +237,8 @@ function HiddenHazardDetail({ hh, onClose }: { hh: HiddenHazard; onClose: () => 
         </button>
       </div>
       <div className="p-4 space-y-4">
-        <div className="p-3 rounded-lg bg-[#8B5CF6]/10 border border-[#8B5CF6]/30">
-          <p className="text-[10px] text-[#C4B5FD] italic">
+        <div className="p-3 rounded-lg bg-[#FFD166]/10 border border-[#FFD166]/30">
+          <p className="text-[10px] text-zinc-300 italic">
             ⚠ This is an inferred hazard — not directly confirmed beneath the water. Based on correlation of historical observations with current waterlogging reports.
           </p>
         </div>
@@ -246,7 +246,7 @@ function HiddenHazardDetail({ hh, onClose }: { hh: HiddenHazard; onClose: () => 
         <div className="grid grid-cols-2 gap-2">
           <div className="p-2.5 bg-[#12121A] border border-[#1C1C28] rounded-lg">
             <div className="text-[10px] text-zinc-500 mb-0.5">Confidence</div>
-            <div className="text-sm font-bold text-white">{hh.confidence}%</div>
+            <div className="text-sm font-bold text-[#FF4D6D]">{hh.confidence}%</div>
             <div className="text-[9px] text-zinc-400">{hh.confidenceLabel}</div>
           </div>
           <div className="p-2.5 bg-[#12121A] border border-[#1C1C28] rounded-lg">
@@ -261,8 +261,8 @@ function HiddenHazardDetail({ hh, onClose }: { hh: HiddenHazard; onClose: () => 
 
         <div className="space-y-2">
           <h4 className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider">Evidence Correlation</h4>
-          <div className="p-3 bg-[#8B5CF6]/10 border border-[#8B5CF6]/30 rounded-lg">
-            <div className="text-[10px] text-[#8B5CF6] font-medium mb-1">Historical Record ({formatTimeAgo(hh.historicalObservedAt)})</div>
+          <div className="p-3 bg-[#FF9F43]/10 border border-[#FF9F43]/30 rounded-lg">
+            <div className="text-[10px] text-[#FF9F43] font-medium mb-1">Historical Record ({formatTimeAgo(hh.historicalObservedAt)})</div>
             <p className="text-xs text-zinc-300">
               {hh.historicalDefectType.replace('_', ' ')} observed at this location · Ref: {hh.historicalIncidentId}
             </p>
@@ -315,7 +315,7 @@ export function RoadIntelligencePage() {
   const selectedHH = allHiddenHazards.find(h => h.id === selectedHHId);
 
   return (
-    <div className="p-4 lg:p-6 space-y-4 bg-[#050507] min-h-screen text-white">
+    <div className="p-4 lg:p-6 space-y-4 bg-transparent min-h-screen text-white">
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-white flex items-center gap-2">
@@ -448,10 +448,10 @@ export function RoadIntelligencePage() {
           )}
           {tab === 'hidden' && (
             <>
-              <div className="p-3 rounded-lg bg-[#00F5FF]/10 border border-[#00F5FF]/30 mb-3 shadow-[0_0_16px_rgba(0,245,255,0.08)]">
+              <div className="p-3 rounded-lg bg-[#FF4D6D]/10 border border-[#FF4D6D]/30 mb-3 shadow-[0_0_16px_rgba(255,77,109,0.1)]">
                 <div className="flex items-center gap-2 mb-1">
-                  <AlertTriangle className="w-4 h-4 text-[#00F5FF]" />
-                  <span className="text-xs font-semibold text-[#00F5FF]">About Hidden Hazard Detection</span>
+                  <AlertTriangle className="w-4 h-4 text-[#FF4D6D]" />
+                  <span className="text-xs font-semibold text-[#FF4D6D]">About Hidden Hazard Detection</span>
                 </div>
                 <p className="text-[10px] text-zinc-300">
                   Hidden hazards are <strong className="text-white">inferred correlations</strong> between historical road defects and current waterlogging.

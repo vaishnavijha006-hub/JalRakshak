@@ -1,8 +1,10 @@
 import { useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { addIncident, generateIncidentId } from '../data/store';
 import type { HazardCategory, Severity } from '../data/types';
 import { AlertTriangle, MapPin, Camera, Send, CheckCircle, Shield, Clock, X, Info } from 'lucide-react';
 import { getCategoryLabel, cn } from '../utils/format';
+import { getAreaCoordinates } from '../utils/geo';
 
 type Step = 'form' | 'review' | 'success';
 
@@ -71,6 +73,8 @@ export function ReportPage() {
   const handleConfirm = () => {
     const id = generateIncidentId();
     const now = new Date().toISOString();
+    const coords = getAreaCoordinates(form.area, `${form.road}-${form.description}-${id}`);
+
     addIncident({
       id,
       category: form.category,
@@ -80,7 +84,7 @@ export function ReportPage() {
       location: {
         road: form.road,
         area: form.area,
-        coordinates: { lat: 28.6139, lng: 77.2090 }, // generic Delhi center for demo
+        coordinates: coords,
       },
       observedAt: new Date(form.observedAt).toISOString(),
       lastVerifiedAt: now,
@@ -162,22 +166,25 @@ export function ReportPage() {
         <div className="bg-navy-800 border border-navy-700/50 rounded-xl p-5 space-y-5">
           {/* Category */}
           <div>
-            <label className="block text-xs font-semibold text-white mb-2">Hazard Category *</label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <label id="category-label" className="block text-xs font-semibold text-white mb-2">Hazard Category *</label>
+            <div role="radiogroup" aria-labelledby="category-label" className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {CATEGORIES.map(cat => (
                 <button
                   key={cat.value}
                   type="button"
+                  role="radio"
+                  aria-checked={form.category === cat.value}
                   onClick={() => setForm(f => ({ ...f, category: cat.value }))}
                   className={cn(
-                    'flex flex-col items-center gap-1 p-3 rounded-lg border text-center transition-all',
+                    'flex flex-col items-center justify-center gap-1 p-3 rounded-lg border text-center transition-all min-h-[58px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
                     form.category === cat.value
-                      ? 'border-cyan-500/40 bg-cyan-500/10 text-cyan-300'
-                      : 'border-navy-700/50 text-navy-400 hover:border-navy-600 hover:text-navy-200'
+                      ? 'border-cyan-500/50 bg-cyan-500/15 text-cyan-300 shadow-sm'
+                      : 'border-navy-700/50 text-navy-400 hover:border-navy-600 hover:text-navy-200',
+                    cat.value === 'other' ? 'col-span-2 sm:col-span-1' : ''
                   )}
                 >
                   <span className="text-xl">{cat.icon}</span>
-                  <span className="text-[10px] font-medium">{cat.label}</span>
+                  <span className="text-[10px] font-bold">{cat.label}</span>
                   <span className="text-[9px] text-navy-500">{cat.desc}</span>
                 </button>
               ))}
@@ -187,50 +194,73 @@ export function ReportPage() {
           {/* Road + Area */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-white mb-1.5">
+              <label htmlFor="road-input" className="block text-xs font-semibold text-white mb-1.5">
                 <MapPin className="inline w-3 h-3 mr-1" />Road / Street Name *
               </label>
               <input
+                id="road-input"
                 type="text"
                 value={form.road}
                 onChange={e => setForm(f => ({ ...f, road: e.target.value }))}
                 placeholder="e.g. Ring Road, Mathura Road"
                 className={cn(
-                  'w-full px-3 py-2.5 bg-navy-700/50 border rounded-lg text-sm text-white placeholder:text-navy-500 focus:outline-none focus:border-cyan-500/50 transition-colors',
+                  'w-full min-h-[44px] px-3 py-2.5 bg-navy-700/50 border rounded-lg text-sm text-white placeholder:text-navy-500 focus:outline-none focus:border-cyan-500/50 transition-colors',
                   errors.road ? 'border-red-500/50' : 'border-navy-600/50'
                 )}
               />
               {errors.road && <p className="text-[10px] text-red-400 mt-1">{errors.road}</p>}
             </div>
             <div>
-              <label className="block text-xs font-semibold text-white mb-1.5">Area / Landmark *</label>
+              <label htmlFor="area-input" className="block text-xs font-semibold text-white mb-1.5">Area / Landmark *</label>
               <input
+                id="area-input"
                 type="text"
                 value={form.area}
                 onChange={e => setForm(f => ({ ...f, area: e.target.value }))}
                 placeholder="e.g. Lajpat Nagar, ITO"
                 className={cn(
-                  'w-full px-3 py-2.5 bg-navy-700/50 border rounded-lg text-sm text-white placeholder:text-navy-500 focus:outline-none focus:border-cyan-500/50 transition-colors',
+                  'w-full min-h-[44px] px-3 py-2.5 bg-navy-700/50 border rounded-lg text-sm text-white placeholder:text-navy-500 focus:outline-none focus:border-cyan-500/50 transition-colors',
                   errors.area ? 'border-red-500/50' : 'border-navy-600/50'
                 )}
               />
+              {/* Quick Area Chips */}
+              <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                <span className="text-[10px] text-navy-400 font-medium">Quick select:</span>
+                {['Connaught Place', 'Lajpat Nagar', 'ITO', 'Minto Bridge', 'Pragati Maidan', 'Vikas Marg'].map(a => (
+                  <button
+                    key={a}
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, area: a }))}
+                    className={cn(
+                      'text-[10px] px-2 py-0.5 rounded border transition-colors min-h-[28px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
+                      form.area.toLowerCase() === a.toLowerCase()
+                        ? 'bg-cyan-500/20 border-cyan-500 text-cyan-300 font-semibold'
+                        : 'bg-navy-800/80 border-navy-700/70 text-navy-300 hover:text-white hover:border-navy-600'
+                    )}
+                  >
+                    {a}
+                  </button>
+                ))}
+              </div>
               {errors.area && <p className="text-[10px] text-red-400 mt-1">{errors.area}</p>}
             </div>
           </div>
 
           {/* Severity */}
           <div>
-            <label className="block text-xs font-semibold text-white mb-2">Severity *</label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <label id="severity-label" className="block text-xs font-semibold text-white mb-2">Severity *</label>
+            <div role="radiogroup" aria-labelledby="severity-label" className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {SEVERITIES.map(sev => (
                 <button
                   key={sev.value}
                   type="button"
+                  role="radio"
+                  aria-checked={form.severity === sev.value}
                   onClick={() => setForm(f => ({ ...f, severity: sev.value }))}
                   className={cn(
-                    'p-3 rounded-lg border text-center transition-all',
+                    'p-3 min-h-[58px] rounded-lg border text-center transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
                     form.severity === sev.value
-                      ? 'border-opacity-50 text-white'
+                      ? 'border-opacity-50 text-white shadow-sm'
                       : 'border-navy-700/50 text-navy-400 hover:border-navy-600'
                   )}
                   style={form.severity === sev.value ? {
@@ -401,12 +431,12 @@ export function ReportPage() {
             >
               Report Another Hazard
             </button>
-            <a
-              href="/dashboard"
-              className="flex-1 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-navy-950 font-bold text-xs text-center transition-all flex items-center justify-center gap-1.5"
+            <Link
+              to="/dashboard"
+              className="flex-1 py-2.5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-navy-950 font-bold text-xs text-center transition-all flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             >
               View on Dashboard Map →
-            </a>
+            </Link>
           </div>
         </div>
       )}

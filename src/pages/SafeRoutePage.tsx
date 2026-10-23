@@ -1,6 +1,8 @@
 // JalRakshak — SafeRoute Experience
 // Demonstrating Innovation 2 (Dynamic Risk-Based Routing) and USP (Hidden Hazard Prediction)
-// Visual identity: Jet Black (#050507), Deep Black (#0B0B10), Royal Amethyst (#8B5CF6), Electric Cyan (#00F5FF)
+// Core Brand: Jet Black (#050507), Deep Black (#0B0B10), Royal Amethyst (#8B5CF6), Electric Cyan (#00F5FF)
+// Semantic Alerts: Red (#FF4D6D), Orange (#FF9F43), Yellow (#FFD166), Green (#35D07F)
+
 import { useState, useMemo } from 'react';
 import { useStore } from '../data/store';
 import type { RouteOption } from '../data/types';
@@ -14,10 +16,10 @@ import {
 } from 'lucide-react';
 
 const RISK_SCORE_BAR_COLOR: Record<string, string> = {
-  low: '#71717A',
-  moderate: '#A78BFA',
-  high: '#8B5CF6',
-  critical: '#00F5FF',
+  low: '#35D07F',
+  moderate: '#FFD166',
+  high: '#FF9F43',
+  critical: '#FF4D6D',
 };
 
 function RiskScoreGauge({ score, level }: { score: number; level: string }) {
@@ -59,11 +61,11 @@ function RouteCard({
         }
       }}
       className={cn(
-        'rounded-xl border p-4 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]',
+        'rounded-xl border p-4 transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF] card-interactive',
         selected
           ? 'border-[#00F5FF]/70 bg-[#00F5FF]/10 shadow-lg shadow-[#00F5FF]/10 ring-1 ring-[#00F5FF]/40'
           : 'border-[#1C1C28] bg-[#0B0B10] hover:border-[#8B5CF6]/50',
-        route.recommended && !selected && 'ring-1 ring-[#8B5CF6]/40 border-[#8B5CF6]/40',
+        route.recommended && !selected && 'ring-1 ring-[#35D07F]/40 border-[#35D07F]/40',
       )}
       onClick={onSelect}
     >
@@ -73,8 +75,8 @@ function RouteCard({
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <h3 className="text-sm font-bold text-white">{route.name}</h3>
             {route.recommended && (
-              <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-[#8B5CF6]/20 text-[#C4B5FD] border border-[#8B5CF6]/40 font-bold">
-                <Star className="w-3 h-3 fill-[#00F5FF] text-[#00F5FF]" />
+              <span className="flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-[#35D07F]/15 text-[#35D07F] border border-[#35D07F]/35 font-bold">
+                <Star className="w-3 h-3 fill-[#35D07F] text-[#35D07F]" />
                 RECOMMENDED ALTERNATIVE
               </span>
             )}
@@ -106,9 +108,9 @@ function RouteCard({
         </div>
         <div className="bg-[#12121A] rounded-lg p-2 border border-[#1C1C28]">
           <div className="flex items-center gap-1.5 text-zinc-400 text-[10px] mb-0.5">
-            <TriangleAlert className="w-3 h-3 text-[#00F5FF]" /> Hidden Defect
+            <TriangleAlert className="w-3 h-3 text-[#FF4D6D]" /> Hidden Defect
           </div>
-          <div className={cn('text-xs font-bold', route.hiddenHazardCount > 0 ? 'text-[#00F5FF]' : 'text-zinc-400')}>
+          <div className={cn('text-xs font-bold', route.hiddenHazardCount > 0 ? 'text-[#FF4D6D]' : 'text-zinc-400')}>
             {route.hiddenHazardCount} danger{route.hiddenHazardCount !== 1 ? 's' : ''}
           </div>
         </div>
@@ -140,7 +142,7 @@ function RouteCard({
               <Layers className="w-3 h-3 text-[#00F5FF]" /> Known Road Conditions Along Path
             </h4>
             {route.hazardDetails.length === 0 ? (
-              <p className="text-xs text-[#00F5FF] italic">No recorded hazards on this path segment</p>
+              <p className="text-xs text-[#35D07F] italic">No recorded hazards on this path segment</p>
             ) : (
               <ul className="space-y-1">
                 {route.hazardDetails.map((detail, i) => (
@@ -268,7 +270,7 @@ export function SafeRoutePage() {
   }, [selectedPlan]);
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 space-y-6 bg-[#050507] min-h-screen text-white">
+    <div className="p-4 md:p-6 lg:p-8 space-y-6 bg-transparent min-h-screen text-white">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-[#1C1C28] pb-4">
         <div>
@@ -288,8 +290,8 @@ export function SafeRoutePage() {
       </div>
 
       {/* Safety & Demo Reality Banner */}
-      <div className="p-3.5 rounded-xl bg-[#12121A] border border-[#8B5CF6]/30 text-zinc-300 text-xs flex items-start gap-2.5">
-        <Shield className="w-4 h-4 text-[#00F5FF] mt-0.5 shrink-0" />
+      <div className="p-3.5 rounded-xl bg-[#12121A] border border-[#FF9F43]/30 text-zinc-300 text-xs flex items-start gap-2.5">
+        <Shield className="w-4 h-4 text-[#FF9F43] mt-0.5 shrink-0" />
         <div className="space-y-0.5">
           <p className="font-semibold text-white">
             Decision-Support Prototype Notice
@@ -412,7 +414,7 @@ export function SafeRoutePage() {
       {!selectedPlan ? (
         /* Explicit corridor unavailable card instead of silent wrong fallback */
         <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] p-8 text-center space-y-4">
-          <div className="w-12 h-12 rounded-full bg-[#8B5CF6]/15 border border-[#8B5CF6]/30 flex items-center justify-center mx-auto text-[#00F5FF]">
+          <div className="w-12 h-12 rounded-full bg-[#FFD166]/15 border border-[#FFD166]/30 flex items-center justify-center mx-auto text-[#FFD166]">
             <TriangleAlert className="w-6 h-6" />
           </div>
           <div className="max-w-md mx-auto">
@@ -457,24 +459,24 @@ export function SafeRoutePage() {
                 Comparing {selectedPlan.routes.length} Route Options ({origin} → {destination})
               </h2>
               <span className="text-[11px] text-zinc-400">
-                Risk Range: <strong className="text-[#00F5FF]">{Math.min(...selectedPlan.routes.map(r => r.riskScore))}</strong> to{' '}
-                <strong className="text-[#8B5CF6]">{Math.max(...selectedPlan.routes.map(r => r.riskScore))}</strong>
+                Risk Range: <strong className="text-[#35D07F]">{Math.min(...selectedPlan.routes.map(r => r.riskScore))}</strong> to{' '}
+                <strong className="text-[#FF4D6D]">{Math.max(...selectedPlan.routes.map(r => r.riskScore))}</strong>
               </span>
             </div>
 
-            {/* Trade-off Highlight Card */}
+            {/* Trade-off Highlight Card with Semantic Green */}
             {tradeOff && (
-              <div className="rounded-xl border border-[#00F5FF]/30 bg-[#00F5FF]/10 p-4">
+              <div className="rounded-xl border border-[#35D07F]/40 bg-[#35D07F]/10 p-4 shadow-[0_0_20px_rgba(53,208,127,0.1)]">
                 <div className="flex items-start gap-2.5">
-                  <CheckCircle className="w-5 h-5 text-[#00F5FF] shrink-0 mt-0.5" />
+                  <CheckCircle className="w-5 h-5 text-[#35D07F] shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-xs font-bold text-[#00F5FF] uppercase tracking-wider mb-1">
+                    <h4 className="text-xs font-bold text-[#35D07F] uppercase tracking-wider mb-1">
                       Recommended Risk/Time Trade-off
                     </h4>
                     <p className="text-xs text-zinc-200 leading-relaxed">
                       By taking <strong>{tradeOff.recommended.name}</strong> over {tradeOff.highestRisk.name}, the journey is{' '}
                       <strong>{Number(tradeOff.distDiff) >= 0 ? `+${tradeOff.distDiff}` : tradeOff.distDiff} km</strong> and <strong>~{tradeOff.timeDiff} minutes longer</strong>, but circumvents high-risk submerged segments — yielding an estimated{' '}
-                      <strong className="text-[#00F5FF]">{tradeOff.riskReduction}% lower hazard risk</strong>.
+                      <strong className="text-[#35D07F] font-extrabold">{tradeOff.riskReduction}% lower hazard risk</strong>.
                     </p>
                   </div>
                 </div>
@@ -494,7 +496,7 @@ export function SafeRoutePage() {
             </div>
 
             {/* Methodology Disclosure Accordion */}
-            <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] overflow-hidden">
+            <div className="rounded-xl border border-[#1C1C28] bg-[#0B0B10] overflow-hidden shadow-xl">
               <button
                 type="button"
                 onClick={() => setShowMethodology(!showMethodology)}
@@ -518,15 +520,15 @@ export function SafeRoutePage() {
                       Active surface flooding depth and reported impassability
                     </div>
                     <div className="p-2 rounded bg-[#12121A] border border-[#1C1C28]">
-                      <span className="font-bold text-[#00F5FF] block">30% Hidden Hazard Factor</span>
+                      <span className="font-bold text-[#FF4D6D] block">30% Hidden Hazard Factor</span>
                       Pre-monsoon defects concealed under current water
                     </div>
                     <div className="p-2 rounded bg-[#12121A] border border-[#1C1C28]">
-                      <span className="font-bold text-[#8B5CF6] block">20% Historical Defect Severity</span>
+                      <span className="font-bold text-[#FF9F43] block">20% Historical Defect Severity</span>
                       Pothole depth, broken manhole structural risk
                     </div>
                     <div className="p-2 rounded bg-[#12121A] border border-[#1C1C28]">
-                      <span className="font-bold text-[#A78BFA] block">15% Freshness &amp; Verification</span>
+                      <span className="font-bold text-[#35D07F] block">15% Freshness &amp; Verification</span>
                       Decay weighting over time + volunteer confirmation
                     </div>
                   </div>
@@ -582,13 +584,13 @@ export function SafeRoutePage() {
               </div>
             </div>
 
-            {/* Deep-Dive USP Correlation Card */}
+            {/* Deep-Dive USP Correlation Card with Semantic Red & Orange Alert */}
             {activeRoute && activeRoute.hiddenHazardCount > 0 && (
-              <div className="rounded-xl border border-[#00F5FF]/50 bg-[#0B0B10] p-4 space-y-3 shadow-[0_0_24px_rgba(0,245,255,0.12)]">
+              <div className="rounded-xl border border-[#FF4D6D]/50 bg-[#0B0B10] p-4 space-y-3 shadow-[0_0_24px_rgba(255,77,109,0.15)]">
                 <div className="flex items-start gap-2.5">
-                  <AlertOctagon className="w-5 h-5 text-[#00F5FF] shrink-0 mt-0.5" />
+                  <AlertOctagon className="w-5 h-5 text-[#FF4D6D] shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-xs font-bold text-[#00F5FF] uppercase tracking-wider">
+                    <h4 className="text-xs font-bold text-[#FF4D6D] uppercase tracking-wider">
                       USP Demonstration — Hidden Hazard Correlation Detected on Path
                     </h4>
                     <p className="text-xs text-zinc-300 mt-1 leading-relaxed">
@@ -599,7 +601,7 @@ export function SafeRoutePage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                   <div className="p-2.5 rounded-lg bg-[#050507] border border-[#1C1C28]">
-                    <span className="text-[10px] font-bold text-[#8B5CF6] uppercase tracking-wider block mb-1">
+                    <span className="text-[10px] font-bold text-[#FF9F43] uppercase tracking-wider block mb-1">
                       Pre-Monsoon Defect
                     </span>
                     <span className="text-zinc-200">
@@ -618,7 +620,7 @@ export function SafeRoutePage() {
                   </div>
                 </div>
 
-                <div className="text-[11px] text-[#C4B5FD] bg-[#8B5CF6]/15 p-2.5 rounded-lg border border-[#8B5CF6]/30">
+                <div className="text-[11px] text-zinc-200 bg-[#FF4D6D]/15 p-2.5 rounded-lg border border-[#FF4D6D]/30">
                   <strong className="text-white">Why risk is elevated:</strong> The water level conceals roadbed damage, dramatically elevating crash risk for two-wheelers and delivery riders navigating through standing water.
                 </div>
               </div>

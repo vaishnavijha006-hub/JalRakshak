@@ -1,4 +1,5 @@
 // JalRakshak — Formatting and display utilities
+// Cyber-Civic Palette: Jet Black (#050507), Deep Black (#0B0B10), Royal Amethyst (#8B5CF6), Electric Cyan (#00F5FF)
 
 import type { HazardCategory, Severity, RiskLevel, VerificationStatus, IncidentStatus } from '../data/types';
 
@@ -52,50 +53,50 @@ export function getCategoryIcon(cat: HazardCategory): string {
 
 export function getSeverityColor(sev: Severity): string {
   const colors: Record<Severity, string> = {
-    low: '#10B981',
-    medium: '#F59E0B',
-    high: '#F97316',
-    critical: '#EF4444',
+    low: '#71717A',
+    medium: '#A78BFA',
+    high: '#8B5CF6',
+    critical: '#00F5FF',
   };
   return colors[sev];
 }
 
 export function getSeverityBg(sev: Severity): string {
-  const colors: Record<Severity, string> = {
-    low: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    medium: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    high: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-    critical: 'bg-red-500/20 text-red-400 border-red-500/30',
+  const classes: Record<Severity, string> = {
+    low: 'bg-[#12121A] text-[#9CA3AF] border-[#222233]',
+    medium: 'bg-[#8B5CF6]/10 text-[#C4B5FD] border-[#8B5CF6]/25',
+    high: 'bg-[#8B5CF6]/20 text-[#DDD6FE] border-[#8B5CF6]/45',
+    critical: 'bg-[#00F5FF]/15 text-[#00F5FF] border-[#00F5FF]/50 shadow-[0_0_12px_rgba(0,245,255,0.2)]',
   };
-  return colors[sev];
+  return classes[sev];
 }
 
 export function getRiskColor(risk: RiskLevel): string {
   const colors: Record<RiskLevel, string> = {
-    low: '#10B981',
-    moderate: '#F59E0B',
-    high: '#F97316',
-    critical: '#EF4444',
+    low: '#71717A',
+    moderate: '#A78BFA',
+    high: '#8B5CF6',
+    critical: '#00F5FF',
   };
   return colors[risk];
 }
 
 export function getRiskBg(risk: RiskLevel): string {
   const classes: Record<RiskLevel, string> = {
-    low: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    moderate: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    high: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-    critical: 'bg-red-500/20 text-red-400 border-red-500/30',
+    low: 'bg-[#12121A] text-[#9CA3AF] border-[#222233]',
+    moderate: 'bg-[#8B5CF6]/10 text-[#C4B5FD] border-[#8B5CF6]/25',
+    high: 'bg-[#8B5CF6]/20 text-[#DDD6FE] border-[#8B5CF6]/45',
+    critical: 'bg-[#00F5FF]/15 text-[#00F5FF] border-[#00F5FF]/50 shadow-[0_0_12px_rgba(0,245,255,0.2)]',
   };
   return classes[risk];
 }
 
 export function getVerificationBg(v: VerificationStatus): string {
   const classes: Record<VerificationStatus, string> = {
-    unverified: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
-    verified: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    disputed: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    resolved: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
+    unverified: 'bg-[#12121A] text-[#71717A] border-[#222233]',
+    verified: 'bg-[#8B5CF6]/20 text-[#DDD6FE] border-[#8B5CF6]/40',
+    disputed: 'bg-[#00F5FF]/15 text-[#00F5FF] border-[#00F5FF]/40',
+    resolved: 'bg-[#8B5CF6]/10 text-[#A78BFA] border-[#8B5CF6]/25',
   };
   return classes[v];
 }
@@ -114,23 +115,23 @@ export function getStatusLabel(status: IncidentStatus): string {
 
 export function getStatusBg(status: IncidentStatus): string {
   const classes: Record<IncidentStatus, string> = {
-    reported: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30',
-    under_verification: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
-    forwarded_for_review: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
-    repair_reported: 'bg-teal-500/20 text-teal-400 border-teal-500/30',
-    resolution_verified: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    outdated: 'bg-slate-500/20 text-slate-400 border-slate-500/30',
+    reported: 'bg-[#00F5FF]/15 text-[#00F5FF] border-[#00F5FF]/30',
+    under_verification: 'bg-[#8B5CF6]/15 text-[#C4B5FD] border-[#8B5CF6]/30',
+    forwarded_for_review: 'bg-[#8B5CF6]/25 text-[#DDD6FE] border-[#8B5CF6]/45',
+    repair_reported: 'bg-[#00F5FF]/20 text-[#67E8F9] border-[#00F5FF]/40',
+    resolution_verified: 'bg-[#8B5CF6]/30 text-[#EDE9FE] border-[#8B5CF6]/60 shadow-[0_0_10px_rgba(139,92,246,0.2)]',
+    outdated: 'bg-[#12121A] text-[#71717A] border-[#222233]',
   };
   return classes[status];
 }
 
 export function getCategoryMarkerColor(cat: HazardCategory): string {
   const colors: Record<HazardCategory, string> = {
-    pothole: '#F97316',
-    open_manhole: '#EF4444',
-    waterlogging: '#06B6D4',
-    damaged_road: '#F59E0B',
-    other: '#8B5CF6',
+    pothole: '#8B5CF6',
+    open_manhole: '#A78BFA',
+    waterlogging: '#00F5FF',
+    damaged_road: '#7C3AED',
+    other: '#00B4D8',
   };
   return colors[cat];
 }

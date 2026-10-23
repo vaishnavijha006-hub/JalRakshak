@@ -20,27 +20,29 @@ interface HazardMapProps {
 function createSvgIcon(color: string, size: number, isHidden = false, isCritical = false): L.DivIcon {
   const pulseClass = isCritical ? 'hazard-marker-critical' : '';
   const innerIcon = isHidden
-    ? `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" width="12" height="12">
+    ? `<svg viewBox="0 0 24 24" fill="none" stroke="#00F5FF" stroke-width="2.5" width="12" height="12">
         <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
         <line x1="12" y1="9" x2="12" y2="13"/>
         <line x1="12" y1="17" x2="12.01" y2="17"/>
       </svg>`
-    : `<svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" width="10" height="10">
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" width="10" height="10">
         <circle cx="12" cy="12" r="3"/>
       </svg>`;
+
+  const bgStyle = isHidden
+    ? 'background: #0B0B10; border: 2px solid #00F5FF; box-shadow: 0 0 14px rgba(0, 245, 255, 0.6), 0 0 6px rgba(139, 92, 246, 0.4);'
+    : `background: ${color}; border: 1.5px solid rgba(255, 255, 255, 0.4); box-shadow: 0 0 10px ${color}88, 0 0 0 2px rgba(11, 11, 16, 0.8);`;
 
   return L.divIcon({
     className: `${pulseClass}`,
     html: `<div style="
       width: ${size}px; height: ${size}px;
-      background: ${color};
-      border: 2px solid rgba(255,255,255,0.3);
+      ${bgStyle}
       border-radius: ${isHidden ? '4px' : '50%'};
       display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 2px 8px ${color}88, 0 0 0 3px ${color}33;
       cursor: pointer;
-      transform: rotate(${isHidden ? '0deg' : '0deg'});
-    ">${innerIcon}</div>`,
+      transform: rotate(${isHidden ? '45deg' : '0deg'});
+    "><div style="transform: rotate(${isHidden ? '-45deg' : '0deg'}); display: flex; align-items: center; justify-content: center;">${innerIcon}</div></div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
     popupAnchor: [0, -size / 2],
@@ -206,32 +208,32 @@ export function HazardMap({
       <div ref={mapRef} className="w-full h-full rounded-xl" />
 
       {mapError && (
-        <div className="absolute top-3 right-3 z-[1000] flex items-center gap-2 px-3 py-1.5 rounded-lg bg-navy-900/90 border border-amber-500/30 text-amber-300 text-xs shadow-lg backdrop-blur-sm">
-          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0" />
-          <span>Offline Tile Fallback Active · Markers & Vectors Live</span>
+        <div className="absolute top-3 right-3 z-[1000] flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0B0B10]/95 border border-[#00F5FF]/40 text-[#00F5FF] text-xs shadow-xl backdrop-blur-sm">
+          <span className="w-2 h-2 rounded-full bg-[#00F5FF] animate-pulse shrink-0" />
+          <span>Offline Vector Mode Active · Markers Live</span>
         </div>
       )}
 
       {showLegend && (
-        <div className="absolute bottom-3 left-3 z-[1000] bg-navy-800/95 backdrop-blur-sm border border-navy-700/50 rounded-lg p-3 max-w-48">
-          <h4 className="text-[10px] font-semibold text-navy-300 uppercase tracking-wider mb-2">Legend</h4>
+        <div className="absolute bottom-3 left-3 z-[1000] bg-[#0B0B10]/95 backdrop-blur-md border border-[#1C1C28] rounded-lg p-3 max-w-52 shadow-2xl">
+          <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Map Legend</h4>
           <div className="space-y-1.5">
             {[
-              { color: '#F97316', label: 'Pothole' },
-              { color: '#EF4444', label: 'Open Manhole' },
-              { color: '#06B6D4', label: 'Waterlogging' },
-              { color: '#F59E0B', label: 'Damaged Road' },
+              { color: '#8B5CF6', label: 'Pre-Monsoon Pothole' },
+              { color: '#A78BFA', label: 'Open Manhole' },
+              { color: '#00F5FF', label: 'Active Waterlogging' },
+              { color: '#7C3AED', label: 'Damaged Roadbed' },
             ].map(item => (
               <div key={item.label} className="flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full border border-white/20" style={{ background: item.color }} />
-                <span className="text-[10px] text-navy-300">{item.label}</span>
+                <div className="w-2.5 h-2.5 rounded-full border border-white/30" style={{ background: item.color }} />
+                <span className="text-[10px] text-gray-300">{item.label}</span>
               </div>
             ))}
-            <div className="flex items-center gap-2 pt-1 border-t border-navy-700/50">
-              <div className="w-3 h-3 rounded border border-white/20 bg-red-500 flex items-center justify-center">
-                <span className="text-[7px] text-white font-bold">!</span>
+            <div className="flex items-center gap-2 pt-1 border-t border-[#1C1C28]">
+              <div className="w-2.5 h-2.5 rounded-sm border border-[#00F5FF] bg-[#0B0B10] flex items-center justify-center rotate-45">
+                <span className="text-[7px] text-[#00F5FF] font-bold -rotate-45">!</span>
               </div>
-              <span className="text-[10px] text-red-400 font-medium">Hidden Hazard</span>
+              <span className="text-[10px] text-[#00F5FF] font-semibold">Hidden Hazard (USP)</span>
             </div>
           </div>
         </div>

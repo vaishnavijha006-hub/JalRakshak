@@ -5,7 +5,6 @@ import {
   Zap,
   ArrowRight,
   Navigation,
-  Waves,
   GitMerge,
   Bell,
   Activity,
@@ -18,8 +17,13 @@ import {
   Clock,
   Route,
   AlertOctagon,
+  Radar,
+  Crosshair,
+  CloudRain,
 } from 'lucide-react';
 import { InteractiveBackground } from '../components/layout/InteractiveBackground';
+import { MonsoonRainEffect } from '../components/ui/MonsoonRainEffect';
+import delhiHeroImg from '../assets/delhi-monsoon-hero.jpg';
 
 /* ------------------------------------------------------------------ */
 /*  Landing Page – standalone (no shared Layout wrapper)               */
@@ -75,8 +79,8 @@ export function LandingPage() {
             </h1>
 
             <p className="mt-5 text-base leading-relaxed text-zinc-400 sm:text-lg">
-              Road intelligence that connects historical defects with current
-              waterlogging to help commuters identify hidden road hazards.
+              Delhi&apos;s monsoon road intelligence platform connecting dry-season baseline defects
+              with real-time waterlogging — unmasking deep potholes and cave-ins concealed beneath standing floodwater.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
@@ -94,6 +98,22 @@ export function LandingPage() {
                 <Navigation className="h-4 w-4 text-[#8B5CF6]" />
                 Explore SafeRoute
               </Link>
+            </div>
+
+            {/* Micro Delhi telemetry pills */}
+            <div className="mt-8 pt-6 border-t border-[#1C1C28] grid grid-cols-3 gap-2 text-left">
+              <div>
+                <span className="text-[10px] uppercase font-mono text-zinc-500 block">Corridors</span>
+                <span className="text-xs font-bold text-zinc-300">Central &amp; South Delhi</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-mono text-zinc-500 block">Monsoon Radar</span>
+                <span className="text-xs font-bold text-[#00F5FF]">42 mm/hr Inundation</span>
+              </div>
+              <div>
+                <span className="text-[10px] uppercase font-mono text-zinc-500 block">Hazard Mode</span>
+                <span className="text-xs font-bold text-[#FF4D6D]">Submerged Inferred</span>
+              </div>
             </div>
           </div>
 
@@ -311,118 +331,115 @@ export function LandingPage() {
 
 function HeroComposition() {
   return (
-    <div className="relative h-[340px] sm:h-[400px] w-full">
-      {/* Stylised "road" SVG */}
-      <svg
-        viewBox="0 0 400 320"
-        className="absolute inset-0 h-full w-full"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        {/* road surface */}
-        <path
-          d="M0 200 Q100 160 200 180 T400 160"
-          stroke="#12121A"
-          strokeWidth="56"
-          strokeLinecap="round"
-        />
-        {/* road centre dashes */}
-        <path
-          d="M0 200 Q100 160 200 180 T400 160"
-          stroke="#2A2A3C"
-          strokeWidth="2"
-          strokeDasharray="12 10"
-          strokeLinecap="round"
-        />
-        {/* waterlogging fill */}
-        <path
-          d="M120 170 Q160 155 200 165 T280 155"
-          stroke="#00F5FF"
-          strokeWidth="48"
-          strokeLinecap="round"
-          opacity="0.14"
-        />
-        {/* animated water shimmer */}
-        <path
-          d="M130 172 Q165 160 200 167 T270 157"
-          stroke="#00F5FF"
-          strokeWidth="2"
-          strokeDasharray="6 8"
-          opacity="0.45"
-        >
-          <animate attributeName="stroke-dashoffset" from="0" to="-28" dur="2s" repeatCount="indefinite" />
-        </path>
+    <div className="relative h-[380px] sm:h-[440px] md:h-[480px] w-full rounded-2xl border border-[#1C1C28] bg-[#0B0B10] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.85)] group">
+      {/* ── Photographic Delhi Monsoon Anchor ── */}
+      <img
+        src={delhiHeroImg}
+        alt="India Gate New Delhi silhouetted during monsoon downpour with submerged road defect in waterlogged road"
+        className="absolute inset-0 h-full w-full object-cover object-center filter brightness-[0.88] contrast-[1.08] transition-transform duration-1000 group-hover:scale-[1.02]"
+      />
 
-        {/* hazard markers */}
-        <circle cx="170" cy="174" r="6" fill="#8B5CF6" opacity="0.8">
-          <animate attributeName="r" values="6;8;6" dur="2s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="220" cy="168" r="5" fill="#00F5FF" opacity="0.9">
-          <animate attributeName="r" values="5;7;5" dur="1.8s" repeatCount="indefinite" />
-        </circle>
-        <circle cx="260" cy="160" r="4" fill="#A78BFA" opacity="0.7">
-          <animate attributeName="r" values="4;6;4" dur="2.2s" repeatCount="indefinite" />
-        </circle>
-      </svg>
+      {/* ── Continuous Atmospheric Monsoon Rain Simulation ── */}
+      <MonsoonRainEffect intensity="moderate" className="absolute inset-0 pointer-events-none z-10" />
 
-      {/* Floating card — Hidden Hazard Alert */}
-      <div className="absolute top-2 right-2 sm:top-4 sm:right-4 w-52 rounded-xl border border-[#8B5CF6]/40 bg-[#0B0B10]/95 p-3.5 shadow-2xl backdrop-blur-md animate-float-slow">
-        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#00F5FF]">
-          <AlertOctagon className="h-3 w-3" />
-          Hidden Hazard
+      {/* ── Atmospheric Lighting & Edge Vignette ── */}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0B0B10] via-[#050507]/20 to-[#050507]/80 pointer-events-none z-10" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_45%,rgba(5,5,7,0.75)_100%)] pointer-events-none z-10" />
+
+      {/* ── Corner Tactical Reticles ── */}
+      <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-[#00F5FF]/70 z-20 pointer-events-none" />
+      <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-[#00F5FF]/70 z-20 pointer-events-none" />
+      <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-[#00F5FF]/70 z-20 pointer-events-none" />
+      <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-[#00F5FF]/70 z-20 pointer-events-none" />
+
+      {/* ── Top Telemetry HUD Bar ── */}
+      <div className="absolute top-4 inset-x-4 flex items-center justify-between z-20 pointer-events-none">
+        <div className="inline-flex items-center gap-2 rounded-lg bg-[#050507]/85 border border-[#1C1C28] px-3 py-1.5 backdrop-blur-md shadow-lg">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00F5FF] opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00F5FF]" />
+          </span>
+          <span className="text-[10px] font-mono font-bold tracking-wider text-white">
+            LIVE // RAJPATH C-HEXAGON
+          </span>
         </div>
-        <p className="mt-1.5 text-[11px] leading-snug text-zinc-300">
-          Pothole detected beneath active flooding on Mathura Road.
-        </p>
-        <div className="mt-2 flex items-center gap-1.5 text-[10px] text-[#A78BFA] font-bold">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#00F5FF] animate-pulse" />
-          Risk Profile: Critical
+
+        <div className="hidden sm:inline-flex items-center gap-3 rounded-lg bg-[#050507]/85 border border-[#1C1C28] px-3 py-1.5 backdrop-blur-md text-[10px] font-mono text-zinc-300 shadow-lg">
+          <span className="flex items-center gap-1.5 text-[#00F5FF] font-bold">
+            <CloudRain className="h-3 w-3" />
+            42 mm/hr
+          </span>
+          <span className="text-zinc-600">|</span>
+          <span className="text-zinc-400">28.6129° N, 77.2295° E</span>
         </div>
       </div>
 
-      {/* Floating card — Waterlogging indicator */}
-      <div className="absolute bottom-6 left-0 sm:left-2 w-48 rounded-xl border border-[#00F5FF]/35 bg-[#0B0B10]/95 p-3.5 shadow-2xl backdrop-blur-md animate-float-medium">
-        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[#00F5FF]">
-          <Waves className="h-3 w-3" />
-          Waterlogging
-        </div>
-        <p className="mt-1.5 text-[11px] leading-snug text-zinc-300">
-          ~2.5 ft depth reported near ITO junction.
-        </p>
-        <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#1C1C28]">
-          <div className="h-full w-3/4 rounded-full bg-[#00F5FF]" />
+      {/* ── Submerged Hazard Reticle (Targeting waterlogged cavity in foreground) ── */}
+      <div className="absolute bottom-16 left-4 sm:bottom-16 sm:left-8 z-20 pointer-events-auto">
+        <div className="relative">
+          {/* Pulsing crosshair marker */}
+          <div className="absolute -top-3 -left-3 h-8 w-8 rounded-full border-2 border-[#FF4D6D] animate-ping opacity-60 pointer-events-none" />
+          <div className="absolute -top-1 -left-1 h-4 w-4 rounded-full bg-[#FF4D6D] border border-white flex items-center justify-center pointer-events-none">
+            <Crosshair className="h-3 w-3 text-white" />
+          </div>
+
+          {/* Precision telemetry popout */}
+          <div className="ml-5 rounded-xl border border-[#FF4D6D]/60 bg-[#0B0B10]/95 backdrop-blur-md p-3 shadow-2xl max-w-[230px]">
+            <div className="flex items-center justify-between gap-1 text-[9px] font-mono font-bold uppercase text-[#FF4D6D]">
+              <span className="flex items-center gap-1">
+                <AlertOctagon className="h-3 w-3" />
+                Hidden Hazard Locked
+              </span>
+              <span className="text-[8px] bg-[#FF4D6D]/20 text-[#FF4D6D] px-1 py-0.5 rounded">
+                CRITICAL
+              </span>
+            </div>
+            <p className="mt-1 text-[11px] font-bold text-white leading-snug">
+              Submerged 28cm Pothole
+            </p>
+            <p className="text-[10px] text-zinc-300 leading-tight">
+              Concealed beneath 1.6 ft standing floodwater. Inferred via pre-monsoon survey #DL-4819.
+            </p>
+            <div className="mt-2 pt-1.5 border-t border-[#1C1C28] flex items-center justify-between text-[9px] font-mono">
+              <span className="text-zinc-500">Confidence</span>
+              <span className="text-[#00F5FF] font-bold">94% Spatial Match</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Floating card — Risk Level */}
-      <div className="absolute top-1/2 -translate-y-1/2 left-0 sm:-left-2 w-36 rounded-xl border border-[#1C1C28] bg-[#0B0B10]/95 p-3 shadow-xl backdrop-blur-md animate-float-fast">
-        <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-          <Activity className="h-3 w-3 text-[#00F5FF]" />
-          Risk Score
+      {/* ── SafeRoute Dynamic Vector HUD Pill (Top right) ── */}
+      <div className="absolute top-16 right-4 z-20 pointer-events-auto max-w-[210px] hidden xs:block sm:block">
+        <div className="rounded-xl border border-[#8B5CF6]/50 bg-[#0B0B10]/95 backdrop-blur-md p-3 shadow-2xl">
+          <div className="flex items-center gap-1.5 text-[9px] font-mono font-bold uppercase text-[#A78BFA]">
+            <Radar className="h-3 w-3 text-[#00F5FF]" />
+            SafeRoute Corridor Vector
+          </div>
+          <div className="mt-1 text-[11px] font-bold text-white">
+            ITO ↔ Lajpat Nagar
+          </div>
+          <div className="mt-1.5 space-y-1 text-[9px] font-mono">
+            <div className="flex items-center justify-between text-zinc-400">
+              <span>Direct (Ring Rd):</span>
+              <span className="text-[#FF4D6D] font-bold">Risk 84 (Critical)</span>
+            </div>
+            <div className="flex items-center justify-between text-zinc-400">
+              <span>Barapullah Bypass:</span>
+              <span className="text-[#35D07F] font-bold">Risk 28 (Low)</span>
+            </div>
+          </div>
         </div>
-        <div className="mt-2 flex gap-1">
-          {['bg-[#1C1C28]', 'bg-[#8B5CF6]/40', 'bg-[#8B5CF6]', 'bg-[#00F5FF]'].map((c, i) => (
-            <div key={i} className={`h-2.5 flex-1 rounded-sm ${c}`} />
-          ))}
-        </div>
-        <p className="mt-1 text-[10px] text-[#00F5FF] font-extrabold tracking-wide">Elevated Risk</p>
       </div>
 
-      {/* Keyframe styles */}
-      <style>{`
-        @keyframes float-slow  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-        @keyframes float-medium{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
-        @keyframes float-fast  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-        .animate-float-slow   { animation: float-slow   5s ease-in-out infinite; }
-        .animate-float-medium { animation: float-medium  4s ease-in-out infinite 0.5s; }
-        .animate-float-fast   { animation: float-fast    3.5s ease-in-out infinite 1s; }
-        @media (prefers-reduced-motion: reduce) {
-          .animate-float-slow,
-          .animate-float-medium,
-          .animate-float-fast { animation: none; }
-          svg animate { animation: none; }
-        }
-      `}</style>
+      {/* ── Bottom Status Bar ── */}
+      <div className="absolute bottom-2 inset-x-3 flex items-center justify-between z-20 pointer-events-none text-[9px] font-mono text-zinc-400 bg-[#050507]/90 px-3 py-1 rounded border border-[#1C1C28]">
+        <span className="truncate">
+          STATUS: ACTIVE MONSOON SURVEILLANCE // SENSING HIDDEN CAVITIES &amp; FLOOD RECESSION
+        </span>
+        <span className="hidden md:inline text-[#00F5FF] font-bold shrink-0 ml-2">
+          JALRAKSHAK INTELLIGENCE ENGINE v1.0
+        </span>
+      </div>
     </div>
   );
 }

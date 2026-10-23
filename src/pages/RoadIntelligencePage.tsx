@@ -326,18 +326,39 @@ export function RoadIntelligencePage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-navy-800 border border-navy-700/50 rounded-xl p-1">
+      <div role="tablist" aria-label="Road intelligence record categories" className="flex gap-1 bg-navy-800 border border-navy-700/50 rounded-xl p-1">
         {([
           { id: 'all', label: 'All Records', count: incidents.length },
           { id: 'historical', label: 'Historical', count: incidents.filter(i => i.isHistorical).length },
           { id: 'active', label: 'Active Reports', count: incidents.filter(i => !i.isHistorical && i.isActive).length },
           { id: 'hidden', label: 'Hidden Hazards', count: allHiddenHazards.length },
-        ] as const).map(t => (
+        ] as const).map((t, idx, arr) => (
           <button
             key={t.id}
+            role="tab"
+            id={`intel-tab-${t.id}`}
+            aria-selected={tab === t.id}
+            aria-controls={`intel-panel-${t.id}`}
             onClick={() => { setTab(t.id); setSelectedIncidentId(null); setSelectedHHId(null); }}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                const nextTab = arr[(idx + 1) % arr.length].id;
+                setTab(nextTab);
+                setSelectedIncidentId(null);
+                setSelectedHHId(null);
+                document.getElementById(`intel-tab-${nextTab}`)?.focus();
+              } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                const prevTab = arr[(idx - 1 + arr.length) % arr.length].id;
+                setTab(prevTab);
+                setSelectedIncidentId(null);
+                setSelectedHHId(null);
+                document.getElementById(`intel-tab-${prevTab}`)?.focus();
+              }
+            }}
             className={cn(
-              'flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-xs font-medium transition-all',
+              'flex-1 flex items-center justify-center gap-2 py-2 px-3 min-h-[42px] rounded-lg text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
               tab === t.id
                 ? 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/20'
                 : 'text-navy-400 hover:text-white'
@@ -396,7 +417,12 @@ export function RoadIntelligencePage() {
       )}
 
       {/* Main content */}
-      <div className={cn('grid gap-4', (selectedIncident || selectedHH) ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1')}>
+      <div
+        role="tabpanel"
+        id={`intel-panel-${tab}`}
+        aria-labelledby={`intel-tab-${tab}`}
+        className={cn('grid gap-4', (selectedIncident || selectedHH) ? 'grid-cols-1 xl:grid-cols-2' : 'grid-cols-1')}
+      >
         {/* List */}
         <div className="space-y-2">
           {tab !== 'hidden' && (

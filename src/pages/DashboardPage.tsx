@@ -449,9 +449,12 @@ export function DashboardPage() {
             {CATEGORY_FILTERS.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
+                type="button"
+                role="button"
+                aria-pressed={selectedCategory === key}
                 onClick={() => setSelectedCategory(key)}
                 className={cn(
-                  'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-all',
+                  'flex items-center gap-1.5 px-2.5 py-1.5 min-h-[36px] rounded-lg text-xs font-medium border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
                   selectedCategory === key
                     ? 'bg-cyan-500/15 text-cyan-300 border-cyan-500/50 shadow-sm'
                     : 'bg-navy-900/60 text-gray-400 border-navy-700/60 hover:text-gray-200 hover:border-gray-600',
@@ -471,7 +474,7 @@ export function DashboardPage() {
               placeholder="Search roads, areas, IDs..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-navy-900 border border-navy-700 text-xs text-gray-200 placeholder:text-gray-500 focus:border-cyan-500/50 focus:outline-none"
+              className="w-full min-h-[38px] pl-8 pr-3 py-1.5 rounded-lg bg-navy-900 border border-navy-700 text-xs text-gray-200 placeholder:text-gray-500 focus:border-cyan-500/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
             />
           </div>
         </div>
@@ -485,9 +488,12 @@ export function DashboardPage() {
             {SEVERITY_FILTERS.map(({ key, label, color }) => (
               <button
                 key={key}
+                type="button"
+                role="button"
+                aria-pressed={selectedSeverity === key}
                 onClick={() => setSelectedSeverity(key)}
                 className={cn(
-                  'px-2 py-1 rounded text-[11px] font-medium border transition-all',
+                  'px-2.5 py-1 min-h-[32px] rounded text-[11px] font-medium border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
                   selectedSeverity === key
                     ? 'bg-white/10 text-white font-bold border-white/30'
                     : 'bg-transparent text-gray-400 border-navy-700 hover:text-gray-200',
@@ -501,8 +507,9 @@ export function DashboardPage() {
 
           {hasActiveFilters && (
             <button
+              type="button"
               onClick={handleResetFilters}
-              className="flex items-center gap-1 px-2.5 py-1 rounded text-xs text-red-400 bg-red-500/10 border border-red-500/25 hover:bg-red-500/20 transition-colors"
+              className="flex items-center gap-1 px-2.5 py-1 min-h-[32px] rounded text-xs text-red-400 bg-red-500/10 border border-red-500/25 hover:bg-red-500/20 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
             >
               <X className="w-3 h-3" />
               Reset Filters
@@ -570,11 +577,23 @@ export function DashboardPage() {
           )}
 
           {/* Tab Switcher: Incident Feed vs Inferred Hazards */}
-          <div className="flex rounded-lg bg-[#111827] border border-[#1F2937] p-1">
+          <div role="tablist" aria-label="Geospatial feed views" className="flex rounded-lg bg-[#111827] border border-[#1F2937] p-1">
             <button
+              type="button"
+              role="tab"
+              id="dashboard-tab-feed"
+              aria-selected={activeTab === 'feed'}
+              aria-controls="dashboard-panel-feed"
               onClick={() => setActiveTab('feed')}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                  e.preventDefault();
+                  setActiveTab('hidden_hazards');
+                  document.getElementById('dashboard-tab-hidden-hazards')?.focus();
+                }
+              }}
               className={cn(
-                'flex-1 py-1.5 rounded-md text-xs font-semibold transition-all',
+                'flex-1 py-2 px-3 rounded-md text-xs font-semibold transition-all min-h-[40px] flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
                 activeTab === 'feed'
                   ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
                   : 'text-gray-400 hover:text-white',
@@ -583,9 +602,21 @@ export function DashboardPage() {
               Incident Feed ({filteredIncidents.length})
             </button>
             <button
+              type="button"
+              role="tab"
+              id="dashboard-tab-hidden-hazards"
+              aria-selected={activeTab === 'hidden_hazards'}
+              aria-controls="dashboard-panel-hidden-hazards"
               onClick={() => setActiveTab('hidden_hazards')}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+                  e.preventDefault();
+                  setActiveTab('feed');
+                  document.getElementById('dashboard-tab-feed')?.focus();
+                }
+              }}
               className={cn(
-                'flex-1 py-1.5 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5',
+                'flex-1 py-2 px-3 rounded-md text-xs font-semibold transition-all flex items-center justify-center gap-1.5 min-h-[40px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400',
                 activeTab === 'hidden_hazards'
                   ? 'bg-red-500/20 text-red-300 border border-red-500/30'
                   : 'text-gray-400 hover:text-white',
@@ -598,7 +629,12 @@ export function DashboardPage() {
 
           {/* Incident Feed Tab */}
           {activeTab === 'feed' && (
-            <div className="rounded-xl border border-[#1F2937] bg-[#111827] overflow-hidden">
+            <div
+              role="tabpanel"
+              id="dashboard-panel-feed"
+              aria-labelledby="dashboard-tab-feed"
+              className="rounded-xl border border-[#1F2937] bg-[#111827] overflow-hidden"
+            >
               <div className="px-4 py-2.5 border-b border-[#1F2937] flex items-center justify-between bg-navy-900/40">
                 <h3 className="text-xs font-bold text-gray-200 uppercase tracking-wider">
                   Reported Hazards Feed
@@ -639,7 +675,12 @@ export function DashboardPage() {
 
           {/* Hidden Hazards List Tab */}
           {activeTab === 'hidden_hazards' && (
-            <div className="rounded-xl border border-[#1F2937] bg-[#111827] overflow-hidden">
+            <div
+              role="tabpanel"
+              id="dashboard-panel-hidden-hazards"
+              aria-labelledby="dashboard-tab-hidden-hazards"
+              className="rounded-xl border border-[#1F2937] bg-[#111827] overflow-hidden"
+            >
               <div className="px-4 py-2.5 border-b border-[#1F2937] bg-red-500/10 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <TriangleAlert className="w-3.5 h-3.5 text-red-400" />

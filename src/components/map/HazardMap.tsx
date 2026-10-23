@@ -144,14 +144,14 @@ export function HazardMap({
 
     // Add hidden hazard markers
     hiddenHazards.forEach(hh => {
-      const icon = createSvgIcon('#00F5FF', 30, true, true);
+      const icon = createSvgIcon('#FF4D6D', 30, true, true);
       const marker = L.marker([hh.location.coordinates.lat, hh.location.coordinates.lng], { icon });
       marker.on('click', () => onSelectHiddenHazard?.(hh.id));
 
       const popupContent = `
         <div style="min-width: 200px; font-family: Inter, sans-serif;">
           <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-            <span style="font-size: 10px; padding: 2px 8px; border-radius: 4px; background: rgba(0,245,255,0.15); color: #00F5FF; border: 1px solid rgba(0,245,255,0.35); font-weight: 700;">
+            <span style="font-size: 10px; padding: 2px 8px; border-radius: 4px; background: rgba(255,77,109,0.15); color: #FF4D6D; border: 1px solid rgba(255,77,109,0.35); font-weight: 700;">
               ⚡ HIDDEN HAZARD
             </span>
           </div>
@@ -159,8 +159,8 @@ export function HazardMap({
             ${hh.historicalDefectType.replace('_', ' ')} beneath waterlogging
           </div>
           <div style="font-size: 10px; color: #9CA3AF; margin-bottom: 4px;">${hh.location.road}, ${hh.location.area}</div>
-          <div style="font-size: 10px; color: #00F5FF; font-weight: 600;">Confidence: ${hh.confidence}% — ${hh.confidenceLabel}</div>
-          <div style="font-size: 9px; color: #A78BFA; margin-top: 4px; font-style: italic;">
+          <div style="font-size: 10px; color: #FFD166; font-weight: 600;">Confidence: ${hh.confidence}% — ${hh.confidenceLabel}</div>
+          <div style="font-size: 9px; color: #C4B5FD; margin-top: 4px; font-style: italic;">
             ⚠ Inferred hazard, not directly confirmed
           </div>
         </div>
@@ -219,10 +219,10 @@ export function HazardMap({
           <h4 className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Map Legend</h4>
           <div className="space-y-1.5">
             {[
-              { color: '#8B5CF6', label: 'Pre-Monsoon Pothole' },
-              { color: '#A78BFA', label: 'Open Manhole' },
+              { color: '#FF9F43', label: 'Pre-Monsoon Pothole' },
+              { color: '#FF4D6D', label: 'Open Manhole (Critical)' },
               { color: '#00F5FF', label: 'Active Waterlogging' },
-              { color: '#7C3AED', label: 'Damaged Roadbed' },
+              { color: '#FFD166', label: 'Damaged Roadbed' },
             ].map(item => (
               <div key={item.label} className="flex items-center gap-2">
                 <div className="w-2.5 h-2.5 rounded-full border border-white/30" style={{ background: item.color }} />
@@ -230,10 +230,10 @@ export function HazardMap({
               </div>
             ))}
             <div className="flex items-center gap-2 pt-1 border-t border-[#1C1C28]">
-              <div className="w-2.5 h-2.5 rounded-sm border border-[#00F5FF] bg-[#0B0B10] flex items-center justify-center rotate-45">
-                <span className="text-[7px] text-[#00F5FF] font-bold -rotate-45">!</span>
+              <div className="w-2.5 h-2.5 rounded-sm border border-[#FF4D6D] bg-[#0B0B10] flex items-center justify-center rotate-45">
+                <span className="text-[7px] text-[#FF4D6D] font-bold -rotate-45">!</span>
               </div>
-              <span className="text-[10px] text-[#00F5FF] font-semibold">Hidden Hazard (USP)</span>
+              <span className="text-[10px] text-[#FF4D6D] font-semibold">Hidden Hazard (USP)</span>
             </div>
           </div>
         </div>

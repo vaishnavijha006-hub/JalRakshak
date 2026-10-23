@@ -8,6 +8,7 @@ import {
 import { resetDemoData } from '../../data/store';
 import { cn } from '../../utils/format';
 import { BackendStatusBadge } from './BackendStatusBadge';
+import { InteractiveBackground } from './InteractiveBackground';
 
 const NAV_ITEMS = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Command Center', desc: 'Hazard overview & map' },
@@ -31,7 +32,10 @@ export function Layout() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050507] text-[#F3F4F6] flex">
+    <div className="min-h-screen bg-[#050507] text-[#F3F4F6] flex relative">
+      {/* Interactive Cursor Ambient Background & Grid Depth */}
+      <InteractiveBackground mode="restrained" />
+
       {/* Desktop Sidebar */}
       <aside
         className={cn(
@@ -205,7 +209,7 @@ export function Layout() {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto bg-[#050507]">
+        <main className="flex-1 overflow-auto bg-transparent relative z-[1]">
           <Outlet />
         </main>
       </div>

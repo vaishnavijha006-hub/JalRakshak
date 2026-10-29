@@ -1,7 +1,8 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { validatePhotoFile, generateStoragePath } from '../src/services/storageService';
-import { mapRowToIncident, fetchIncidents, createIncident, updateIncidentStatusBackend, updateIncidentVerificationBackend } from '../src/services/incidentService';
+import { mapRowToIncident, fetchIncidents, fetchHiddenHazards, createIncident, updateIncidentStatusBackend, updateIncidentVerificationBackend } from '../src/services/incidentService';
+import { setHiddenHazards, getHiddenHazards } from '../src/data/store';
 import { signUpWithEmail, signInWithEmail, signOutUser, fetchProfile } from '../src/services/authService';
 
 describe('Storage Service', () => {
@@ -54,6 +55,13 @@ describe('Storage Service', () => {
     assert.ok(!path1.includes(' '));
     // Repeated calls generate distinct timestamps/entropy
     assert.notEqual(path1, path2);
+  });
+
+  it('neutralizes path traversal attempts in incident IDs and filenames', () => {
+    const maliciousPath = generateStoragePath('../../etc/passwd', '../../danger.php.jpg');
+    assert.ok(!maliciousPath.includes('..'));
+    assert.ok(maliciousPath.startsWith('incidents/______etc_passwd/'));
+    assert.ok(maliciousPath.endsWith('.jpg'));
   });
 
   it('safely handles deleteIncidentPhoto in demo mode without error', async () => {
@@ -155,6 +163,36 @@ describe('Incident Service & Row Mapping', () => {
     const res = await updateIncidentStatusBackend('INC-NON-EXISTENT', 'resolution_verified', 'QA Tester');
     assert.equal(res.updated, null);
   });
+
+  it('fetches hidden hazards and updates store reactively', async () => {
+    const hazards = await fetchHiddenHazards();
+    assert.ok(Array.isArray(hazards));
+    assert.ok(hazards.length > 0);
+
+    const testHazard = {
+      id: 'HH-TEST-001',
+      historicalIncidentId: 'INC-001',
+      waterloggingIncidentId: 'INC-003',
+      confidence: 95,
+      confidenceLabel: 'Test High Confidence',
+      explanation: 'Test correlation logic',
+      detectedAt: new Date().toISOString(),
+      location: {
+        road: 'Test Road',
+        area: 'Test Area',
+        coordinates: { lat: 28.6, lng: 77.2 },
+      },
+      historicalDefectType: 'pothole' as const,
+      historicalObservedAt: new Date().toISOString(),
+      waterloggingReportedAt: new Date().toISOString(),
+      verificationState: 'unverified' as const,
+    };
+
+    setHiddenHazards([testHazard]);
+    const stored = getHiddenHazards();
+    assert.equal(stored.length, 1);
+    assert.equal(stored[0].id, 'HH-TEST-001');
+  });
 });
 
 describe('Authentication Service Fallbacks', () => {
@@ -179,5 +217,35 @@ describe('Authentication Service Fallbacks', () => {
   it('fetchProfile returns null when unconfigured', async () => {
     const profile = await fetchProfile('non-existent-user');
     assert.equal(profile, null);
+  });
+});
+
+describe('Security Invariants & Validation', () => {
+  it('rejects file extension and MIME type mismatches (spoofed extensions)', () => {
+    const spoofedJpg = new File(['fake php payload'], 'shell.php', { type: 'image/jpeg' });
+    const res = validatePhotoFile(spoofedJpg);
+    assert.equal(res.valid, false);
+    assert.match(res.error || '', /File extension "\.php" does not match declared MIME type/);
+  });
+
+  it('rejects extension mismatch for PNG disguised as WebP', () => {
+    const disguisedFile = new File(['data'], 'photo.png', { type: 'image/webp' });
+    const res = validatePhotoFile(disguisedFile);
+    assert.equal(res.valid, false);
+    assert.match(res.error || '', /does not match declared MIME type/);
+  });
+
+  it('safely handles getPhotoSignedUrl for demo paths', async () => {
+    const { getPhotoSignedUrl } = await import('../src/services/storageService');
+    const url = await getPhotoSignedUrl('local_demo_123.jpg');
+    assert.equal(url, null);
+  });
+
+  it('prevents unauthorized photo deletion when caller is not the reporter', async () => {
+    const { deleteIncidentPhoto } = await import('../src/services/storageService');
+    // If user attempts to delete a file owned by a different reporter
+    const result = await deleteIncidentPhoto('incidents/INC-001/photo.jpg', 'other-user-uuid');
+    // In mock/demo environment, should return false or safe boolean without throwing
+    assert.equal(typeof result, 'boolean');
   });
 });

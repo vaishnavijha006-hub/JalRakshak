@@ -166,7 +166,7 @@ BEGIN
     SET email = EXCLUDED.email;
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- Trigger definition
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
@@ -204,7 +204,7 @@ ALTER TABLE public.hidden_hazards ENABLE ROW LEVEL SECURITY;
 CREATE OR REPLACE FUNCTION public.get_user_role()
 RETURNS user_role AS $$
     SELECT role FROM public.profiles WHERE id = auth.uid();
-$$ LANGUAGE sql STABLE SECURITY DEFINER;
+$$ LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp;
 
 -- ── Profiles Policies ──────────────────────────────────────────────────────────
 -- Everyone (including public) can view basic profile information (display_name, avatar, role)

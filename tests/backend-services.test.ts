@@ -55,6 +55,12 @@ describe('Storage Service', () => {
     // Repeated calls generate distinct timestamps/entropy
     assert.notEqual(path1, path2);
   });
+
+  it('safely handles deleteIncidentPhoto in demo mode without error', async () => {
+    const { deleteIncidentPhoto } = await import('../src/services/storageService');
+    const result = await deleteIncidentPhoto('local_demo_123_test.jpg');
+    assert.equal(result, true);
+  });
 });
 
 describe('Incident Service & Row Mapping', () => {
@@ -143,6 +149,11 @@ describe('Incident Service & Row Mapping', () => {
     assert.equal(res.error, null);
     assert.ok(res.updated);
     assert.equal(res.updated.verification, 'verified');
+  });
+
+  it('handles status update for non-existent incident gracefully', async () => {
+    const res = await updateIncidentStatusBackend('INC-NON-EXISTENT', 'resolution_verified', 'QA Tester');
+    assert.equal(res.updated, null);
   });
 });
 

@@ -202,6 +202,12 @@ export function setIncidents(newIncidents: Incident[]): void {
   notifyListeners();
 }
 
+export function setHiddenHazards(newHazards: HiddenHazard[]): void {
+  hiddenHazards = [...newHazards];
+  saveToStorage(STORAGE_KEYS.hiddenHazards, hiddenHazards);
+  notifyListeners();
+}
+
 export function addIncident(incident: Incident): void {
   incidents = [incident, ...incidents];
   saveToStorage(STORAGE_KEYS.incidents, incidents);

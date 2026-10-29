@@ -2,9 +2,10 @@
 // Bridges Supabase PostgreSQL backend with the reactive client store
 
 import { supabase } from '../lib/supabase';
-import type { Incident, StatusEntry, HazardCategory, Severity, IncidentStatus, VerificationStatus } from '../data/types';
+import type { Incident, StatusEntry, HazardCategory, Severity, IncidentStatus, VerificationStatus, HiddenHazard } from '../data/types';
 import {
   getIncidents as getLocalIncidents,
+  getHiddenHazards as getLocalHiddenHazards,
   addIncident as addLocalIncident,
   updateIncidentStatus as updateLocalIncidentStatus,
   updateIncidentVerification as updateLocalIncidentVerification,
@@ -95,6 +96,56 @@ export async function fetchIncidents(): Promise<Incident[]> {
   } catch (err) {
     console.warn('Network error in fetchIncidents, using local store:', err);
     return getLocalIncidents();
+  }
+}
+
+/**
+ * Fetches hidden hazard correlations from Supabase if configured, or falls back to local storage store.
+ */
+export async function fetchHiddenHazards(): Promise<HiddenHazard[]> {
+  if (!supabase) {
+    return getLocalHiddenHazards();
+  }
+
+  try {
+    const { data: rows, error: err } = await (supabase as any)
+      .from('hidden_hazards')
+      .select('*')
+      .order('detected_at', { ascending: false });
+
+    if (err) {
+      console.warn('Supabase fetchHiddenHazards error:', err.message);
+      return getLocalHiddenHazards();
+    }
+
+    if (!rows || rows.length === 0) {
+      return getLocalHiddenHazards();
+    }
+
+    return (rows as any[]).map((row: any) => ({
+      id: row.id,
+      historicalIncidentId: row.historical_incident_id,
+      waterloggingIncidentId: row.waterlogging_incident_id,
+      confidence: Number(row.confidence),
+      confidenceLabel: row.confidence_label,
+      explanation: row.explanation,
+      detectedAt: row.detected_at,
+      location: {
+        road: row.road,
+        area: row.area,
+        coordinates: {
+          lat: Number(row.latitude),
+          lng: Number(row.longitude),
+        },
+      },
+      historicalDefectType: row.historical_defect_type as HazardCategory,
+      historicalObservedAt: row.historical_observed_at,
+      waterloggingReportedAt: row.waterlogging_reported_at,
+      verificationState: row.verification_state as VerificationStatus,
+    }));
+  } catch (err) {
+    console.warn('Network error in fetchHiddenHazards, using local store:', err);
+    return getLocalHiddenHazards();
   }
 }
 

@@ -15,8 +15,8 @@ import {
   Filter, Layers, Sparkles
 } from 'lucide-react';
 
-import { useStore, setIncidents } from '../data/store';
-import { fetchIncidents, subscribeToIncidentsRealtime } from '../services/incidentService';
+import { useStore, setIncidents, setHiddenHazards } from '../data/store';
+import { fetchIncidents, fetchHiddenHazards, subscribeToIncidentsRealtime } from '../services/incidentService';
 import { isSupabaseConfigured } from '../lib/supabase';
 import type { Incident, HiddenHazard, HazardCategory, Severity } from '../data/types';
 import { HazardMap } from '../components/map/HazardMap';
@@ -298,9 +298,17 @@ export function DashboardPage() {
     let isMounted = true;
     const syncData = async () => {
       try {
-        const remote = await fetchIncidents();
-        if (isMounted && remote && remote.length > 0) {
-          setIncidents(remote);
+        const [remoteIncidents, remoteHidden] = await Promise.all([
+          fetchIncidents(),
+          fetchHiddenHazards(),
+        ]);
+        if (isMounted) {
+          if (remoteIncidents && remoteIncidents.length > 0) {
+            setIncidents(remoteIncidents);
+          }
+          if (remoteHidden && remoteHidden.length > 0) {
+            setHiddenHazards(remoteHidden);
+          }
         }
       } catch (err) {
         console.warn('Realtime sync failed:', err);

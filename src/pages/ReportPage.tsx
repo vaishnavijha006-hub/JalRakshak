@@ -165,39 +165,17 @@ export function ReportPage() {
         );
 
         if (error) {
-          console.warn('Backend creation failed, saving to local store:', error);
-          addIncident({
-            id,
-            category: form.category,
-            severity: form.severity,
-            title: `${getCategoryLabel(form.category)} on ${form.road}`,
-            description: form.description,
-            location: {
-              road: form.road,
-              area: form.area,
-              coordinates: coords,
-            },
-            observedAt: new Date(form.observedAt).toISOString(),
-            lastVerifiedAt: now,
-            reportedAt: now,
-            status: 'reported',
-            verification: 'unverified',
-            source: 'community',
-            isHistorical: false,
-            isActive: true,
-            reporterAlias,
-            photoPlaceholder: !!photo,
-            photoDataUrl: photo?.dataUrl,
-            statusHistory: [
-              { status: 'reported', timestamp: now, actor: reporterAlias, note: 'Submitted via JalRakshak' },
-            ],
-          });
-          setSubmittedId(id);
-        } else if (created) {
+          setSubmitError(`Backend error: ${error}. Report could not be saved to the database. Please check your connection and retry.`);
+          return;
+        }
+
+        if (created) {
           addIncident(created);
           setSubmittedId(created.id);
+          setStep('success');
         }
       } else {
+        // Standalone Local Demo Mode
         addIncident({
           id,
           category: form.category,
@@ -225,8 +203,8 @@ export function ReportPage() {
           ],
         });
         setSubmittedId(id);
+        setStep('success');
       }
-      setStep('success');
     } catch (err: any) {
       setSubmitError(err?.message || 'Failed to submit report. Please try again.');
     } finally {

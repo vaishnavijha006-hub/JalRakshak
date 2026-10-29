@@ -27,9 +27,18 @@ function EvidencePlaceholder({ label }: { label: string }) {
 function IncidentRow({ incident, selected, onClick }: { incident: Incident; selected: boolean; onClick: () => void }) {
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={`Select incident ${incident.id}: ${incident.title}`}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       onClick={onClick}
       className={cn(
-        'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all duration-150 group card-interactive',
+        'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all duration-150 group card-interactive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00F5FF]',
         selected
           ? 'border-[#00F5FF]/50 bg-[#00F5FF]/10 shadow-[0_0_12px_rgba(0,245,255,0.1)]'
           : 'border-[#1C1C28] bg-[#0B0B10] hover:border-[#8B5CF6]/40 hover:bg-[#12121A]'
@@ -62,9 +71,18 @@ function IncidentRow({ incident, selected, onClick }: { incident: Incident; sele
 function HiddenHazardRow({ hh, selected, onClick }: { hh: HiddenHazard; selected: boolean; onClick: () => void }) {
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={`Select hidden hazard ${hh.id}: ${hh.historicalDefectType} beneath waterlogging`}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick();
+        }
+      }}
       onClick={onClick}
       className={cn(
-        'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all duration-150 group card-interactive',
+        'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all duration-150 group card-interactive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4D6D]',
         selected
           ? 'border-[#FF4D6D]/50 bg-[#FF4D6D]/10 shadow-[0_0_12px_rgba(255,77,109,0.15)]'
           : 'border-[#1C1C28] bg-[#0B0B10] hover:border-[#FF9F43]/40 hover:bg-[#12121A]'
@@ -145,11 +163,20 @@ function DetailPanel({ incident, onClose }: { incident: Incident; onClose: () =>
           </div>
         </div>
 
-        {/* Evidence Placeholders */}
+        {/* Evidence */}
         <div>
           <h4 className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider mb-2">Evidence</h4>
           <div className="grid grid-cols-2 gap-2">
-            <EvidencePlaceholder label="Pre-observation photo" />
+            {incident.photoDataUrl ? (
+              <div className="h-24 rounded-lg border border-[#00F5FF]/30 bg-[#12121A] overflow-hidden flex flex-col justify-between">
+                <div className="h-16 bg-[#050507] flex items-center justify-center overflow-hidden">
+                  <img src={incident.photoDataUrl} alt={incident.title} className="w-full h-full object-cover" />
+                </div>
+                <div className="px-2 py-1 text-[9px] font-bold text-[#00F5FF] truncate">Reporter photo</div>
+              </div>
+            ) : (
+              <EvidencePlaceholder label="Pre-observation photo" />
+            )}
             <EvidencePlaceholder label="Follow-up photo" />
           </div>
         </div>

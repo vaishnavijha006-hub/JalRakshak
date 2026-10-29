@@ -38,7 +38,17 @@ export interface Incident {
   isHistorical: boolean;     // Pre-monsoon observation
   isActive: boolean;         // Currently relevant
   reporterAlias?: string;
+  /** Filename of the originally selected photo (display only) */
   photoPlaceholder?: boolean;
+  /**
+   * A data-URL (base64) of the user-selected photo, stored in localStorage.
+   * Only present when a photo was successfully read from the File input.
+   * Intentionally optional — not every incident carries a photo.
+   *
+   * Persistence note: this URL lives in localStorage alongside the incident.
+   * localStorage is cleared on hard browser data wipe; no server backup exists.
+   */
+  photoDataUrl?: string;
   statusHistory: StatusEntry[];
 }
 

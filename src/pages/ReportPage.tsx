@@ -6,6 +6,14 @@ import { AlertTriangle, MapPin, Camera, Send, CheckCircle, Shield, Clock, X, Inf
 import { getCategoryLabel, cn } from '../utils/format';
 import { getAreaCoordinates } from '../utils/geo';
 
+// ── Photo constraints ──────────────────────────────────────────────────────────
+// localStorage note: photo is stored as a base64 data-URL alongside the incident JSON.
+// It persists across page reloads but is lost when the user clears browser storage.
+// No server upload occurs in this demo application.
+const PHOTO_MAX_BYTES = 2 * 1024 * 1024; // 2 MB → base64 ≈ 2.7 MB in storage
+const PHOTO_ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+// ──────────────────────────────────────────────────────────────────────────────
+
 type Step = 'form' | 'review' | 'success';
 
 const CATEGORIES: { value: HazardCategory; label: string; icon: string; desc: string }[] = [
@@ -30,7 +38,13 @@ interface FormData {
   severity: Severity;
   description: string;
   observedAt: string;
-  photoName: string;
+}
+
+/** Holds the result of a successful FileReader read or an error message. */
+interface PhotoState {
+  name: string;
+  dataUrl: string;
+  sizeBytes: number;
 }
 
 const defaultTime = () => {
@@ -44,6 +58,11 @@ export function ReportPage() {
   const [submittedId, setSubmittedId] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // ── photo state (separate from core form to keep FormData lean) ──
+  const [photo, setPhoto] = useState<PhotoState | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [photoLoading, setPhotoLoading] = useState(false);
+
   const [form, setForm] = useState<FormData>({
     category: 'pothole',
     road: '',
@@ -51,7 +70,6 @@ export function ReportPage() {
     severity: 'medium',
     description: '',
     observedAt: defaultTime(),
-    photoName: '',
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({});
 
@@ -68,6 +86,50 @@ export function ReportPage() {
   const handleSubmit = () => {
     if (!validate()) return;
     setStep('review');
+  };
+
+  /** Read a File object, validate type/size, and store the data-URL in state. */
+  const handlePhotoChange = (file: File | undefined) => {
+    setPhotoError(null);
+    if (!file) return;
+
+    if (!PHOTO_ALLOWED_TYPES.includes(file.type)) {
+      setPhotoError(`Unsupported file type "${file.type}". Please choose a JPEG, PNG, WebP, or GIF image.`);
+      // Reset the input so the same file can be re-selected after correcting the choice
+      if (fileRef.current) fileRef.current.value = '';
+      return;
+    }
+    if (file.size > PHOTO_MAX_BYTES) {
+      setPhotoError(
+        `Photo is too large (${(file.size / 1024 / 1024).toFixed(1)} MB). Maximum allowed size is 2 MB.`
+      );
+      if (fileRef.current) fileRef.current.value = '';
+      return;
+    }
+
+    setPhotoLoading(true);
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      const result = evt.target?.result;
+      if (typeof result === 'string') {
+        setPhoto({ name: file.name, dataUrl: result, sizeBytes: file.size });
+      } else {
+        setPhotoError('Could not read the selected file. Please try a different image.');
+      }
+      setPhotoLoading(false);
+    };
+    reader.onerror = () => {
+      setPhotoError('File read failed. Please try again.');
+      setPhotoLoading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePhoto = () => {
+    setPhoto(null);
+    setPhotoError(null);
+    if (fileRef.current) fileRef.current.value = '';
   };
 
   const handleConfirm = () => {
@@ -95,7 +157,8 @@ export function ReportPage() {
       isHistorical: false,
       isActive: true,
       reporterAlias: 'Demo User',
-      photoPlaceholder: !!form.photoName,
+      photoPlaceholder: !!photo,
+      photoDataUrl: photo?.dataUrl,
       statusHistory: [
         { status: 'reported', timestamp: now, actor: 'Demo User', note: 'Submitted via browser demo' },
       ],
@@ -112,9 +175,10 @@ export function ReportPage() {
       severity: 'medium',
       description: '',
       observedAt: defaultTime(),
-      photoName: '',
     });
     setErrors({});
+    setPhoto(null);
+    setPhotoError(null);
     setStep('form');
   };
 
@@ -205,10 +269,10 @@ export function ReportPage() {
                 placeholder="e.g. Ring Road, Mathura Road"
                 className={cn(
                   'w-full min-h-[44px] px-3 py-2.5 bg-[#12121A] border rounded-lg text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#00F5FF]/50 transition-colors',
-                  errors.road ? 'border-[#00F5FF]' : 'border-[#1C1C28]'
+                  errors.road ? 'border-[#FF4D6D]' : 'border-[#1C1C28]'
                 )}
               />
-              {errors.road && <p className="text-[10px] text-[#00F5FF] mt-1">{errors.road}</p>}
+              {errors.road && <p className="text-[10px] text-[#FF4D6D] mt-1">{errors.road}</p>}
             </div>
             <div>
               <label htmlFor="area-input" className="block text-xs font-semibold text-white mb-1.5">Area / Landmark *</label>
@@ -220,7 +284,7 @@ export function ReportPage() {
                 placeholder="e.g. Lajpat Nagar, ITO"
                 className={cn(
                   'w-full min-h-[44px] px-3 py-2.5 bg-[#12121A] border rounded-lg text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#00F5FF]/50 transition-colors',
-                  errors.area ? 'border-[#00F5FF]' : 'border-[#1C1C28]'
+                  errors.area ? 'border-[#FF4D6D]' : 'border-[#1C1C28]'
                 )}
               />
               {/* Quick Area Chips */}
@@ -242,7 +306,7 @@ export function ReportPage() {
                   </button>
                 ))}
               </div>
-              {errors.area && <p className="text-[10px] text-[#00F5FF] mt-1">{errors.area}</p>}
+              {errors.area && <p className="text-[10px] text-[#FF4D6D] mt-1">{errors.area}</p>}
             </div>
           </div>
 
@@ -287,10 +351,10 @@ export function ReportPage() {
               placeholder="Describe the hazard in detail — size, exact location, any visible danger..."
               className={cn(
                 'w-full px-3 py-2.5 bg-[#12121A] border rounded-lg text-sm text-white placeholder:text-zinc-500 focus:outline-none focus:border-[#00F5FF]/50 transition-colors resize-none',
-                errors.description ? 'border-[#00F5FF]' : 'border-[#1C1C28]'
+                errors.description ? 'border-[#FF4D6D]' : 'border-[#1C1C28]'
               )}
             />
-            {errors.description && <p className="text-[10px] text-[#00F5FF] mt-1">{errors.description}</p>}
+            {errors.description && <p className="text-[10px] text-[#FF4D6D] mt-1">{errors.description}</p>}
           </div>
 
           {/* Time */}
@@ -308,38 +372,81 @@ export function ReportPage() {
 
           {/* Photo */}
           <div>
-            <label className="block text-xs font-semibold text-white mb-1.5">
-              <Camera className="inline w-3 h-3 mr-1 text-[#00F5FF]" />Photo (Optional)
-            </label>
-            <div
-              onClick={() => fileRef.current?.click()}
-              className="flex items-center justify-center gap-3 h-20 border-2 border-dashed border-[#1C1C28] bg-[#12121A] rounded-lg cursor-pointer hover:border-[#00F5FF]/40 transition-colors"
-            >
-              {form.photoName ? (
-                <div className="flex items-center gap-2">
-                  <Camera className="w-4 h-4 text-[#00F5FF]" />
-                  <span className="text-xs text-[#00F5FF]">{form.photoName}</span>
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setForm(f => ({ ...f, photoName: '' })); }}
-                    className="text-zinc-400 hover:text-white"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <Camera className="w-5 h-5 text-zinc-500 mx-auto mb-1" />
-                  <span className="text-[10px] text-zinc-500">Click to attach photo</span>
-                </div>
-              )}
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold text-white">
+                <Camera className="inline w-3 h-3 mr-1 text-[#00F5FF]" />Photo Evidence (Optional)
+              </label>
+              <span className="text-[10px] text-zinc-500">Max 2 MB (stored locally)</span>
             </div>
+
+            {photo ? (
+              <div className="p-3 rounded-lg border border-[#00F5FF]/40 bg-[#12121A] flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <img
+                    src={photo.dataUrl}
+                    alt={photo.name}
+                    className="w-14 h-14 object-cover rounded-md border border-[#1C1C28] shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-white truncate">{photo.name}</p>
+                    <p className="text-[10px] text-zinc-400">
+                      {(photo.sizeBytes / 1024).toFixed(0)} KB · Ready to save
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => fileRef.current?.click()}
+                      className="text-[10px] text-[#00F5FF] hover:underline mt-0.5 block"
+                    >
+                      Change photo
+                    </button>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRemovePhoto}
+                  aria-label="Remove photo"
+                  className="p-1.5 rounded-lg text-zinc-400 hover:text-[#FF4D6D] hover:bg-[#1C1C28] transition-colors shrink-0"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div
+                onClick={() => fileRef.current?.click()}
+                className="flex flex-col items-center justify-center gap-1.5 h-24 border-2 border-dashed border-[#1C1C28] bg-[#12121A] rounded-lg cursor-pointer hover:border-[#00F5FF]/50 hover:bg-[#161622] transition-colors text-center px-4"
+              >
+                {photoLoading ? (
+                  <div className="flex items-center gap-2 text-xs text-[#00F5FF]">
+                    <span className="w-2 h-2 rounded-full bg-[#00F5FF] animate-ping" />
+                    <span>Loading and processing photo...</span>
+                  </div>
+                ) : (
+                  <>
+                    <Camera className="w-5 h-5 text-zinc-400" />
+                    <span className="text-xs font-medium text-zinc-300">
+                      Click to attach photo from device
+                    </span>
+                    <span className="text-[10px] text-zinc-500">
+                      JPG, PNG, WebP or GIF up to 2 MB
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
+
+            {photoError && (
+              <p className="text-[10px] text-[#FF4D6D] mt-1.5 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3 shrink-0" />
+                {photoError}
+              </p>
+            )}
+
             <input
               ref={fileRef}
               type="file"
-              accept="image/*"
+              accept={PHOTO_ALLOWED_TYPES.join(',')}
               className="hidden"
-              onChange={e => setForm(f => ({ ...f, photoName: e.target.files?.[0]?.name ?? '' }))}
+              onChange={e => handlePhotoChange(e.target.files?.[0])}
             />
           </div>
 
@@ -364,13 +471,32 @@ export function ReportPage() {
               { label: 'Location', value: `${form.road}, ${form.area}` },
               { label: 'Severity', value: form.severity.charAt(0).toUpperCase() + form.severity.slice(1) },
               { label: 'Observed', value: new Date(form.observedAt).toLocaleString('en-IN') },
-              { label: 'Photo', value: form.photoName || 'None attached' },
             ].map(item => (
               <div key={item.label} className="flex justify-between gap-3 py-2 border-b border-[#1C1C28] last:border-0">
                 <span className="text-xs text-zinc-400 font-medium">{item.label}</span>
                 <span className="text-xs text-white text-right">{item.value}</span>
               </div>
             ))}
+
+            {/* Photo preview in review */}
+            <div className="flex justify-between items-center gap-3 py-2 border-b border-[#1C1C28]">
+              <span className="text-xs text-zinc-400 font-medium">Photo</span>
+              {photo ? (
+                <div className="flex items-center gap-2 text-right">
+                  <img
+                    src={photo.dataUrl}
+                    alt={photo.name}
+                    className="w-8 h-8 rounded object-cover border border-[#1C1C28]"
+                  />
+                  <span className="text-xs text-white truncate max-w-[180px]">
+                    {photo.name} ({(photo.sizeBytes / 1024).toFixed(0)} KB)
+                  </span>
+                </div>
+              ) : (
+                <span className="text-xs text-zinc-500">None attached</span>
+              )}
+            </div>
+
             <div className="py-2">
               <span className="text-xs text-zinc-400 font-medium block mb-1">Description</span>
               <p className="text-xs text-white">{form.description}</p>

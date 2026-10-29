@@ -42,9 +42,11 @@ if (routesUpdated) {
 }
 
 // Persist initial data if not already stored
-if (!localStorage.getItem(STORAGE_KEYS.incidents)) {
-  saveToStorage(STORAGE_KEYS.incidents, incidents);
-}
+try {
+  if (typeof localStorage !== 'undefined' && !localStorage.getItem(STORAGE_KEYS.incidents)) {
+    saveToStorage(STORAGE_KEYS.incidents, incidents);
+  }
+} catch { /* ignore in non-browser environments */ }
 
 // === Reactive Subscription Pattern ===
 type Listener = () => void;
@@ -128,6 +130,26 @@ export function getMetrics(): MetricSummary {
 
 // === FILTER operations ===
 
+/**
+ * Maps an incident's Severity to the equivalent RiskLevel used in FilterState.
+ *
+ * Domain note:
+ *  - Severity describes the physical danger of a hazard (low/medium/high/critical).
+ *  - RiskLevel describes route-corridor danger (low/moderate/high/critical).
+ * The two scales are intentionally distinct types; the only mismatch is
+ * Severity 'medium' ↔ RiskLevel 'moderate'.  Every other value is identical.
+ * This explicit mapping is the single source of truth for that translation.
+ */
+export function severityToRiskLevel(severity: Incident['severity']): import('./types').RiskLevel {
+  const map: Record<Incident['severity'], import('./types').RiskLevel> = {
+    low:      'low',
+    medium:   'moderate',   // ← the mismatch the audit found
+    high:     'high',
+    critical: 'critical',
+  };
+  return map[severity];
+}
+
 export function filterIncidents(filters: Partial<FilterState>): Incident[] {
   let result = [...incidents];
 
@@ -146,7 +168,9 @@ export function filterIncidents(filters: Partial<FilterState>): Incident[] {
   }
 
   if (filters.riskLevels && filters.riskLevels.length > 0) {
-    result = result.filter(i => filters.riskLevels!.includes(i.severity as any));
+    result = result.filter(i =>
+      filters.riskLevels!.includes(severityToRiskLevel(i.severity))
+    );
   }
 
   if (filters.verificationStatuses && filters.verificationStatuses.length > 0) {

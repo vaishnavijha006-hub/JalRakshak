@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getIncidentById, getHiddenHazards, updateIncidentStatus, updateIncidentVerification } from '../data/store';
+import { useStore, updateIncidentStatus, updateIncidentVerification } from '../data/store';
 import { HazardMap } from '../components/map/HazardMap';
 import {
   formatDate, formatTimeAgo, getCategoryLabel, getSeverityBg,
@@ -20,11 +20,20 @@ const STATUS_FLOW: IncidentStatus[] = [
 export function IncidentDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [incident, setIncident] = useState(() => getIncidentById(id ?? ''));
-  const hiddenHazards = getHiddenHazards();
-  const relatedHH = hiddenHazards.filter(
-    hh => hh.historicalIncidentId === id || hh.waterloggingIncidentId === id
+
+  // Subscribe reactively to store updates so this page stays synchronized with any external or internal state changes
+  const { incidents, hiddenHazards } = useStore();
+
+  const incident = useMemo(
+    () => incidents.find(i => i.id === id),
+    [incidents, id]
   );
+
+  const relatedHH = useMemo(
+    () => hiddenHazards.filter(hh => hh.historicalIncidentId === id || hh.waterloggingIncidentId === id),
+    [hiddenHazards, id]
+  );
+
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [verificationUpdating, setVerificationUpdating] = useState(false);
 
@@ -48,17 +57,17 @@ export function IncidentDetailPage() {
   }
 
   const handleStatusUpdate = (status: IncidentStatus) => {
+    if (!incident) return;
     setStatusUpdating(true);
-    const updated = updateIncidentStatus(incident.id, status, 'Demo Reviewer');
-    if (updated) setIncident(updated);
-    setTimeout(() => setStatusUpdating(false), 500);
+    updateIncidentStatus(incident.id, status, 'Demo Reviewer');
+    setTimeout(() => setStatusUpdating(false), 400);
   };
 
   const handleVerificationUpdate = (verification: VerificationStatus) => {
+    if (!incident) return;
     setVerificationUpdating(true);
-    const updated = updateIncidentVerification(incident.id, verification, 'Demo Reviewer');
-    if (updated) setIncident(updated);
-    setTimeout(() => setVerificationUpdating(false), 500);
+    updateIncidentVerification(incident.id, verification, 'Demo Reviewer');
+    setTimeout(() => setVerificationUpdating(false), 400);
   };
 
   const currentStatusIdx = STATUS_FLOW.indexOf(incident.status as IncidentStatus);
@@ -160,19 +169,41 @@ export function IncidentDetailPage() {
             </div>
           </div>
 
-          {/* Evidence Placeholders */}
+          {/* Evidence */}
           <div className="bg-[#0B0B10] border border-[#1C1C28] rounded-xl p-4 shadow-xl">
             <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-3">Evidence</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {['Pre-observation / Historical photo', 'Recent follow-up photo'].map(label => (
-                <div key={label} className="h-28 rounded-lg border-2 border-dashed border-[#1C1C28] flex flex-col items-center justify-center gap-1.5 bg-[#12121A]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {incident.photoDataUrl ? (
+                <div className="rounded-lg border border-[#00F5FF]/30 bg-[#12121A] overflow-hidden flex flex-col justify-between">
+                  <div className="h-32 bg-[#050507] flex items-center justify-center overflow-hidden">
+                    <img
+                      src={incident.photoDataUrl}
+                      alt={incident.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-2 border-t border-[#1C1C28]">
+                    <span className="text-[10px] font-bold text-[#00F5FF] block">Reporter Photo Evidence</span>
+                    <span className="text-[9px] text-zinc-400">Attached at report time · Stored locally</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-28 rounded-lg border-2 border-dashed border-[#1C1C28] flex flex-col items-center justify-center gap-1.5 bg-[#12121A]">
                   <div className="w-8 h-8 rounded-full bg-[#1C1C28] flex items-center justify-center">
                     <Info className="w-4 h-4 text-zinc-500" />
                   </div>
-                  <span className="text-[10px] text-zinc-400 text-center px-3">{label}</span>
+                  <span className="text-[10px] text-zinc-400 text-center px-3">Pre-observation / Historical photo</span>
                   <span className="text-[9px] text-zinc-600 italic text-center px-2">Illustrative placeholder — not authentic evidence</span>
                 </div>
-              ))}
+              )}
+
+              <div className="h-28 rounded-lg border-2 border-dashed border-[#1C1C28] flex flex-col items-center justify-center gap-1.5 bg-[#12121A]">
+                <div className="w-8 h-8 rounded-full bg-[#1C1C28] flex items-center justify-center">
+                  <Info className="w-4 h-4 text-zinc-500" />
+                </div>
+                <span className="text-[10px] text-zinc-400 text-center px-3">Recent follow-up photo</span>
+                <span className="text-[9px] text-zinc-600 italic text-center px-2">Awaiting municipal verification inspection</span>
+              </div>
             </div>
           </div>
 

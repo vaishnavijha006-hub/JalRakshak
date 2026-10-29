@@ -42,6 +42,7 @@ export function VoiceAssistant() {
   const [isListening, setIsListening] = useState(false);
   const [speechTranscript, setSpeechTranscript] = useState('');
   const recognizerRef = useRef<any>(null);
+  const isMountedRef = useRef(true);
 
   const panelRef = useRef<HTMLDivElement>(null);
   const prevPathRef = useRef(location.pathname);
@@ -49,7 +50,9 @@ export function VoiceAssistant() {
   // Subscribe to system voices change
   useEffect(() => {
     const unsub = speechEngine.subscribeVoices(() => {
-      setCapabilities(speechEngine.getCapabilities());
+      if (isMountedRef.current) {
+        setCapabilities(speechEngine.getCapabilities());
+      }
     });
     return unsub;
   }, []);
@@ -67,23 +70,34 @@ export function VoiceAssistant() {
     return getScriptForMode(guidance, activeMode, lang);
   }, [guidance, activeMode, lang]);
 
-  // Clean up audio on route change
+  // Clean up audio & speech recognition on route change
   useEffect(() => {
     if (prevPathRef.current !== location.pathname) {
       prevPathRef.current = location.pathname;
       speechEngine.stop();
       setPlaybackState('idle');
       if (recognizerRef.current) {
-        recognizerRef.current.abort();
-        setIsListening(false);
+        try {
+          recognizerRef.current.abort();
+        } catch { /* ignore */ }
+        recognizerRef.current = null;
       }
+      setIsListening(false);
     }
   }, [location.pathname]);
 
-  // Clean up audio on unmount
+  // Clean up audio and active speech recognizer on unmount to prevent leaks and stale state updates
   useEffect(() => {
+    isMountedRef.current = true;
     return () => {
+      isMountedRef.current = false;
       speechEngine.stop();
+      if (recognizerRef.current) {
+        try {
+          recognizerRef.current.abort();
+        } catch { /* ignore */ }
+        recognizerRef.current = null;
+      }
     };
   }, []);
 
@@ -113,18 +127,23 @@ export function VoiceAssistant() {
 
     const success = speechEngine.speak(script, lang, {
       onStart: () => {
+        if (!isMountedRef.current) return;
         setPlaybackState('playing');
       },
       onEnd: () => {
+        if (!isMountedRef.current) return;
         setPlaybackState('idle');
       },
       onPause: () => {
+        if (!isMountedRef.current) return;
         setPlaybackState('paused');
       },
       onResume: () => {
+        if (!isMountedRef.current) return;
         setPlaybackState('playing');
       },
       onError: (err) => {
+        if (!isMountedRef.current) return;
         setPlaybackState('idle');
         setErrorMessage(err);
       },
@@ -154,7 +173,10 @@ export function VoiceAssistant() {
   const handleToggleVoiceInput = () => {
     if (isListening) {
       if (recognizerRef.current) {
-        recognizerRef.current.stop();
+        try {
+          recognizerRef.current.abort();
+        } catch { /* ignore */ }
+        recognizerRef.current = null;
       }
       setIsListening(false);
       return;
@@ -171,19 +193,25 @@ export function VoiceAssistant() {
     const recognizer = createSpeechRecognizer({
       lang,
       onStart: () => {
+        if (!isMountedRef.current) return;
         setIsListening(true);
       },
       onResult: ({ transcript, isFinal }) => {
+        if (!isMountedRef.current) return;
         setSpeechTranscript(transcript);
         if (isFinal) {
           processVoiceCommand(transcript.toLowerCase());
         }
       },
       onError: (err) => {
+        if (!isMountedRef.current) return;
         setIsListening(false);
-        setErrorMessage(`Voice command error: ${err}`);
+        if (err !== 'aborted' && err !== 'no-speech') {
+          setErrorMessage(`Voice command error: ${err}`);
+        }
       },
       onEnd: () => {
+        if (!isMountedRef.current) return;
         setIsListening(false);
       },
     });
@@ -213,7 +241,15 @@ export function VoiceAssistant() {
       setIsOpen(false);
       return;
     }
-    if (trimmed.includes('intelligence') || trimmed.includes('history') || trimmed.includes('लेजर') || trimmed.includes('रिकॉर्ड')) {
+    if (
+      trimmed.includes('intelligence') ||
+      trimmed.includes('history') ||
+      trimmed.includes('रोड इंटेलिजेंस') ||
+      trimmed.includes('इंटेलिजेंस') ||
+      trimmed.includes('सड़क बुद्धिमत्ता') ||
+      trimmed.includes('लेजर') ||
+      trimmed.includes('रिकॉर्ड')
+    ) {
       navigate('/road-intelligence');
       setIsOpen(false);
       return;

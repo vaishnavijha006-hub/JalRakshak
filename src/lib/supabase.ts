@@ -3,7 +3,7 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-export type BackendMode = 'demo' | 'configured' | 'connected' | 'error';
+export type BackendMode = 'demo' | 'connecting' | 'configured' | 'connected' | 'error';
 
 /**
  * Safely retrieves an environment variable across Vite, browser, and test environments.

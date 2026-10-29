@@ -66,12 +66,12 @@ export async function fetchIncidents(): Promise<Incident[]> {
       .order('reported_at', { ascending: false });
 
     if (incidentErr) {
-      console.warn('Supabase fetchIncidents error, falling back to local store:', incidentErr.message);
-      return getLocalIncidents();
+      console.error('Supabase fetchIncidents error:', incidentErr.message);
+      throw new Error(`Failed to fetch incidents from database: ${incidentErr.message}`);
     }
 
-    if (!incidentRows || (incidentRows as any[]).length === 0) {
-      return getLocalIncidents();
+    if (!incidentRows) {
+      return [];
     }
 
     // Fetch related status history
@@ -235,7 +235,7 @@ export async function createIncident(
 }
 
 /**
- * Updates an incident's lifecycle status in Supabase and syncs with local store.
+ * Updates an incident's lifecycle status in Supabase atomically via RPC and syncs with local store.
  */
 export async function updateIncidentStatusBackend(
   incidentId: string,
@@ -249,29 +249,50 @@ export async function updateIncidentStatusBackend(
 
   if (supabase) {
     try {
-      const { error: updateErr } = await (supabase as any)
-        .from('incidents')
-        .update({
-          status: newStatus,
-          is_active: !isDeactivated,
-          last_verified_at: now,
-        })
-        .eq('id', incidentId);
+      // 1. Attempt atomic transactional RPC update
+      const { error: rpcErr } = await (supabase as any).rpc(
+        'update_incident_status_atomic',
+        {
+          p_incident_id: incidentId,
+          p_new_status: newStatus,
+          p_note: note || null,
+        }
+      );
 
-      if (updateErr) {
-        return { updated: null, error: updateErr.message };
+      if (rpcErr) {
+        // Fallback for database instances where RPC migration hasn't been executed
+        if (rpcErr.message && rpcErr.message.includes('function') && rpcErr.message.includes('does not exist')) {
+          const { error: updateErr } = await (supabase as any)
+            .from('incidents')
+            .update({
+              status: newStatus,
+              is_active: !isDeactivated,
+              last_verified_at: now,
+            })
+            .eq('id', incidentId);
+
+          if (updateErr) {
+            return { updated: null, error: `Database update failed: ${updateErr.message}` };
+          }
+
+          const { error: historyErr } = await (supabase as any).from('incident_status_history').insert({
+            incident_id: incidentId,
+            status: newStatus,
+            actor_id: actorId || null,
+            actor_name: actorName,
+            note: note || null,
+            timestamp: now,
+          });
+
+          if (historyErr) {
+            console.warn('Status history insert failed:', historyErr.message);
+          }
+        } else {
+          return { updated: null, error: rpcErr.message };
+        }
       }
-
-      await (supabase as any).from('incident_status_history').insert({
-        incident_id: incidentId,
-        status: newStatus,
-        actor_id: actorId || null,
-        actor_name: actorName,
-        note: note || null,
-        timestamp: now,
-      });
     } catch (err: any) {
-      console.warn('Backend update failed:', err);
+      return { updated: null, error: err?.message || 'Network error updating incident status.' };
     }
   }
 
@@ -291,15 +312,19 @@ export async function updateIncidentVerificationBackend(
 
   if (supabase) {
     try {
-      await (supabase as any)
+      const { error: verifyErr } = await (supabase as any)
         .from('incidents')
         .update({
           verification,
           last_verified_at: now,
         })
         .eq('id', incidentId);
-    } catch (err) {
-      console.warn('Backend verification update failed:', err);
+
+      if (verifyErr) {
+        return { updated: null, error: `Database update failed: ${verifyErr.message}` };
+      }
+    } catch (err: any) {
+      return { updated: null, error: err?.message || 'Network error updating verification.' };
     }
   }
 

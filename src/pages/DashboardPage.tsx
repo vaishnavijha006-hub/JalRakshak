@@ -12,12 +12,14 @@ import {
   AlertTriangle, Shield, Droplets, Activity, CheckCircle2, Search,
   Clock, MapPin, ChevronRight, ExternalLink, TriangleAlert, X,
   CircleDot, Construction, ShieldAlert, ArrowUpRight,
-  Filter, Layers, Sparkles
+  Filter, Layers, Sparkles, CloudRain, Thermometer, RefreshCw
 } from 'lucide-react';
 
 import { useStore, setIncidents, setHiddenHazards } from '../data/store';
 import { fetchIncidents, fetchHiddenHazards, subscribeToIncidentsRealtime } from '../services/incidentService';
 import { isSupabaseConfigured } from '../lib/supabase';
+import { fetchDelhiWeather, type WeatherObservation } from '../services/weatherService';
+import { getStationSummaries, fetchLiveNwdpRainfall, NWDP_METADATA, type StationSummary } from '../services/rainfallService';
 import type { Incident, HiddenHazard, HazardCategory, Severity } from '../data/types';
 import { HazardMap } from '../components/map/HazardMap';
 import {
@@ -84,8 +86,13 @@ function MetricCard({
           <span className="px-2 py-0.5 text-[9px] font-bold tracking-wider uppercase rounded-full bg-[#FF4D6D]/15 text-[#FF4D6D] border border-[#FF4D6D]/40 animate-pulse">
             USP Inferred
           </span>
+        ) : isSupabaseConfigured() ? (
+          <span className="text-[10px] text-[#35D07F] font-mono flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#35D07F] animate-pulse" />
+            LIVE DB
+          </span>
         ) : (
-          <span className="text-[10px] text-zinc-500 font-mono">SYNTHETIC</span>
+          <span className="text-[10px] text-[#C4B5FD] font-mono">LOCAL STORE</span>
         )}
       </div>
       <div className="mt-3">
@@ -130,21 +137,24 @@ function IncidentCard({
             <span className="text-[10px] text-zinc-400 font-medium">
               {getCategoryLabel(incident.category)}
             </span>
-            {incident.isHistorical && (
+            {incident.isHistorical ? (
               <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#8B5CF6]/15 text-[#C4B5FD] border border-[#8B5CF6]/30">
-                Pre-Monsoon
+                Pre-Monsoon 2024
+              </span>
+            ) : (
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#35D07F]/15 text-[#35D07F] border border-[#35D07F]/30">
+                Live Report
               </span>
             )}
           </div>
           <p className="text-xs font-semibold text-zinc-200 truncate">{incident.title}</p>
-          <div className="flex items-center gap-3 mt-1.5 text-[11px] text-zinc-400">
+          <div className="flex items-center justify-between gap-2 mt-1.5 text-[11px] text-zinc-400">
             <span className="flex items-center gap-1 truncate">
               <MapPin className="w-3 h-3 text-zinc-500 shrink-0" />
               {incident.location.area}
             </span>
-            <span className="flex items-center gap-1 shrink-0">
-              <Clock className="w-3 h-3 text-zinc-500" />
-              {formatTimeAgo(incident.reportedAt)}
+            <span className="text-[10px] text-zinc-500 shrink-0 truncate max-w-[120px]">
+              {incident.isHistorical ? 'PWD Survey' : (incident.reporterAlias || 'Citizen')}
             </span>
           </div>
         </div>
@@ -194,6 +204,18 @@ function IncidentDetail({ incident }: { incident: Incident }) {
             <span className="font-mono text-zinc-200">{formatTimeAgo(incident.lastVerifiedAt)}</span>
           </div>
         </div>
+
+        {incident.isHistorical ? (
+          <div className="mt-2.5 p-2 rounded bg-[#8B5CF6]/10 border border-[#8B5CF6]/30 text-[10px] text-zinc-300">
+            <span className="font-semibold text-[#C4B5FD] block mb-0.5">Historical Baseline (Pre-Monsoon 2024)</span>
+            <span>Recorded by {incident.reporterAlias || 'PWD Survey Team'} during pre-monsoon inspection. Preserved for predictive waterlogging analysis.</span>
+          </div>
+        ) : (
+          <div className="mt-2.5 p-2 rounded bg-[#00F5FF]/10 border border-[#00F5FF]/30 text-[10px] text-zinc-300">
+            <span className="font-semibold text-[#00F5FF] block mb-0.5">Live Citizen Filing</span>
+            <span>Submitted by {incident.reporterAlias || 'Citizen'} · {formatTimeAgo(incident.reportedAt)}</span>
+          </div>
+        )}
 
         <Link
           to={`/incidents/${incident.id}`}
@@ -333,6 +355,37 @@ export function DashboardPage() {
   const [activeTab, setActiveTab] = useState<'feed' | 'hidden_hazards'>('feed');
   const [selectedIncidentId, setSelectedIncidentId] = useState<string | null>(null);
   const [selectedHiddenHazardId, setSelectedHiddenHazardId] = useState<string | null>('HH-001');
+
+  // Real-world telemetry state
+  const [weather, setWeather] = useState<WeatherObservation | null>(null);
+  const [rainfallStations, setRainfallStations] = useState<StationSummary[]>(() => getStationSummaries());
+  const [isRefreshingTelemetry, setIsRefreshingTelemetry] = useState(false);
+  const [telemetrySourceInfo, setTelemetrySourceInfo] = useState<string>('NWDP Verified Telemetry Archive');
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchDelhiWeather().then(w => {
+      if (isMounted) setWeather(w);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleRefreshTelemetry = async () => {
+    setIsRefreshingTelemetry(true);
+    try {
+      const [freshWeather, freshNwdp] = await Promise.all([
+        fetchDelhiWeather(),
+        fetchLiveNwdpRainfall(),
+      ]);
+      setWeather(freshWeather);
+      setRainfallStations(freshNwdp.summaries);
+      setTelemetrySourceInfo(freshNwdp.source);
+    } finally {
+      setIsRefreshingTelemetry(false);
+    }
+  };
 
   // Filtered incidents
   const filteredIncidents = useMemo(() => {
@@ -478,6 +531,141 @@ export function DashboardPage() {
           sublabel="Verified safe"
           color="#35D07F"
         />
+      </div>
+
+      {/* ─── Real-World Telemetry: NWDP Hourly Rainfall & Weather ───────── */}
+      <div className="bg-[#0B0B10] border border-[#1C1C28] rounded-xl p-4 shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#1C1C28] pb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#00F5FF]/15 border border-[#00F5FF]/30 flex items-center justify-center">
+              <CloudRain className="w-4 h-4 text-[#00F5FF]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-sm font-bold text-white tracking-tight">
+                  National Water Data Portal &amp; Meteorological Telemetry
+                </h2>
+                <span className="px-2 py-0.5 rounded-full bg-[#35D07F]/15 border border-[#35D07F]/30 text-[9px] font-bold text-[#35D07F] flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#35D07F] animate-pulse" />
+                  AUTHENTIC GOVT DATA (GODL)
+                </span>
+              </div>
+              <p className="text-[11px] text-zinc-400 mt-0.5">
+                Hourly observations from Delhi Surface Water Ground Water Department &amp; Safdarjung Meteorological Observatory
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            <a
+              href={NWDP_METADATA.portalUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[10px] text-[#00F5FF] hover:underline flex items-center gap-1 px-2.5 py-1 rounded bg-[#00F5FF]/10 border border-[#00F5FF]/20"
+            >
+              <span>NWDP Dataset Portal</span>
+              <ExternalLink className="w-3 h-3" />
+            </a>
+            <button
+              type="button"
+              onClick={handleRefreshTelemetry}
+              disabled={isRefreshingTelemetry}
+              className="px-2.5 py-1 rounded bg-[#12121A] border border-[#1C1C28] hover:border-[#8B5CF6] text-[10px] font-semibold text-zinc-300 hover:text-white transition-colors flex items-center gap-1.5 disabled:opacity-50"
+              title="Refresh live telemetry stream"
+            >
+              <RefreshCw className={cn('w-3 h-3 text-[#00F5FF]', isRefreshingTelemetry && 'animate-spin')} />
+              <span>{isRefreshingTelemetry ? 'Syncing...' : 'Sync'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Live Weather & Telemetry Stations Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Weather Card */}
+          <div className="rounded-lg bg-[#050507] border border-[#1C1C28] p-3 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1">
+                <Thermometer className="w-3 h-3 text-[#FF9F43]" /> Delhi Weather
+              </span>
+              <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#8B5CF6]/15 text-[#C4B5FD] font-mono">
+                {weather?.source === 'imd_api' ? 'IMD API' : 'OPEN-METEO'}
+              </span>
+            </div>
+            <div className="flex items-baseline justify-between">
+              <div>
+                <span className="text-2xl font-black text-white">{weather?.temperatureC ?? '--'}°C</span>
+                <span className="text-[10px] text-zinc-400 ml-1.5">Feels {weather?.apparentTemperatureC ?? '--'}°C</span>
+              </div>
+              <span className="text-xs font-semibold text-[#00F5FF]">{weather?.weatherDescription ?? 'Loading...'}</span>
+            </div>
+            <div className="grid grid-cols-3 gap-1 pt-2 border-t border-[#1C1C28] text-[9px] text-zinc-400">
+              <div>
+                <span className="block text-zinc-500">Humidity</span>
+                <span className="text-zinc-200 font-mono">{weather?.relativeHumidityPct ?? '--'}%</span>
+              </div>
+              <div>
+                <span className="block text-zinc-500">Rainfall</span>
+                <span className="text-[#00F5FF] font-mono">{weather?.precipitationMm ?? 0} mm</span>
+              </div>
+              <div>
+                <span className="block text-zinc-500">Wind</span>
+                <span className="text-zinc-200 font-mono">{weather?.windSpeedKmh ?? '--'} km/h</span>
+              </div>
+            </div>
+            <div className="text-[8px] text-zinc-500 truncate" title={weather?.sourceAttribution}>
+              {weather?.sourceAttribution ?? 'Safdarjung Observatory (Station 42182)'}
+            </div>
+          </div>
+
+          {/* Top 3 NWDP Stations */}
+          {rainfallStations.slice(0, 3).map(stn => (
+            <div key={stn.station} className="rounded-lg bg-[#050507] border border-[#1C1C28] p-3 space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-white truncate max-w-[140px]" title={stn.station}>
+                  {stn.station}
+                </span>
+                <span className={cn(
+                  'text-[9px] px-1.5 py-0.5 rounded font-mono font-bold',
+                  stn.latestRainfallMm > 0 ? 'bg-[#00F5FF]/15 text-[#00F5FF] border border-[#00F5FF]/30' : 'bg-zinc-800 text-zinc-400'
+                )}>
+                  {stn.latestRainfallMm} mm
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-[10px] text-zinc-400">
+                <span>{stn.district}</span>
+                <span className="text-zinc-500 font-mono">Max: {stn.maxRainfallMm} mm</span>
+              </div>
+              <div className="pt-2 border-t border-[#1C1C28] flex items-center justify-between text-[9px] text-zinc-500">
+                <span>Acquired: {stn.latestAcquisitionTime}</span>
+                <span className="text-[#35D07F]">Active</span>
+              </div>
+              <div className="text-[8px] text-zinc-600 truncate">
+                Coord: {stn.latitude.toFixed(4)}°N, {stn.longitude.toFixed(4)}°E
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Remaining 3 NWDP Stations */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+          {rainfallStations.slice(3, 6).map(stn => (
+            <div key={stn.station} className="rounded-lg bg-[#050507] border border-[#1C1C28] p-2.5 flex items-center justify-between">
+              <div className="min-w-0 pr-2">
+                <div className="text-xs font-bold text-white truncate" title={stn.station}>{stn.station}</div>
+                <div className="text-[10px] text-zinc-400">{stn.district} &middot; {stn.latestAcquisitionTime}</div>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="text-xs font-mono font-bold text-[#00F5FF]">{stn.latestRainfallMm} mm</div>
+                <div className="text-[9px] text-zinc-500">{stn.intensity}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-center justify-between text-[10px] text-zinc-500 pt-1 border-t border-[#1C1C28]">
+          <span>Source: {telemetrySourceInfo} &middot; Dataset ID: c4fd33e4-73a9-47f7-ac61-e2053b9006e4</span>
+          <span>OpenStreetMap &copy; Contributors (ODbL)</span>
+        </div>
       </div>
 
       {/* ─── Multi-factor Filter Bar ──────────────────────────────────── */}

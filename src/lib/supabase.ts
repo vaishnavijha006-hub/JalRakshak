@@ -1,5 +1,5 @@
-// JalRakshak — Optional Supabase Client Foundation
-// Non-breaking initialization with graceful fallback to local demo store
+// JalRakshak — Typed Supabase Client & Backend Foundation
+// Supports full-stack production Supabase connectivity with non-breaking graceful fallback to local demo store
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
@@ -8,7 +8,7 @@ export type BackendMode = 'demo' | 'configured' | 'connected' | 'error';
 /**
  * Safely retrieves an environment variable across Vite, browser, and test environments.
  */
-function getEnv(key: string): string | undefined {
+export function getEnv(key: string): string | undefined {
   if (typeof import.meta !== 'undefined' && import.meta.env) {
     return import.meta.env[key] as string | undefined;
   }
@@ -82,8 +82,6 @@ export function isSupabaseConfigured(
 
 /**
  * Returns the current baseline backend mode based on environment configuration.
- * For Milestone 1: returns 'configured' when valid configuration exists, or 'demo' otherwise.
- * ('connected' or 'error' are reserved for active connectivity checks).
  */
 export function getBackendMode(
   customUrl?: string | null,
@@ -97,7 +95,7 @@ export function getBackendMode(
 }
 
 /**
- * Safely initialized Supabase client, or null if unconfigured or forced demo.
+ * Safely initialized Supabase typed client, or null if unconfigured or forced demo.
  */
 function initSupabaseClient(): SupabaseClient | null {
   try {
@@ -110,12 +108,33 @@ function initSupabaseClient(): SupabaseClient | null {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
+        detectSessionInUrl: true,
       },
     });
   } catch (error) {
-    console.warn('Failed to initialize optional Supabase client:', error);
+    console.warn('Failed to initialize Supabase client:', error);
     return null;
   }
 }
 
 export const supabase: SupabaseClient | null = initSupabaseClient();
+
+/**
+ * Performs an active connectivity check against Supabase.
+ * Returns 'connected' if the database answers, 'error' if connection failed,
+ * or 'demo' if not configured.
+ */
+export async function testBackendConnection(): Promise<BackendMode> {
+  if (!supabase) return 'demo';
+  try {
+    const { error } = await supabase.from('incidents').select('id').limit(1);
+    if (error) {
+      console.warn('Supabase ping check returned error:', error.message);
+      return 'error';
+    }
+    return 'connected';
+  } catch (err) {
+    console.warn('Supabase ping check network error:', err);
+    return 'error';
+  }
+}

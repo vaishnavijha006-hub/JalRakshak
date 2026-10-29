@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useStore, updateIncidentStatus, updateIncidentVerification } from '../data/store';
+import { useStore } from '../data/store';
+import { updateIncidentStatusBackend, updateIncidentVerificationBackend } from '../services/incidentService';
+import { useAuth } from '../context/AuthContext';
 import { HazardMap } from '../components/map/HazardMap';
 import {
   formatDate, formatTimeAgo, getCategoryLabel, getSeverityBg,
@@ -34,6 +36,7 @@ export function IncidentDetailPage() {
     [hiddenHazards, id]
   );
 
+  const { user, profile } = useAuth();
   const [statusUpdating, setStatusUpdating] = useState(false);
   const [verificationUpdating, setVerificationUpdating] = useState(false);
 
@@ -56,18 +59,20 @@ export function IncidentDetailPage() {
     );
   }
 
-  const handleStatusUpdate = (status: IncidentStatus) => {
+  const handleStatusUpdate = async (status: IncidentStatus) => {
     if (!incident) return;
     setStatusUpdating(true);
-    updateIncidentStatus(incident.id, status, 'Demo Reviewer');
-    setTimeout(() => setStatusUpdating(false), 400);
+    const actorName = profile?.displayName || user?.email?.split('@')[0] || 'Demo Reviewer';
+    await updateIncidentStatusBackend(incident.id, status, actorName, undefined, user?.id);
+    setStatusUpdating(false);
   };
 
-  const handleVerificationUpdate = (verification: VerificationStatus) => {
+  const handleVerificationUpdate = async (verification: VerificationStatus) => {
     if (!incident) return;
     setVerificationUpdating(true);
-    updateIncidentVerification(incident.id, verification, 'Demo Reviewer');
-    setTimeout(() => setVerificationUpdating(false), 400);
+    const actorName = profile?.displayName || user?.email?.split('@')[0] || 'Demo Reviewer';
+    await updateIncidentVerificationBackend(incident.id, verification, actorName);
+    setVerificationUpdating(false);
   };
 
   const currentStatusIdx = STATUS_FLOW.indexOf(incident.status as IncidentStatus);

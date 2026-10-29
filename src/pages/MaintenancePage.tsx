@@ -1,6 +1,8 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useStore, updateIncidentStatus } from '../data/store';
+import { useStore } from '../data/store';
+import { updateIncidentStatusBackend } from '../services/incidentService';
+import { useAuth } from '../context/AuthContext';
 import type { Incident, IncidentStatus } from '../data/types';
 import {
   formatTimeAgo, getCategoryLabel, getSeverityBg,
@@ -166,6 +168,7 @@ function IncidentRow({
 
 export function MaintenancePage() {
   const { incidents } = useStore();
+  const { user, profile } = useAuth();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<IncidentStatus | 'all'>('all');
   const [showArchitecture, setShowArchitecture] = useState(false);
@@ -188,11 +191,16 @@ export function MaintenancePage() {
 
   const selectedIncident = incidents.find(i => i.id === selectedId);
 
-  const handleStatusUpdate = (id: string, status: IncidentStatus) => {
-    updateIncidentStatus(id, status, 'Demo Reviewer',
+  const handleStatusUpdate = async (id: string, status: IncidentStatus) => {
+    const actorName = profile?.displayName || user?.email?.split('@')[0] || 'Demo Reviewer';
+    await updateIncidentStatusBackend(
+      id,
+      status,
+      actorName,
       status === 'forwarded_for_review'
-        ? 'Forwarded to proposed municipal review queue (demo only)'
-        : undefined
+        ? 'Forwarded to proposed municipal review queue'
+        : undefined,
+      user?.id
     );
   };
 

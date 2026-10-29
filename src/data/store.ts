@@ -196,6 +196,12 @@ export function filterIncidents(filters: Partial<FilterState>): Incident[] {
 
 // === WRITE operations ===
 
+export function setIncidents(newIncidents: Incident[]): void {
+  incidents = [...newIncidents];
+  saveToStorage(STORAGE_KEYS.incidents, incidents);
+  notifyListeners();
+}
+
 export function addIncident(incident: Incident): void {
   incidents = [incident, ...incidents];
   saveToStorage(STORAGE_KEYS.incidents, incidents);

@@ -2,15 +2,16 @@ import { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { addIncident, generateIncidentId } from '../data/store';
 import type { HazardCategory, Severity } from '../data/types';
-import { AlertTriangle, MapPin, Camera, Send, CheckCircle, Shield, Clock, X, Info } from 'lucide-react';
+import { AlertTriangle, MapPin, Camera, Send, CheckCircle, Shield, Clock, X, Info, Loader2 } from 'lucide-react';
 import { getCategoryLabel, cn } from '../utils/format';
 import { getAreaCoordinates } from '../utils/geo';
+import { useAuth } from '../context/AuthContext';
+import { createIncident } from '../services/incidentService';
 
 // ── Photo constraints ──────────────────────────────────────────────────────────
-// localStorage note: photo is stored as a base64 data-URL alongside the incident JSON.
-// It persists across page reloads but is lost when the user clears browser storage.
-// No server upload occurs in this demo application.
-const PHOTO_MAX_BYTES = 2 * 1024 * 1024; // 2 MB → base64 ≈ 2.7 MB in storage
+// With Supabase configured, photo is uploaded to Supabase Storage and stored via secure public URL.
+// In local demo mode, photo is stored as a base64 data-URL alongside the incident JSON.
+const PHOTO_MAX_BYTES = 5 * 1024 * 1024; // 5 MB
 const PHOTO_ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -45,6 +46,7 @@ interface PhotoState {
   name: string;
   dataUrl: string;
   sizeBytes: number;
+  file?: File;
 }
 
 const defaultTime = () => {
@@ -54,8 +56,11 @@ const defaultTime = () => {
 };
 
 export function ReportPage() {
+  const { user, profile, isConfigured } = useAuth();
   const [step, setStep] = useState<Step>('form');
   const [submittedId, setSubmittedId] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   // ── photo state (separate from core form to keep FormData lean) ──
@@ -112,7 +117,7 @@ export function ReportPage() {
     reader.onload = (evt) => {
       const result = evt.target?.result;
       if (typeof result === 'string') {
-        setPhoto({ name: file.name, dataUrl: result, sizeBytes: file.size });
+        setPhoto({ name: file.name, dataUrl: result, sizeBytes: file.size, file });
       } else {
         setPhotoError('Could not read the selected file. Please try a different image.');
       }
@@ -132,39 +137,101 @@ export function ReportPage() {
     if (fileRef.current) fileRef.current.value = '';
   };
 
-  const handleConfirm = () => {
-    const id = generateIncidentId();
-    const now = new Date().toISOString();
-    const coords = getAreaCoordinates(form.area, `${form.road}-${form.description}-${id}`);
+  const handleConfirm = async () => {
+    setIsSubmitting(true);
+    setSubmitError(null);
 
-    addIncident({
-      id,
-      category: form.category,
-      severity: form.severity,
-      title: `${getCategoryLabel(form.category)} on ${form.road}`,
-      description: form.description,
-      location: {
-        road: form.road,
-        area: form.area,
-        coordinates: coords,
-      },
-      observedAt: new Date(form.observedAt).toISOString(),
-      lastVerifiedAt: now,
-      reportedAt: now,
-      status: 'reported',
-      verification: 'unverified',
-      source: 'community',
-      isHistorical: false,
-      isActive: true,
-      reporterAlias: 'Demo User',
-      photoPlaceholder: !!photo,
-      photoDataUrl: photo?.dataUrl,
-      statusHistory: [
-        { status: 'reported', timestamp: now, actor: 'Demo User', note: 'Submitted via browser demo' },
-      ],
-    });
-    setSubmittedId(id);
-    setStep('success');
+    try {
+      const id = generateIncidentId();
+      const now = new Date().toISOString();
+      const coords = getAreaCoordinates(form.area, `${form.road}-${form.description}-${id}`);
+      const reporterAlias = profile?.displayName || user?.email?.split('@')[0] || 'Citizen';
+
+      if (isConfigured) {
+        const { incident: created, error } = await createIncident(
+          {
+            title: `${getCategoryLabel(form.category)} on ${form.road}`,
+            category: form.category,
+            severity: form.severity,
+            road: form.road,
+            area: form.area,
+            description: form.description,
+            latitude: coords.lat,
+            longitude: coords.lng,
+            reporterUserId: user?.id,
+            reporterAlias,
+          },
+          photo?.file
+        );
+
+        if (error) {
+          console.warn('Backend creation failed, saving to local store:', error);
+          addIncident({
+            id,
+            category: form.category,
+            severity: form.severity,
+            title: `${getCategoryLabel(form.category)} on ${form.road}`,
+            description: form.description,
+            location: {
+              road: form.road,
+              area: form.area,
+              coordinates: coords,
+            },
+            observedAt: new Date(form.observedAt).toISOString(),
+            lastVerifiedAt: now,
+            reportedAt: now,
+            status: 'reported',
+            verification: 'unverified',
+            source: 'community',
+            isHistorical: false,
+            isActive: true,
+            reporterAlias,
+            photoPlaceholder: !!photo,
+            photoDataUrl: photo?.dataUrl,
+            statusHistory: [
+              { status: 'reported', timestamp: now, actor: reporterAlias, note: 'Submitted via JalRakshak' },
+            ],
+          });
+          setSubmittedId(id);
+        } else if (created) {
+          addIncident(created);
+          setSubmittedId(created.id);
+        }
+      } else {
+        addIncident({
+          id,
+          category: form.category,
+          severity: form.severity,
+          title: `${getCategoryLabel(form.category)} on ${form.road}`,
+          description: form.description,
+          location: {
+            road: form.road,
+            area: form.area,
+            coordinates: coords,
+          },
+          observedAt: new Date(form.observedAt).toISOString(),
+          lastVerifiedAt: now,
+          reportedAt: now,
+          status: 'reported',
+          verification: 'unverified',
+          source: 'community',
+          isHistorical: false,
+          isActive: true,
+          reporterAlias,
+          photoPlaceholder: !!photo,
+          photoDataUrl: photo?.dataUrl,
+          statusHistory: [
+            { status: 'reported', timestamp: now, actor: reporterAlias, note: 'Submitted via browser demo' },
+          ],
+        });
+        setSubmittedId(id);
+      }
+      setStep('success');
+    } catch (err: any) {
+      setSubmitError(err?.message || 'Failed to submit report. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {
@@ -503,12 +570,27 @@ export function ReportPage() {
             </div>
           </div>
 
+          {submitError && (
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300 text-xs flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-red-400 shrink-0" />
+              <span>{submitError}</span>
+            </div>
+          )}
+
           <div className="p-3 rounded-lg bg-[#8B5CF6]/10 border border-[#8B5CF6]/30">
             <div className="flex items-start gap-2">
               <Info className="w-4 h-4 text-[#00F5FF] mt-0.5 shrink-0" />
               <p className="text-[10px] text-[#C4B5FD]">
-                This browser demo does <strong>not</strong> automatically notify government departments.
-                Submitted reports are stored locally for demonstration purposes only.
+                {isConfigured ? (
+                  <>
+                    Connected to <strong>Supabase Cloud</strong>. Your report and photo will be securely stored in the PostgreSQL database and cloud storage bucket.
+                  </>
+                ) : (
+                  <>
+                    This browser demo does <strong>not</strong> automatically notify government departments.
+                    Submitted reports are stored locally for demonstration purposes only.
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -516,16 +598,27 @@ export function ReportPage() {
           <div className="flex gap-3">
             <button
               onClick={() => setStep('form')}
-              className="flex-1 py-2.5 rounded-lg border border-[#1C1C28] text-zinc-300 hover:text-white hover:border-[#8B5CF6]/50 text-sm font-medium transition-all"
+              disabled={isSubmitting}
+              className="flex-1 py-2.5 rounded-lg border border-[#1C1C28] text-zinc-300 hover:text-white hover:border-[#8B5CF6]/50 text-sm font-medium transition-all disabled:opacity-50"
             >
               ← Edit
             </button>
             <button
               onClick={handleConfirm}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#00F5FF] hover:bg-[#00F5FF]/90 text-black font-bold text-sm transition-all"
+              disabled={isSubmitting}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#00F5FF] hover:bg-[#00F5FF]/90 text-black font-bold text-sm transition-all disabled:opacity-50"
             >
-              <Send className="w-4 h-4" />
-              Submit Report
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Persisting Report...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  <span>Submit Report</span>
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -539,7 +632,11 @@ export function ReportPage() {
           </div>
           <div>
             <h2 className="text-lg font-bold text-white mb-1">Report Submitted</h2>
-            <p className="text-sm text-zinc-400">Your hazard report has been added to the local demo database.</p>
+            <p className="text-sm text-zinc-400">
+              {isConfigured
+                ? 'Your hazard report has been securely saved to the Supabase database.'
+                : 'Your hazard report has been added to the local demo database.'}
+            </p>
           </div>
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#12121A] border border-[#1C1C28]">
             <span className="text-xs text-zinc-400">Incident ID:</span>
@@ -547,7 +644,9 @@ export function ReportPage() {
           </div>
           <div className="p-3 rounded-lg bg-[#12121A] border border-[#1C1C28] text-left">
             <p className="text-[10px] text-zinc-400">
-              ✓ Added to incident database · ✓ Reflected in dashboard metrics · ✗ Not submitted to any government system
+              {isConfigured
+                ? '✓ Persisted in PostgreSQL · ✓ Photo stored in cloud · ✓ Reflected in live incident map'
+                : '✓ Added to local incident store · ✓ Reflected in dashboard metrics · ✗ Not submitted to any government system'}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 pt-2">

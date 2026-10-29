@@ -3,7 +3,7 @@
 // Core Brand: Jet Black (#050507), Deep Black (#0B0B10), Royal Amethyst (#8B5CF6), Electric Cyan (#00F5FF)
 // Semantic Alerts: Red (#FF4D6D), Orange (#FF9F43), Yellow (#FFD166), Green (#35D07F)
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
@@ -15,7 +15,9 @@ import {
   Filter, Layers, Sparkles
 } from 'lucide-react';
 
-import { useStore } from '../data/store';
+import { useStore, setIncidents } from '../data/store';
+import { fetchIncidents, subscribeToIncidentsRealtime } from '../services/incidentService';
+import { isSupabaseConfigured } from '../lib/supabase';
 import type { Incident, HiddenHazard, HazardCategory, Severity } from '../data/types';
 import { HazardMap } from '../components/map/HazardMap';
 import {
@@ -288,6 +290,34 @@ function ChartTooltip({ active, payload, label }: any) {
 
 export function DashboardPage() {
   const { incidents: allIncidents, hiddenHazards, metrics } = useStore();
+
+  // Sync with Supabase on mount and listen to realtime updates
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+
+    let isMounted = true;
+    const syncData = async () => {
+      try {
+        const remote = await fetchIncidents();
+        if (isMounted && remote && remote.length > 0) {
+          setIncidents(remote);
+        }
+      } catch (err) {
+        console.warn('Realtime sync failed:', err);
+      }
+    };
+
+    syncData();
+
+    const { unsubscribe } = subscribeToIncidentsRealtime(() => {
+      syncData();
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, []);
 
   const [selectedCategory, setSelectedCategory] = useState<HazardCategory | 'all'>('all');
   const [selectedSeverity, setSelectedSeverity] = useState<Severity | 'all'>('all');

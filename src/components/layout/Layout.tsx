@@ -3,12 +3,14 @@ import { Outlet, NavLink, useLocation, Link } from 'react-router-dom';
 import {
   LayoutDashboard, Navigation, FileText, AlertTriangle,
   Wrench, Menu, X, ChevronLeft, ChevronRight, Shield,
-  RotateCcw, User
+  RotateCcw, User, LogIn, LogOut
 } from 'lucide-react';
 import { resetDemoData } from '../../data/store';
 import { cn } from '../../utils/format';
 import { BackendStatusBadge } from './BackendStatusBadge';
 import { InteractiveBackground } from './InteractiveBackground';
+import { useAuth } from '../../context/AuthContext';
+import { AuthModal } from '../auth/AuthModal';
 
 const NAV_ITEMS = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Command Center', desc: 'Hazard overview & map' },
@@ -21,6 +23,8 @@ const NAV_ITEMS = [
 export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const { user, profile, signOut } = useAuth();
   const location = useLocation();
   const currentNav = NAV_ITEMS.find(n => location.pathname.startsWith(n.to));
 
@@ -159,6 +163,39 @@ export function Layout() {
             </nav>
             <div className="p-3 border-t border-[#1C1C28] space-y-2">
               <BackendStatusBadge />
+              {user ? (
+                <div className="p-2.5 rounded-lg bg-[#12121A] border border-[#1C1C28] space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-white truncate max-w-[130px]">
+                      {profile?.displayName || user.email?.split('@')[0]}
+                    </span>
+                    <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-[#8B5CF6]/20 text-[#A78BFA] border border-[#8B5CF6]/30">
+                      {profile?.role || 'citizen'}
+                    </span>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      await signOut();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setAuthModalOpen(true);
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-white bg-[#8B5CF6]/20 hover:bg-[#8B5CF6]/30 border border-[#8B5CF6]/40 transition-colors text-xs font-semibold"
+                >
+                  <LogIn className="w-3.5 h-3.5 text-[#00F5FF]" />
+                  Sign In / Register
+                </button>
+              )}
               <button
                 onClick={() => { handleReset(); setMobileMenuOpen(false); }}
                 className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-zinc-400 hover:text-white bg-[#0B0B10] hover:bg-[#12121A] border border-[#1C1C28] transition-colors text-xs font-semibold"
@@ -201,10 +238,36 @@ export function Layout() {
 
           <div className="flex items-center gap-3">
             <BackendStatusBadge compact className="hidden sm:flex" />
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0B0B10] border border-[#1C1C28]">
-              <User className="w-3.5 h-3.5 text-[#8B5CF6]" />
-              <span className="text-xs font-semibold text-zinc-300">Demo Reviewer</span>
-            </div>
+
+            {user ? (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0B0B10] border border-[#1C1C28]">
+                  <User className="w-3.5 h-3.5 text-[#00F5FF]" />
+                  <span className="text-xs font-semibold text-zinc-200 max-w-[120px] truncate">
+                    {profile?.displayName || user.email?.split('@')[0]}
+                  </span>
+                  <span className="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded bg-[#8B5CF6]/20 text-[#A78BFA] border border-[#8B5CF6]/30">
+                    {profile?.role || 'citizen'}
+                  </span>
+                </div>
+                <button
+                  onClick={signOut}
+                  title="Sign Out"
+                  aria-label="Sign out"
+                  className="p-1.5 rounded-lg bg-[#0B0B10] border border-[#1C1C28] text-zinc-400 hover:text-red-400 hover:border-red-500/40 transition-colors"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setAuthModalOpen(true)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0B0B10] hover:bg-[#12121A] border border-[#1C1C28] hover:border-[#8B5CF6]/40 transition-colors cursor-pointer text-xs font-semibold text-zinc-300 hover:text-white"
+              >
+                <LogIn className="w-3.5 h-3.5 text-[#8B5CF6]" />
+                <span>Sign In</span>
+              </button>
+            )}
           </div>
         </header>
 
@@ -213,6 +276,9 @@ export function Layout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
     </div>
   );
 }

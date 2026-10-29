@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
 import { Layout } from './components/layout/Layout';
 import { LandingPage } from './pages/LandingPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -11,7 +12,7 @@ import { VoiceAssistant } from './components/voice/VoiceAssistant';
 
 export default function App() {
   return (
-    <>
+    <AuthProvider>
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route element={<Layout />}>
@@ -24,6 +25,6 @@ export default function App() {
         </Route>
       </Routes>
       <VoiceAssistant />
-    </>
+    </AuthProvider>
   );
 }

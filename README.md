@@ -6,9 +6,11 @@ JalRakshak is a civic-tech prototype that helps delivery riders and commuters ma
 
 ---
 
-## 🚀 Live Demo
+## 🚀 Live Demo & Dual-Mode Architecture
 
-> **All data shown is synthetic demonstration data.** No real incidents, no government integration, no live sensor feeds.
+JalRakshak features a **dual-mode architecture**:
+1. **Cloud Connected Mode**: Backed by a full Supabase PostgreSQL database, Supabase Auth, Supabase Storage for incident photographs, and Realtime event streams.
+2. **Local Demo Mode**: Zero-configuration standalone mode that runs instantly in any browser with `localStorage` persistence and fallback mock services if Supabase credentials are not provided.
 
 ### Run locally
 ```bash
@@ -17,11 +19,53 @@ npm run dev
 ```
 App starts at **http://localhost:5173**
 
-### Production build
+### Run automated tests
+```bash
+npm test
+```
+
+### Production build & lint
 ```bash
 npm run build
-npm run preview
+npm run lint
 ```
+
+---
+
+## 🗄️ Full-Stack Backend Integration (Supabase)
+
+JalRakshak includes complete enterprise-grade full-stack integration with **Supabase**:
+
+### 1. Database Schema & Migration (`supabase/migrations/20261029000001_initial_schema.sql`)
+- **`profiles`**: User profiles automatically provisioned via PostgreSQL triggers on signup, with role-based access control (`citizen`, `reviewer`, `admin`).
+- **`incidents`**: Full geospatial incident ledger tracking coordinates, categories, severities, verification levels, lifecycle status, photo storage paths, and public image URLs.
+- **`incident_status_history`**: Audit trail recording previous status, new status, actor details, notes, and timestamps for every state transition.
+- **`hidden_hazards`**: Correlated hazards connecting pre-monsoon baseline defects with active waterlogging events.
+
+### 2. Row Level Security (RLS) & Policies
+- **Public Read Access**: Active hazard maps and public safety routes are readable by all citizens.
+- **Authenticated Incident Reporting**: Authenticated citizens and anonymous community members can submit incident observations.
+- **Audited Status Lifecycle**: Municipal reviewers and administrators have privileged rights to transition lifecycle stages and verify hazards.
+- **Profile Security**: Users can only edit their own profile; role escalation is blocked at the database trigger level.
+
+### 3. Cloud Photo Storage (`incident-photos`)
+- Dedicated storage bucket for incident hazard photographs.
+- Client-side and server-side MIME validation (JPEG, PNG, WebP, GIF) up to 5 MB.
+- Collision-resistant directory organization (`incidents/<id>/<timestamp>_<sanitized>.<ext>`).
+- Public URL generation with atomic rollback/cleanup if database insert fails.
+
+### 4. Supabase Setup Guide
+1. Create a free project at [supabase.com](https://supabase.com).
+2. Go to the **SQL Editor** in your Supabase dashboard and execute the migration script:
+   ```
+   supabase/migrations/20261029000001_initial_schema.sql
+   ```
+3. Copy `.env.example` to `.env` and fill in your project credentials:
+   ```env
+   VITE_SUPABASE_URL=https://your-project-id.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-anon-public-key
+   ```
+4. Start the application with `npm run dev`. The top navigation will automatically show a green **Supabase Connected** badge.
 
 ---
 
@@ -138,19 +182,32 @@ src/
 │   ├── delhi-red-fort.jpg           # Red Fort / Lal Qila monsoon photograph
 │   ├── delhi-humayun-tomb.jpg       # Humayun's Tomb monsoon photograph
 │   └── delhi-purana-qila.jpg        # Purana Qila monsoon photograph
+├── context/
+│   └── AuthContext.tsx              # React Context for Supabase Auth & citizen profiles
 ├── data/
-│   ├── types.ts                     # Core TypeScript types
-│   ├── incidents.ts                 # Synthetic demo dataset (18 incidents, 4 hidden hazards, 3 route plans)
-│   └── store.ts                     # Reactive data store with localStorage persistence
+│   ├── types.ts                     # Core domain TypeScript types
+│   ├── incidents.ts                 # Synthetic baseline dataset
+│   └── store.ts                     # Reactive data store with local/cloud sync
+├── lib/
+│   └── supabase.ts                  # Supabase client instance, health check & configuration
+├── services/
+│   ├── authService.ts               # Sign-in, sign-up, sign-out & session listeners
+│   ├── incidentService.ts           # PostgreSQL fetch, create, update & Realtime channels
+│   └── storageService.ts            # Cloud photo validation, upload & cleanup
+├── types/
+│   └── database.types.ts            # Generated TypeScript types from PostgreSQL schema
 ├── utils/
 │   ├── format.ts                    # Formatting, color, and utility helpers
 │   ├── geo.ts                       # Geolocation and distance utilities
 │   ├── speech.ts                    # Web Speech API engine (TTS + optional recognition)
 │   └── voiceGuidanceContent.ts      # Bilingual page narration scripts (EN + HI)
 ├── components/
+│   ├── auth/
+│   │   └── AuthModal.tsx            # Citizen & reviewer sign-in / registration modal
 │   ├── layout/
-│   │   ├── Layout.tsx               # Responsive sidebar + top toolbar
-│   │   └── InteractiveBackground.tsx  # Cursor-reactive ambient lighting + continuous rain simulation
+│   │   ├── Layout.tsx               # Responsive sidebar, auth controls & top toolbar
+│   │   ├── BackendStatusBadge.tsx   # Live indicator of Supabase Cloud vs Local Demo
+│   │   └── InteractiveBackground.tsx # Ambient lighting + continuous rain simulation
 │   ├── map/
 │   │   └── HazardMap.tsx            # Leaflet map, dark theme, hazard markers, route waypoints
 │   ├── ui/
@@ -162,9 +219,20 @@ src/
     ├── DashboardPage.tsx            # Command Center — metrics, map, incident feed
     ├── SafeRoutePage.tsx            # SafeRoute corridor comparison + map waypoints
     ├── RoadIntelligencePage.tsx     # Evidence ledger with search, filters, timeline
-    ├── ReportPage.tsx               # Hazard reporting form with review step
+    ├── ReportPage.tsx               # Hazard reporting form with photo upload & validation
     ├── IncidentDetailPage.tsx       # Single incident detail, map, status history
-    └── MaintenancePage.tsx          # Municipal workflow lifecycle + integration diagram
+    └── MaintenancePage.tsx          # Municipal workflow lifecycle + status transitions
+
+supabase/
+└── migrations/
+    └── 20261029000001_initial_schema.sql  # Complete PostgreSQL schema, RLS, triggers & storage
+
+tests/
+├── risk-mapping.test.ts             # Risk-level to severity mapping tests
+├── store.test.ts                    # Reactive store & metric tests
+├── report-photo.test.ts             # Image validation and report constraints tests
+├── backend-services.test.ts         # Supabase auth, storage, and incident service tests
+└── run-all.ts                       # Integrated test runner
 ```
 
 ---
